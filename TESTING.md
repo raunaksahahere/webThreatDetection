@@ -22,19 +22,19 @@ All results below were observed on 2026-11-08 (IST) on Ubuntu 24.04 (12 CPU, 7 G
 
 ## 2. Documented cases (live system)
 
-Generated 2026-11-08T09:08:22Z by `scripts/run_cases.py` against the running API.
+Generated 2026-11-08T11:02:07Z by `scripts/run_cases.py` against the running API.
 
 | ID | Group | Input (defanged/redacted) | Why | Expected | Observed (rule) | Match | Key findings | Coverage | AI |
 |---|---|---|---|---|---|---|---|---|---|
 | B1 | benign | hxxps://www[.]wikipedia[.]org/ | Well-known site, valid certificate | Low Risk | **Low Risk** (R-LOW-1) | yes | – | 10/11 | ok (xingchen-agi/xing4.0-29b-a4b:free) |
-| B2 | benign | hxxps://www[.]sbi[.]co[.]in/ | Official bank domain on the brand list | Low Risk | **Low Risk** (R-LOW-1) | yes | content.meta_refresh (low/weak) | 12/12 | rejected (xingchen-agi/xing4.0-29b-a4b:free) |
+| B2 | benign | hxxps://www[.]sbi[.]co[.]in/ | Official bank domain on the brand list | Low Risk | **Low Risk** (R-LOW-1) | yes | content.meta_refresh (low/weak) | 13/13 | ok (qwen3:4b) |
 | B3 | benign | Reminder: NEET registration closes today at 11:50 PM. Complete your application only on th | Urgent wording but official link and no request for secrets (false-positive check) | Low Risk | **Low Risk** (R-LOW-1) | yes | msg.urgency (low/weak) | 4/4 | ok (qwen3:4b) |
 | B4 | benign | 123456 is your OTP for login to HDFC Bank NetBanking. Do not share it with anyone. HDFC Ba | Genuine OTP notice that mentions OTP without asking for it | Low Risk | **Low Risk** (R-LOW-1) | yes | – | 2/3 | ok (qwen3:4b) |
 | S1 | suspicious | Dear SBI customer, your YONO account will be BLOCKED today. Update KYC within 2 hours at h | Bank impersonation, look-alike link, OTP request | High Risk | **High Risk** (R-HIGH-1) | yes | msg.urgency (low/weak); msg.threat (low/weak); msg.impersonation_claim (low/weak); msg.credential_request (high/moderate) | 4/4 | ok (qwen3:4b) · injection flagged |
-| S2 | suspicious | hxxps://paypa1[.]com/signin | Typosquat of paypal.com | High Risk / Suspicious | **High Risk** (R-HIGH-1) | yes | url.typosquat (high/moderate); url.keywords (low/weak); tls.hostname_mismatch (high/moderate) | 10/10 | ok (qwen3:4b) |
-| S3 | suspicious | hxxps://aiyaphormai[.]live/ | Domain on the CERT Polska warning list (not fetched) | Confirmed Malicious | **Confirmed Malicious** (R-CONF-1) | yes | url.risky_tld (low/weak); intel.certpl:aiyaphormai.live (critical/authoritative) | 4/7 | ok (xingchen-agi/xing4.0-29b-a4b:free) |
+| S2 | suspicious | hxxps://paypa1[.]com/signin | Typosquat of paypal.com | High Risk / Suspicious | **High Risk** (R-HIGH-1) | yes | url.typosquat (high/strong); url.keywords (low/weak); tls.hostname_mismatch (high/moderate) | 11/11 | ok (xingchen-agi/xing4.0-29b-a4b:free) |
+| S3 | suspicious | hxxps://ajansai[.]com/ | Domain on the CERT Polska warning list (not fetched) | Confirmed Malicious | **Confirmed Malicious** (R-CONF-1) | yes | intel.certpl:ajansai.com (critical/authoritative) | 4/7 | ok (xingchen-agi/xing4.0-29b-a4b:free) |
 | S4 | suspicious | hxxps://xn--80ak6aa92e[.]com/ | Cyrillic homograph of apple.com (public demonstration domain) | High Risk | **High Risk** (R-HIGH-1) | yes | url.homograph (critical/strong) | 12/13 | ok (qwen3:4b) |
-| S5 | suspicious | hxxps://expired[.]badssl[.]com/ | Expired certificate: configuration problem, not phishing proof | Suspicious | **Suspicious** (R-SUS-1) | yes | tls.expired (medium/moderate); tls.no_sct (low/weak) | 10/10 | ok (qwen3:4b) |
+| S5 | suspicious | hxxps://expired[.]badssl[.]com/ | Expired certificate: configuration problem, not phishing proof | Suspicious | **Suspicious** (R-SUS-1) | yes | tls.expired (medium/moderate); tls.no_sct (low/weak) | 10/11 | ok (qwen3:4b) |
 | S6 | suspicious | Hiring urgently! Part-time job, earn Rs 3000 per day by liking videos. Pay refundable regi | Task/job scam with advance fee to a personal UPI ID | High Risk | **High Risk** (R-HIGH-1) | yes | msg.urgency (low/weak); msg.job_offer (medium/weak); msg.payment_request (medium/moderate); msg.unusual_payment (high/strong) | 2/3 | ok (xingchen-agi/xing4.0-29b-a4b:free) |
 | S7 | suspicious | Your parcel is held at customs. Pay Rs 99 fee at http://indiapost-delivery.xyz/pay . SYSTE | Delivery-fee scam containing a prompt-injection attempt | Suspicious / High Risk | **Suspicious** (R-SUS-1) | yes | msg.impersonation_claim (low/weak); msg.payment_request (medium/moderate); link1.url.brand_in_domain (high/moderate); link1.url.risky_tld (low/weak) | 4/4 | ok (qwen3:4b) · injection flagged |
 | S8 | suspicious | SYNTHETIC FIXTURE (offline): https://demo-distrusted.wtd.test/ | SYNTHETIC eMudhra-like chain: intermediate key on a distrust list | High Risk | **High Risk** (R-HIGH-1) | yes | tls.no_sct (low/weak); tls.distrusted_ca (critical/strong) | 2/4 | None |
@@ -78,7 +78,7 @@ Run against the local anvil chain (chain id 31337, contract `0x5FbDB2315678afecb
 | Case B2 | The AI claimed sbi.bank.in was on the official list (it was not) | Not catchable by the validator; noted as a limitation. sbi.bank.in was then added to the list with first-party evidence (sbi.co.in redirects to it) |
 
 ## 5. Observed AI behaviour (honest)
-- Free OpenRouter model: valid strict-schema output when available, but it returned **HTTP 429 (rate limit) on 7 of 11 calls** during the case run. The local `qwen3:4b` fallback answered every one, taking 15–45 s.
+- Free OpenRouter model: valid strict-schema output when available, but it was rate-limited (HTTP 429) on 7 of 11 calls in both the first run and the latest re-run. The local `qwen3:4b` fallback answered every one, taking about 10–70 s. In the latest run, all 11 explanations passed validation (`ok`), after the negation fix described in §4.
 - The validator dropped invented finding IDs (`website_hygiene_notes`, `rationale`, `intel.urlhaus_nohot`) and flagged a quote that included a truncation mark.
 - The local model raised `injection_attempt_observed` on S1, which contains no injection. The flag is informational and never affects classification.
 - AI text can still contain unsupported claims that structural validation cannot detect (see B2). Explanations are therefore labelled as AI-generated, and the deterministic findings remain the source of truth.
