@@ -13,17 +13,28 @@
   │  inspector.py  (child process: rlimits, scrubbed env, wall-clock kill)   OpenRouter free model → local Ollama
   │       └─ fetcher.py ── netguard.py (ada-url, IANA blocklist, DNS validation, pinned IP connect)
   │                         └─ Internet (only validated public addresses)
+  ├─ message/ (analyse.py: messages; email_checks.py: raw e-mail headers, links, attachments)
+  ├─ incidents.py ── ai/campaign.py (validated AI campaign brief per cluster)
+  ├─ /api/quick-check (URL rules + local CERT Polska list only; for the extension's opt-in warnings)
   ├─ store.py (SQLite, WAL)
-  └─ registry/ (canonical.py, service.py, chain.py) ──► anvil (chain 31337) ── ThreatReportRegistry.sol
-                                                            ▲
+  └─ registry/ (canonical.py, service.py, chain.py) ──► anvil (31337) or Sepolia ── ThreatReportRegistry.sol
+                                     reporter key: register/revise · reviewer key: Validated/Disputed/Retracted
  verifier/verify.mjs (Node + viem) — independent: recomputes the commitment and reads contract storage
+ extension/ (MV3) — page/link checks on click; optional warning before risky pages (local quick check only)
 ```
 
 One backend, one datastore, one analysis pipeline, one contract. No queues, vector databases or model training.
 
 ## 2. Analysis stages (URL)
 1. **Parse and normalise** with ada-url, the WHATWG parser browsers use. Decimal, hex and short IPv4 forms, percent-encoded hosts, `\@` tricks and IDNs resolve to the host a browser would contact.
-2. **Static URL indicators** (`checks/url_rules.py`): homographs against a curated brand list, typosquats (Damerau distance on the confusable skeleton), brand-in-domain, brand-in-subdomain, wrong suffix, shorteners, shared hosting, embedded redirects, keywords, IP literals and user-info tricks.
+2. **Static URL indicators** (`checks/url_rules.py`):
+   - homographs against a curated list of 43 brands, which includes brand-owned TLDs such as `.google`, `.microsoft` and `.sbi`;
+   - typosquats (Damerau distance on the confusable skeleton);
+   - brand-in-domain, brand-in-subdomain, wrong suffix;
+   - fake-TLD labels (`alebilet.pl-otsochodzi.shop` reads as `alebilet.pl`);
+   - shorteners, shared hosting, embedded redirects, keywords, IP literals and user-info tricks.
+
+   Look-alike rules are skipped for the Tranco top-10k registrable domains, reported as `url.popular_domain`. False positives and detection are measured in `docs/EVALUATION.md`.
 3. **Intelligence first** (`intel.py`): CERT Polska (phishing domains, local copy refreshed in the background) and URLhaus (malware URLs and hosts, live with the operator's key). **An authoritative listing means the site is not visited.**
 4. **Isolated inspection** (`inspector.py` → `fetcher.py`): one GET per hop, at most 5 redirects. Each hop is re-parsed, policy-checked and DNS-validated, and the TCP connection goes only to the validated IP while keeping SNI and Host. TLS chains are captured from that same connection. Limits:
    - 25 s total; 5 s connect and 8 s read;
@@ -54,6 +65,36 @@ Messages (`message/analyse.py`) follow the same path:
 - social-engineering rules: urgency, threat, reward, job, investment, impersonation, OTP/PIN requests (negations excluded), payment requests, unusual channels, brand-versus-link mismatch;
 - static analysis and intel lookups for extracted links (optionally full URL analyses).
 
+**Raw e-mail** (`message/email_checks.py`). It is detected automatically when the pasted text starts with a header block (`From:` plus at least two other RFC 5322 headers). The message is parsed with the standard library only, and nothing is executed or opened.
+- Authentication: SPF, DKIM and DMARC are read from the **topmost** `Authentication-Results` header, written by the final receiving server. Lower ones could have been inserted by the sender.
+  - DMARC fail → high/moderate.
+  - SPF fail without valid DKIM → medium.
+  - Aligned pass → info. It never lowers risk.
+  - Missing → "unknown", not good.
+- Sender: display name claiming a protected brand from an unofficial domain (strong when the address is free webmail); look-alike sender domain (the URL rules applied to the From domain).
+- Routing: Reply-To on another domain (high when it is free webmail); Return-Path divergence (weak, since this is common for bulk senders).
+- HTML links whose visible text shows a different domain than the real target.
+- Attachments, listed by name, declared type, size and SHA-256 and never decoded further:
+  - double extensions such as `.pdf.html` or `.pdf.exe` → strong;
+  - executables and scripts, and HTML attachments → high;
+  - macro-enabled Office files → medium;
+  - archives and disk images → weak.
+
+The body then goes through the message rules above. The report stores only the redacted body, masked addresses and these facts.
+
+**Incidents and AI campaign briefs** (`incidents.py`, `ai/campaign.py`). Reports are clustered deterministically on shared keyed-hash indicators. Each cluster is typed by what the link actually means:
+- `campaign`: different targets share a payment ID, wallet, phone, e-mail or certificate key;
+- `shared_infrastructure`: only an IP or domain is shared;
+- `repeat_checks`: the same target was analysed again.
+
+The optional AI brief explains a cluster, and its grounding is enforced in code:
+- cited indicators must be the cluster's own masked indicators;
+- report and finding ids must exist, and a report is listed under a tactic only if it carries the cited finding;
+- the assessment may not exceed what the link type supports (e.g. no "likely same campaign" for shared infrastructure);
+- attribution to a named actor, or a "Confirmed Malicious" claim no report carries, → `rejected`.
+
+**Quick check** (`POST /api/quick-check`) backs the extension's opt-in warning mode. It applies the URL rules and the local CERT Polska snapshot, with no page fetch, no DNS and no third-party lookup, so browsing history never leaves the machine. Results are cached for 10 minutes and never stored.
+
 ## 3. Classification policy (auditable, first match wins)
 
 | Rule | Result | Condition |
@@ -83,7 +124,7 @@ How the rules are applied:
 ## 5. Security boundaries
 | Boundary | Controls |
 |---|---|
-| Browser → API | Operator token on every non-health route (constant-time compare). Per-client rate limit. Strict pydantic models with size caps (URL 2048, message 20 000). 422 for non-http(s) schemes. |
+| Browser → API | Operator token on every non-health route (constant-time compare). Per-client rate limit. Strict pydantic models with size caps (URL 2048; message or raw e-mail 150 000 characters, of which only redacted excerpts are stored). 422 for non-http(s) schemes. |
 | API → inspector | Only `{url}` crosses. Child process with RLIMIT_AS 1 GB, CPU 30 s, 64 files, no file writes, no core dumps, empty env (no API keys), new session; 40 s wall-clock kill. Output capped at 4 MB and validated. |
 | Inspector → Internet | ada parse → scheme/port/credential/name policy → DNS A/AAAA → **every** address checked against an explicit IANA special-purpose blocklist (IPv4-mapped, NAT64, 6to4 and Teredo embeddings extracted). Any non-public answer blocks the host (anti-rebinding); the socket connects only to the validated address. Each redirect is re-validated; loops are detected. |
 | Backend → intelligence | Fixed endpoints only, never user-controlled. Keys from `.env`. A no-hit is "not listed (unknown)". |
@@ -98,6 +139,8 @@ See `docs/WEB3.md`. Summary:
 - Commitment = `SHA-256(RFC 8785(envelope))`, where the envelope holds the threat report and a 32-byte random salt (prevents confirming a guessed report).
 - `reportId = SHA-256("wtd.report-id.v1:" + uuid)`.
 - The contract enforces reporter/reviewer roles, ordered append-only revisions, status history with no self-review, and unique commitments.
+- Independent review from the dashboard. A separate reviewer account records Validated, Disputed or Retracted. The note text stays off-chain; only its SHA-256 goes on-chain, so a published note can be checked against the chain. The verifier prints the current status and the status history.
+- Public testnet option: `scripts/testnet.sh` creates testnet-only keys (kept in the gitignored `.env.sepolia`) and deploys to Ethereum Sepolia. With `WTD_NETWORK=sepolia`, the same API and verifier run against a chain nobody here controls.
 - `verifier/verify.mjs` independently recomputes the commitment and reads contract storage. A tampered envelope fails.
 - The chain shows a report has not changed since registration, **not** that it is true. On a local anvil chain the guarantee rests on the contract's rules: developer RPCs can rewrite local state.
 
