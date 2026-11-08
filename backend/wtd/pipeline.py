@@ -199,9 +199,20 @@ def analyse_url(rid: str, url: str) -> None:
                     checks.append(_check("tls.certificate", Module.tls, CheckStatus.succeeded, True, f"chain of {len(chain)} from {tls_hop['host']}: {tsum.get('verification')}"))
                     checks.append(_check("tls.distrust_lists", Module.tls, CheckStatus.succeeded, False,
                                          f"{tsum.get('distrust_hits', 0)} hit(s) across: {', '.join(tsum.get('distrust_sources', []))}"))
-                    if tsum.get("ocsp_urls"):
-                        checks.append(_check("tls.revocation", Module.tls, CheckStatus.not_implemented, False,
-                                             "OCSP responder listed; online revocation checking is not enabled in this build. Status unknown."))
+                    oc = insp.get("ocsp") or {}
+                    if tsum.get("ocsp_urls") and oc.get("body_b64") and oc.get("host") == tls_hop["host"]:
+                        rv = tls_checks.interpret_ocsp(chain, base64.b64decode(oc["body_b64"]))
+                        tsum["revocation"] = rv
+                        if rv["status"] in ("good", "revoked", "unknown"):
+                            checks.append(_check("tls.revocation", Module.tls, CheckStatus.succeeded, False,
+                                                 f"OCSP ({oc.get('responder')}): {rv['status']}, signed and fresh until {rv.get('next_update')}"))
+                            findings += tls_checks.revocation_findings(rv)
+                        else:
+                            checks.append(_check("tls.revocation", Module.tls, CheckStatus.unavailable, False,
+                                                 f"OCSP response not usable: {rv.get('detail')}. Status unknown, not a risk signal."))
+                    elif tsum.get("ocsp_urls"):
+                        checks.append(_check("tls.revocation", Module.tls, CheckStatus.unavailable, False,
+                                             f"OCSP responder did not answer within limits ({(oc.get('error') or 'no response')[:120]}). Status unknown, not a risk signal."))
                     else:
                         checks.append(_check("tls.revocation", Module.tls, CheckStatus.unavailable, False,
                                              "No OCSP responder in the certificate (common since OCSP became optional in 2024); CRL checking not enabled. Status unknown, not a risk signal."))

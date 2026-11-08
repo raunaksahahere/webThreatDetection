@@ -437,3 +437,21 @@ def interpret_ocsp(chain_der: list[bytes], response_der: bytes, now: datetime | 
         out["status"] = "unavailable"
         out["detail"] = "response signature invalid" if not sig_ok else "response is stale"
     return out
+
+
+def revocation_findings(rv: dict) -> list[Finding]:
+    if rv.get("status") == "revoked":
+        reason = (rv.get("reason") or "unspecified")
+        incident = reason in ("key_compromise", "ca_compromise", "aa_compromise")
+        return [_f("tls.revoked", "Certificate has been revoked by its issuer",
+                   f"OCSP says revoked on {rv.get('revoked_at')} (reason: {reason}).",
+                   Severity.critical if incident else Severity.high, Strength.strong if incident else Strength.moderate,
+                   "The issuer has withdrawn this certificate; browsers that check revocation will reject it.",
+                   "Do not trust this connection.", "OCSP answers reflect the responder's view at the time of the check.",
+                   {"reason": reason, "revoked_at": rv.get("revoked_at")}, source="OCSP responder listed in the certificate")]
+    if rv.get("status") == "good":
+        return [_f("tls.revocation_good", "Revocation checked: not revoked (OCSP)", f"Signed OCSP response, valid until {rv.get('next_update')}.",
+                   Severity.info, Strength.weak, "The issuer has not revoked this certificate.", "No action.",
+                   "Does not say anything about whether the site itself is legitimate.", {"next_update": rv.get("next_update")},
+                   source="OCSP responder listed in the certificate")]
+    return []

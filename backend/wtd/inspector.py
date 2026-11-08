@@ -68,6 +68,23 @@ def main() -> None:
     url = str(req.get("url", ""))[:2048]
     result = fetch(url)
     out: dict = {"fetch": dataclasses.asdict(result)}
+    # Revocation (OCSP): responder URL comes from the certificate, so it goes through the same request policy.
+    try:
+        import base64 as _b64
+
+        from .checks.tls_checks import ocsp_request_url
+        from .fetcher import Limits as _L
+
+        tls_hop = next((h for h in reversed(result.hops) if h.tls and len(h.tls.chain_der_b64) >= 2), None)
+        if tls_hop:
+            built = ocsp_request_url([_b64.b64decode(c) for c in tls_hop.tls.chain_der_b64])
+            if built:
+                o = fetch(built[0], _L(max_redirects=1, total_timeout=8.0, max_body_bytes=65536, max_decoded_bytes=65536),
+                          accept_types=("application/ocsp-response",))
+                out["ocsp"] = {"host": tls_hop.host, "responder": built[0].split("/")[2][:120], "status": o.final_status,
+                               "body_b64": o.body_b64, "error": o.stop_reason or o.body_note}
+    except Exception as e:  # revocation is best-effort
+        out["ocsp"] = {"error": f"OCSP check failed: {type(e).__name__}"}
     if req.get("http_upgrade_probe"):
         try:
             p = parse_url(url)

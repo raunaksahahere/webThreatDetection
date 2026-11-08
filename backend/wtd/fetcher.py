@@ -80,6 +80,7 @@ class FetchResult:
     body_truncated: bool = False
     body_note: str | None = None
     features: dict | None = None
+    body_b64: str | None = None  # only for explicitly accepted binary types (e.g. OCSP responses)
     stop_reason: str | None = None
     total_ms: int = 0
 
@@ -176,6 +177,7 @@ def _one_request(
     deadline: _Deadline,
     connect_fn: ConnectFn,
     want_body: bool,
+    accept_types: tuple[str, ...] = TEXT_TYPES,
 ) -> tuple[bytes, bool, str | None]:
     """Perform one GET to a pinned IP. Returns (body, truncated, note)."""
     sock = connect_fn(ip, parsed.port, deadline.remaining(limits.connect_timeout))
@@ -228,7 +230,7 @@ def _one_request(
                 if 300 <= ev.status_code < 400 or not want_body:
                     break
                 ctype = hdr.get("content-type", "")
-                if not any(t in ctype.lower() for t in TEXT_TYPES) and ctype:
+                if not any(t in ctype.lower() for t in accept_types) and ctype:
                     note = f"non-text content ({ctype[:80]}) was not downloaded"
                     break
                 continue
@@ -258,6 +260,7 @@ def fetch(
     resolve_fn: ResolveFn | None = None,
     ip_policy: IpPolicy | None = None,
     connect_fn: ConnectFn | None = None,
+    accept_types: tuple[str, ...] = TEXT_TYPES,
 ) -> FetchResult:
     t_start = time.monotonic()
     resolve_fn = resolve_fn or (lambda h: netguard.resolve(h))
@@ -315,7 +318,7 @@ def fetch(
                     continue
                 try:
                     hop.ip = ip
-                    body, truncated, note = _one_request(parsed, ip, hop, limits, deadline, connect_fn, want_body=True)
+                    body, truncated, note = _one_request(parsed, ip, hop, limits, deadline, connect_fn, want_body=True, accept_types=accept_types)
                     last_err = None
                     break
                 except FetchError:
@@ -353,7 +356,9 @@ def fetch(
             result.body_bytes = len(body)
             result.body_truncated = truncated
             result.body_note = note or dnote
-            if decoded and result.content_type and "html" in result.content_type.lower():
+            if decoded and accept_types is not TEXT_TYPES and not any(t in (result.content_type or "").lower() for t in TEXT_TYPES):
+                result.body_b64 = base64.b64encode(decoded).decode()
+            elif decoded and result.content_type and "html" in result.content_type.lower():
                 text = decoded.decode(_charset(result.content_type, decoded), errors="replace")
                 result.features = extract_features(text, base_url=parsed.href)
             elif decoded:
