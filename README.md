@@ -41,6 +41,8 @@ scripts/api.sh start             # API + dashboard on http://127.0.0.1:8000/
 cat data/api_token               # operator token the dashboard asks for
 ```
 
+Hosting: the API runs as a Docker web service on Render (`render.yaml`, `Dockerfile`) and the dashboard optionally on Vercel (`frontend/vercel.json`, with `VITE_API_BASE` pointing at the API). See [`docs/DEPLOY.md`](docs/DEPLOY.md).
+
 Demonstrations:
 - **Offline eMudhra-like demo.** This creates a clearly labelled SYNTHETIC report:
 

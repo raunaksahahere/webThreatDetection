@@ -160,6 +160,10 @@ async function errorFromResponse(res: Response): Promise<ApiError> {
   return new ApiError(res.status, detail || `Request failed (HTTP ${res.status}).`);
 }
 
+/** Backend origin. Empty = same origin (the API serves the dashboard). Set VITE_API_BASE at build time for a
+ *  separately hosted dashboard, e.g. Vercel → https://wtd-api.onrender.com (the API must list this origin in WTD_CORS_ORIGINS). */
+export const API_BASE: string = ((import.meta.env.VITE_API_BASE as string | undefined) ?? '').trim().replace(/\/+$/, '');
+
 async function request(path: string, opts: RequestOpts = {}, attempt = 0): Promise<Response> {
   const { method = 'GET', body, auth = true } = opts;
   const headers = new Headers({ Accept: 'application/json' });
@@ -171,7 +175,7 @@ async function request(path: string, opts: RequestOpts = {}, attempt = 0): Promi
   }
   let res: Response;
   try {
-    res = await fetch(path, {
+    res = await fetch(API_BASE + path, {
       method,
       headers,
       body: body === undefined ? undefined : JSON.stringify(body),

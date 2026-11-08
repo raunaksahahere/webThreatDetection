@@ -1,6 +1,7 @@
 """Configuration from environment and the project .env file (never logged)."""
 from __future__ import annotations
 
+import hashlib
 import os
 import secrets
 from dataclasses import dataclass
@@ -21,6 +22,21 @@ def _load_dotenv(path: Path) -> None:
         k, v = k.strip(), v.strip().strip('"').strip("'")
         if k and k not in os.environ:
             os.environ[k] = v
+
+
+def _hmac_key() -> bytes:
+    """Keyed-hash secret for indicators. WTD_HMAC_KEY (any string; hex used as-is, otherwise SHA-256 of it) lets a
+    container keep stable indicator hashes across restarts; otherwise a random key is kept in data/."""
+    v = os.environ.get("WTD_HMAC_KEY", "").strip()
+    if v:
+        try:
+            raw = bytes.fromhex(v)
+            if len(raw) >= 16:
+                return raw
+        except ValueError:
+            pass
+        return hashlib.sha256(v.encode()).digest()
+    return bytes.fromhex(_secret_file("indicator_hmac.key"))
 
 
 def _secret_file(name: str, nbytes: int = 32) -> str:
@@ -54,7 +70,7 @@ def load() -> Settings:
     token = os.environ.get("WTD_API_TOKEN") or _secret_file("api_token", 24)
     return Settings(
         api_token=token,
-        hmac_key=bytes.fromhex(_secret_file("indicator_hmac.key")),
+        hmac_key=_hmac_key(),
         db_path=Path(os.environ.get("WTD_DB", DATA / "wtd.sqlite3")),
         ai_enabled=os.environ.get("WTD_AI_ENABLED", "1") != "0",
         ai_model=os.environ.get("WTD_AI_MODEL", "xingchen-agi/xing4.0-29b-a4b:free"),

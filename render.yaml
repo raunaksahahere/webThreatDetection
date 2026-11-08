@@ -1,0 +1,41 @@
+# Render Blueprint for the WTD API (Docker). The same service also serves the dashboard on its own origin.
+# The separately hosted dashboard on Vercel talks to it via VITE_API_BASE + WTD_CORS_ORIGINS (see docs/DEPLOY.md).
+services:
+  - type: web
+    name: wtd-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: free              # free instances sleep after ~15 min idle and have an ephemeral filesystem
+    region: singapore
+    healthCheckPath: /api/health
+    autoDeploy: false
+    envVars:
+      - key: WTD_API_TOKEN          # operator token the dashboard asks for; read it in the Render dashboard
+        generateValue: true
+      - key: WTD_HMAC_KEY           # keeps indicator hashes stable across restarts
+        generateValue: true
+      - key: WTD_CORS_ORIGINS       # your Vercel URL, e.g. https://wtd.vercel.app (comma-separate several)
+        sync: false
+      - key: OPENROUTER_API_KEY     # free OpenRouter models only (enforced in code); leave empty for "AI unavailable"
+        sync: false
+      - key: URLHAUS_AUTH_KEY       # optional abuse.ch key
+        sync: false
+      - key: WTD_CHAIN              # embedded = private anvil chain inside the container (resets on restart)
+        value: embedded
+      # For the public Sepolia registry instead (after scripts/testnet.sh deploy and committing deployments/sepolia.json):
+      # - key: WTD_CHAIN
+      #   value: external
+      # - key: WTD_RPC_URL
+      #   value: https://ethereum-sepolia-rpc.publicnode.com
+      # - key: WTD_DEPLOYMENT
+      #   value: /app/deployments/sepolia.json
+      # - key: WTD_REPORTER_KEY
+      #   sync: false
+      # - key: WTD_REVIEWER_KEY
+      #   sync: false
+    # Persistent reports and chain state need a paid plan with a disk:
+    # disk:
+    #   name: wtd-data
+    #   mountPath: /app/data
+    #   sizeGB: 1

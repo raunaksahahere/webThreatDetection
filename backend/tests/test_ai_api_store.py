@@ -225,3 +225,25 @@ def test_negated_or_descriptive_safe_wording_is_not_a_safe_claim(summary):
 
 def test_plain_safe_claim_still_rejected():
     assert explain._validate(_report(), good(summary="Overall the site is legitimate."), "").status == "rejected"
+
+
+def test_cors_only_for_listed_origins():
+    """WTD_CORS_ORIGINS enables cross-origin calls from exactly the listed dashboard origin (fresh interpreter)."""
+    import subprocess
+    import sys
+    code = (
+        "from fastapi.testclient import TestClient\n"
+        "from wtd.api import app\n"
+        "c = TestClient(app)\n"
+        "h = {'Origin': 'https://wtd.vercel.app', 'Access-Control-Request-Method': 'POST', 'Access-Control-Request-Headers': 'x-wtd-token,content-type'}\n"
+        "ok = c.options('/api/analyses', headers=h)\n"
+        "bad = c.options('/api/analyses', headers={**h, 'Origin': 'https://evil.example'})\n"
+        "assert ok.headers.get('access-control-allow-origin') == 'https://wtd.vercel.app', ok.headers\n"
+        "assert 'access-control-allow-origin' not in bad.headers, bad.headers\n"
+        "assert 'access-control-allow-credentials' not in ok.headers\n"
+        "print('ok')\n"
+    )
+    import os
+    env = {**os.environ, "WTD_CORS_ORIGINS": "https://wtd.vercel.app/", "WTD_API_TOKEN": "test-token", "WTD_AI_ENABLED": "0"}
+    r = subprocess.run([sys.executable, "-c", code], capture_output=True, text=True, env=env, cwd=str(__import__("pathlib").Path(__file__).parents[1]))
+    assert r.returncode == 0 and "ok" in r.stdout, r.stderr[-800:]

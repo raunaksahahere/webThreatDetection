@@ -13,7 +13,9 @@ cache/
 broadcast/
 .pytest_cache/
 chain-state/
-deployments/
+deployments/*
+!deployments/sepolia.json
+!deployments/.gitkeep
 contracts/lib/
 frontend/node_modules/
 verifier/node_modules/

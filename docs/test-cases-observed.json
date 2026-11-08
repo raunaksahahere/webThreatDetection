@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-08T10:53:05Z",
+ "generated_at": "2026-11-08T11:02:07Z",
  "results": [
   {
    "id": "B1",
@@ -13,8 +13,8 @@
    "observed": "Low Risk",
    "rule": "R-LOW-1",
    "pass": true,
-   "report_id": "6ff4d86c-f575-4408-b04f-12a90c15823a",
-   "seconds": 16,
+   "report_id": "9c801670-9afa-4b37-94c4-3c46082cf5c4",
+   "seconds": 9,
    "key_findings": [],
    "coverage": "10/11",
    "ai": {
@@ -23,10 +23,10 @@
     "injection_flag": false,
     "notes": [
      "dropped unknown finding id(s): website_hygiene_notes",
-     "quote not found verbatim in the input: \"11 of 11 checks succeeded\""
+     "quote not found verbatim in the input: \"hxxps://www[.]wikipedia[.]org/\""
     ]
    },
-   "observed_at": "2026-11-08T10:47:19Z"
+   "observed_at": "2026-11-08T10:55:23Z"
   },
   {
    "id": "B2",
@@ -40,8 +40,8 @@
    "observed": "Low Risk",
    "rule": "R-LOW-1",
    "pass": true,
-   "report_id": "23119ce4-c6fd-4a3c-a250-a52dc7a53c26",
-   "seconds": 60,
+   "report_id": "9a222e45-fd79-43a4-94ed-0a9112865259",
+   "seconds": 69,
    "key_findings": [
     "content.meta_refresh (low/weak)"
    ],
@@ -51,11 +51,11 @@
     "model": "qwen3:4b",
     "injection_flag": false,
     "notes": [
-     "fallback used after: openrouter: failed: provider error xingchen-agi/xing4.0-29b-a4b:free is temporarily rate-limited upstream. Please retry shortly, or add your own provider k",
+     "fallback used after: openrouter: failed: HTTP 429",
      "quote not found verbatim in the input: \"meta refresh: 5; url=https://sbi.bank.in/\""
     ]
    },
-   "observed_at": "2026-11-08T10:47:42Z"
+   "observed_at": "2026-11-08T10:55:40Z"
   },
   {
    "id": "B3",
@@ -69,8 +69,8 @@
    "observed": "Low Risk",
    "rule": "R-LOW-1",
    "pass": true,
-   "report_id": "02db3ea5-0994-4c07-8456-42049f867acb",
-   "seconds": 42,
+   "report_id": "f063bd7c-d1a5-490d-b835-bf69a31615cf",
+   "seconds": 41,
    "key_findings": [
     "msg.urgency (low/weak)"
    ],
@@ -83,7 +83,7 @@
      "fallback used after: openrouter: failed: HTTP 429"
     ]
    },
-   "observed_at": "2026-11-08T10:48:33Z"
+   "observed_at": "2026-11-08T10:56:40Z"
   },
   {
    "id": "B4",
@@ -97,8 +97,8 @@
    "observed": "Low Risk",
    "rule": "R-LOW-1",
    "pass": true,
-   "report_id": "9d06feed-8849-4705-8772-3a085881881d",
-   "seconds": 28,
+   "report_id": "c64b1fe9-7e6e-4264-a9ff-0d52611117b9",
+   "seconds": 29,
    "key_findings": [],
    "coverage": "2/3",
    "ai": {
@@ -110,7 +110,7 @@
      "no grounded points returned"
     ]
    },
-   "observed_at": "2026-11-08T10:49:14Z"
+   "observed_at": "2026-11-08T10:57:19Z"
   },
   {
    "id": "S1",
@@ -124,8 +124,8 @@
    "observed": "High Risk",
    "rule": "R-HIGH-1",
    "pass": true,
-   "report_id": "f81efd25-d4da-4b61-afea-45845e8cdd7e",
-   "seconds": 15,
+   "report_id": "e7c716e3-4034-4297-a58a-7e9ec1e9f103",
+   "seconds": 44,
    "key_findings": [
     "msg.urgency (low/weak)",
     "msg.threat (low/weak)",
@@ -136,16 +136,14 @@
    ],
    "coverage": "4/4",
    "ai": {
-    "status": "rejected",
-    "model": "xingchen-agi/xing4.0-29b-a4b:free",
-    "injection_flag": false,
+    "status": "ok",
+    "model": "qwen3:4b",
+    "injection_flag": true,
     "notes": [
-     "dropped unknown finding id(s): website_hygiene_notes",
-     "quote not found verbatim in the input: \"The message mentions State Bank of India but its link goes t\"",
-     "explanation called the target safe or legitimate although it is not Low Risk"
+     "fallback used after: openrouter: failed: HTTP 429"
     ]
    },
-   "observed_at": "2026-11-08T10:49:45Z"
+   "observed_at": "2026-11-08T10:57:49Z"
   },
   {
    "id": "S2",
@@ -160,23 +158,23 @@
    "observed": "High Risk",
    "rule": "R-HIGH-1",
    "pass": true,
-   "report_id": "bfa3041a-2d3f-4aeb-bd4b-53339cb7c7b2",
-   "seconds": 49,
+   "report_id": "4e8ea2d2-494b-4f25-a147-a3aa1b65fca2",
+   "seconds": 24,
    "key_findings": [
-    "url.typosquat (high/moderate)",
+    "url.typosquat (high/strong)",
     "url.keywords (low/weak)",
     "tls.hostname_mismatch (high/moderate)"
    ],
    "coverage": "11/11",
    "ai": {
     "status": "ok",
-    "model": "qwen3:4b",
+    "model": "xingchen-agi/xing4.0-29b-a4b:free",
     "injection_flag": false,
     "notes": [
-     "fallback used after: openrouter: failed: HTTP 429"
+     "dropped unknown finding id(s): intel.revocation_good"
     ]
    },
-   "observed_at": "2026-11-08T10:49:59Z"
+   "observed_at": "2026-11-08T10:58:38Z"
   },
   {
    "id": "S3",
@@ -190,7 +188,7 @@
    "observed": "Confirmed Malicious",
    "rule": "R-CONF-1",
    "pass": true,
-   "report_id": "dfa234e8-4b6d-4114-a2ea-85aaae34bfd6",
+   "report_id": "417de1f9-12b4-4ea2-80ca-c8d392689fa9",
    "seconds": 12,
    "key_findings": [
     "intel.certpl:ajansai.com (critical/authoritative)"
@@ -201,12 +199,10 @@
     "model": "xingchen-agi/xing4.0-29b-a4b:free",
     "injection_flag": false,
     "notes": [
-     "quote not found verbatim in the input: \"'ajansai.com' (matching host 'ajansai.com') is listed in the\"",
-     "quote not found verbatim in the input: \"No URLhaus record for the URL or 1 host(s).\"",
-     "quote not found verbatim in the input: \"already listed as malicious by threat intelligence; not visi\""
+     "dropped unknown finding id(s): intel.certpl:other_certpl"
     ]
    },
-   "observed_at": "2026-11-08T10:50:50Z"
+   "observed_at": "2026-11-08T10:58:58Z"
   },
   {
    "id": "S4",
@@ -220,22 +216,22 @@
    "observed": "High Risk",
    "rule": "R-HIGH-1",
    "pass": true,
-   "report_id": "81e0c270-efbd-49b6-8dd8-c3fb1dd5196a",
-   "seconds": 25,
+   "report_id": "3cf078c6-b88c-441e-a20e-8cd36b278f17",
+   "seconds": 68,
    "key_findings": [
     "url.homograph (critical/strong)"
    ],
    "coverage": "12/13",
    "ai": {
-    "status": "rejected",
-    "model": "xingchen-agi/xing4.0-29b-a4b:free",
+    "status": "ok",
+    "model": "qwen3:4b",
     "injection_flag": false,
     "notes": [
-     "dropped unknown finding id(s): website_hygiene_notes",
-     "explanation called the target safe or legitimate although it is not Low Risk"
+     "fallback used after: openrouter: failed: response truncated",
+     "dropped unknown finding id(s): website_hygiene_notes"
     ]
    },
-   "observed_at": "2026-11-08T10:51:06Z"
+   "observed_at": "2026-11-08T10:59:15Z"
   },
   {
    "id": "S5",
@@ -246,24 +242,26 @@
    "expected": [
     "Suspicious"
    ],
-   "observed": "Inconclusive",
-   "rule": "R-INC-1",
-   "pass": false,
-   "report_id": "cb089fe1-203f-4c3d-a18a-ad67a5a6f269",
-   "seconds": 39,
-   "key_findings": [],
-   "coverage": "6/9",
+   "observed": "Suspicious",
+   "rule": "R-SUS-1",
+   "pass": true,
+   "report_id": "015ea4d4-3f2e-4b03-a279-130afb26dbd2",
+   "seconds": 51,
+   "key_findings": [
+    "tls.expired (medium/moderate)",
+    "tls.no_sct (low/weak)"
+   ],
+   "coverage": "10/11",
    "ai": {
     "status": "ok",
     "model": "qwen3:4b",
     "injection_flag": false,
     "notes": [
      "fallback used after: openrouter: failed: HTTP 429",
-     "dropped unknown finding id(s): rationale",
-     "dropped unknown finding id(s): classification"
+     "dropped unknown finding id(s): website_hygiene_notes"
     ]
    },
-   "observed_at": "2026-11-08T10:51:30Z"
+   "observed_at": "2026-11-08T11:00:26Z"
   },
   {
    "id": "S6",
@@ -277,8 +275,8 @@
    "observed": "High Risk",
    "rule": "R-HIGH-1",
    "pass": true,
-   "report_id": "98c2a987-53c7-4b60-b056-c2356814a4f3",
-   "seconds": 10,
+   "report_id": "1ca81d6b-30b4-4299-b487-dba8639057c5",
+   "seconds": 12,
    "key_findings": [
     "msg.urgency (low/weak)",
     "msg.job_offer (medium/weak)",
@@ -293,7 +291,7 @@
     "injection_flag": false,
     "notes": []
    },
-   "observed_at": "2026-11-08T10:52:05Z"
+   "observed_at": "2026-11-08T11:01:09Z"
   },
   {
    "id": "S7",
@@ -308,8 +306,8 @@
    "observed": "Suspicious",
    "rule": "R-SUS-1",
    "pass": true,
-   "report_id": "896a2254-3f39-4ca8-a789-01cb9e91fe3b",
-   "seconds": 48,
+   "report_id": "88d1517f-6526-4477-9fdc-7af4b3d39983",
+   "seconds": 45,
    "key_findings": [
     "msg.impersonation_claim (low/weak)",
     "msg.payment_request (medium/moderate)",
@@ -326,7 +324,7 @@
      "fallback used after: openrouter: failed: HTTP 429"
     ]
    },
-   "observed_at": "2026-11-08T10:52:18Z"
+   "observed_at": "2026-11-08T11:01:23Z"
   },
   {
    "id": "S8",
@@ -340,7 +338,7 @@
    "observed": "High Risk",
    "rule": "R-HIGH-1",
    "pass": true,
-   "report_id": "715f1fab-74a4-4e74-b32f-8c9841f17185",
+   "report_id": "984ab78a-1970-4b72-a9a8-902065cfc3e4",
    "seconds": 0,
    "key_findings": [
     "tls.no_sct (low/weak)",
@@ -353,7 +351,7 @@
     "injection_flag": null,
     "notes": []
    },
-   "observed_at": "2026-11-08T10:53:05Z"
+   "observed_at": "2026-11-08T11:02:07Z"
   }
  ]
 }

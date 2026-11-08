@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import hmac
 import logging
+import os
 import time
 from collections import defaultdict, deque
 from pathlib import Path
@@ -21,6 +22,15 @@ from .netguard import UrlRejected, defang, parse_url
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 log = logging.getLogger("wtd.api")
 app = FastAPI(title="WTD — Web Threat Detection & Digital Trust Intelligence", version="0.1.0", docs_url="/api/docs", redoc_url=None)
+
+# Cross-origin access only for explicitly listed dashboard origins (e.g. a Vercel deployment).
+# No cookies are used (the token travels in X-WTD-Token), so credentials stay disabled.
+_cors = [o.strip().rstrip("/") for o in os.environ.get("WTD_CORS_ORIGINS", "").split(",") if o.strip()]
+if _cors:
+    from fastapi.middleware.cors import CORSMiddleware
+
+    app.add_middleware(CORSMiddleware, allow_origins=_cors, allow_methods=["GET", "POST"], allow_credentials=False,
+                       allow_headers=["Content-Type", "X-WTD-Token", "Accept"], expose_headers=["Content-Disposition"], max_age=600)
 _hits: dict[str, deque] = defaultdict(deque)
 
 
