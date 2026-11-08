@@ -11,3 +11,7 @@ cache/
 broadcast/
 .pytest_cache/
 chain-state/
+deployments/
+contracts/lib/
+frontend/node_modules/
+verifier/node_modules/
