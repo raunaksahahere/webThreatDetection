@@ -20,7 +20,8 @@ Hackathon prototype (AI · Cybersecurity · Web3).
 | On-chain threat-report registry | `contracts/src/ThreatReportRegistry.sol` (roles, ordered revisions, status history), local anvil chain |
 | Independent verification | `verifier/verify.mjs` (Node + viem) recomputes the commitment and reads contract storage |
 | Investigation dashboard | `frontend/` (React + Vite), served at `/` |
-| ≥ 3 suspicious + 3 benign cases | `TESTING.md`, `docs/test-cases-observed.json` |
+| ≥ 3 suspicious + 3 benign cases | `TESTING.md`, `docs/test-cases-observed.json` (12 cases, all matched) |
+| Optional companion extension | `extension/` (MV3; user-triggered page/link checks) |
 
 All six functional modules are covered: URL analysis, TLS trust, message analysis, deterministic correlation, passive website security assessment, and decentralised report integrity.
 
@@ -54,7 +55,7 @@ Demonstrations:
 Tests:
 
 ```bash
-(cd backend && .venv/bin/python -m pytest -q)        # 105 tests: request boundary, TLS, classifier, messages, AI validation, API, persistence
+(cd backend && .venv/bin/python -m pytest -q)        # 106 tests: request boundary, TLS, classifier, messages, AI validation, API, persistence
 (cd contracts && forge test)                          # 22 contract tests incl. unauthorised writes and revision ordering
 node verifier/test-vectors.mjs                        # cross-language canonicalization vectors
 backend/.venv/bin/python scripts/run_cases.py         # documented cases through the live API
@@ -97,7 +98,7 @@ Weak signals (urgent wording, keywords, AI observations, missing security header
   - otherwise status is reported as unknown, never as "not revoked".
 - The free AI model is rate-limited (HTTP 429 seen in testing). The local model is slower (about 15–45 s), and without either the report says "AI unavailable".
 - The chain is a local anvil instance. Integrity holds under the contract's rules, but anvil's developer RPCs can rewrite local state. It proves a report has not changed, not that it is true.
-- No browser extension is included (a deliberate scope decision).
+- The optional browser companion (`extension/`) only checks the current page or a right-clicked link when you ask. It is not pre-navigation protection, and its in-browser test is manual.
 
 ## Disclosures
 - Open-source components and data sources are listed with licences in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
