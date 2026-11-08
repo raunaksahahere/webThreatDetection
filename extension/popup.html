@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>WTD Companion</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header><strong>WTD</strong> page check</header>
+  <p class="note">Checks the page you are already on. This is not protection before opening a page.</p>
+  <div id="target" class="mono"></div>
+  <button id="check" type="button">Check this page</button>
+  <section id="result" hidden>
+    <div id="verdict" class="verdict"></div>
+    <div id="rule" class="small"></div>
+    <ul id="findings"></ul>
+    <a id="open" href="#" target="_blank" rel="noopener">Open full report</a>
+  </section>
+  <div id="error" class="error" hidden></div>
+  <details><summary>Recent checks</summary><ul id="recent"></ul></details>
+  <footer><a href="options.html" target="_blank">Settings</a></footer>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>

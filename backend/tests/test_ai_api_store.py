@@ -135,3 +135,9 @@ def test_rate_limit(client, monkeypatch):
     api._hits.clear()
     codes = [client.post("/api/analyses", json={"kind": "url", "url": "javascript:x"}, headers={"X-WTD-Token": "test-token"}).status_code for _ in range(3)]
     assert codes[-1] == 429
+
+
+def test_negated_classification_mention_is_not_a_contradiction():
+    r = _report()
+    res = explain._validate(r, good(summary="The redirect alone does not classify as Low Risk evidence; it is High Risk because of the OTP request."), "")
+    assert res.status == "ok"

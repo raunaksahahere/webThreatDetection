@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>WTD Companion settings</title><link rel="stylesheet" href="popup.css"></head>
+<body style="width:auto;max-width:520px">
+  <h2>WTD Companion settings</h2>
+  <p class="note">The extension talks only to your local WTD server at http://127.0.0.1:8000. It sends a URL only when you click "Check this page" or "Check this link". It never reads page content, cookies, form data or browsing history.</p>
+  <label>Operator token (from <code>data/api_token</code>)<br><input id="token" type="password" autocomplete="off" style="width:100%"></label>
+  <p><button id="save" type="button">Save</button></p>
+  <p id="status" class="small"></p>
+  <script type="module" src="options.js"></script>
+</body>
+</html>

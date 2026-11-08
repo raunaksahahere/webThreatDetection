@@ -19,7 +19,8 @@
    "official": [
     "sbi.co.in",
     "onlinesbi.sbi",
-    "sbicard.com"
+    "sbicard.com",
+    "sbi.bank.in"
    ]
   },
   {
@@ -525,5 +526,8 @@
   "framer.app",
   "webflow.io"
  ],
- "_unverified_note": "Banks' RBI-mandated '.bank.in' domains are not listed until verified on each bank's own site; until then such hosts get no 'official' credit and no brand-mismatch penalty is applied to hosts under bank.in."
+ "_unverified_note": "Banks' RBI-mandated '.bank.in' domains are not listed until verified on each bank's own site; until then such hosts get no 'official' credit and no brand-mismatch penalty is applied to hosts under bank.in.",
+ "_verified_notes": {
+  "sbi.bank.in": "observed 2026-11-08: the official https://www.sbi.co.in/ homepage redirects (meta refresh) to https://sbi.bank.in/"
+ }
 }

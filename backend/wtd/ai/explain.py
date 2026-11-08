@@ -163,7 +163,13 @@ def _validate(r: Report, raw: str, untrusted: str) -> AIResult:
                 notes.append(f"quote not found verbatim in the input: \"{q[:60]}\"")
     actual = r.assessment.classification
     text = " ".join([data["summary"]] + [p.explanation for p in points]).lower()
-    others = [l for l in LABELS if l != actual and re.search(rf"\b(is|as|classified|rated|rating of)\s+(an?\s+)?['\"]?{l.lower()}", text)]
+    def asserted(label: str) -> bool:
+        for m in re.finditer(rf"\b(is|as|classified|rated|rating of)\s+(an?\s+)?['\"]?{label.lower()}", text):
+            if not re.search(r"\b(not|no|never|isn't|doesn't|does not|wouldn't|rather than|instead of|below)\b[^.]{0,25}$", text[max(0, m.start() - 40): m.start()]):
+                return True
+        return False
+
+    others = [l for l in LABELS if l != actual and asserted(l)]
     safe_claim = actual != "Low Risk" and re.search(r"\b(is|looks|appears)\s+(completely\s+|totally\s+)?(safe|legitimate|genuine|trustworthy)\b", text)
     status = "ok"
     if others:

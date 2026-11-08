@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "WTD Companion (link & page check)",
+  "version": "0.1.0",
+  "description": "User-triggered checks of the current page or a link with your local WTD investigation server. Not real-time protection.",
+  "minimum_chrome_version": "120",
+  "permissions": ["activeTab", "contextMenus", "storage"],
+  "host_permissions": ["http://127.0.0.1:8000/*"],
+  "background": { "service_worker": "sw.js", "type": "module" },
+  "action": { "default_title": "Check this page with WTD", "default_popup": "popup.html" },
+  "options_page": "options.html",
+  "content_security_policy": { "extension_pages": "script-src 'self'; object-src 'none'; base-uri 'none'" }
+}

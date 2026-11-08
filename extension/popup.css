@@ -1,0 +1,16 @@
+:root { color-scheme: light dark; --bg: #fff; --fg: #1a1d23; --muted: #5b6270; --line: #d9dde3; }
+@media (prefers-color-scheme: dark) { :root { --bg: #15171c; --fg: #e8eaee; --muted: #a3aab6; --line: #2c3038; } }
+body { width: 340px; margin: 0; padding: 12px 14px; font: 13px/1.45 system-ui, sans-serif; background: var(--bg); color: var(--fg); }
+header { font-size: 15px; margin-bottom: 4px; }
+.note, .small { color: var(--muted); font-size: 12px; }
+.mono { font-family: ui-monospace, monospace; font-size: 12px; word-break: break-all; margin: 8px 0; }
+button { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid var(--line); background: #2f5bd3; color: #fff; font-weight: 600; cursor: pointer; }
+button:disabled { opacity: .55; cursor: default; }
+.verdict { margin-top: 10px; padding: 8px 10px; border-radius: 6px; font-weight: 700; font-size: 15px; }
+.low { background: #e3f4e8; color: #17603a; } .sus { background: #fff2d6; color: #7a4d00; } .high { background: #fde3dc; color: #8f2410; }
+.conf { background: #8f1d1d; color: #fff; } .inc { background: #e9ebef; color: #3c4250; }
+@media (prefers-color-scheme: dark) { .low { background: #12351f; color: #9fe2b7; } .sus { background: #3b2c08; color: #ffd27a; } .high { background: #4a1a10; color: #ffb4a1; } .inc { background: #2a2e36; color: #c9ced8; } }
+ul { padding-left: 18px; margin: 6px 0; }
+a { color: #4a7bff; }
+.error { margin-top: 8px; color: #c0392b; }
+details { margin-top: 10px; } footer { margin-top: 8px; font-size: 12px; }
