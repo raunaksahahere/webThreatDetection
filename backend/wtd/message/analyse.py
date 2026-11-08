@@ -14,6 +14,7 @@ from .. import intel
 from ..checks import url_rules
 from ..models import CheckResult, CheckStatus, Finding, Indicator, Module, Provenance, Severity, Strength, iso
 from ..netguard import UrlRejected, defang, parse_url, refang
+from .email_checks import analyse_email, looks_like_email
 from ..pipeline import EXECUTOR, STORE, _check, _finish, correlate, correlation_findings, hmac_key, new_report, submit_url
 
 SOURCE = "wtd.message_rules v1 (deterministic patterns)"
@@ -194,8 +195,22 @@ def analyse_message(rid: str, text: str, investigate_links: bool) -> None:
     findings: list[Finding] = []
     checks: list[CheckResult] = []
     try:
+        email_facts, email_items = None, []
+        if looks_like_email(text):
+            ef, body, email_facts, email_items, hrefs = analyse_email(text)
+            findings += ef
+            auth = email_facts.get("authentication_results")
+            checks.append(_check("email.structure", Module.message, CheckStatus.succeeded, True,
+                                 f"headers parsed; {email_facts['received_hops']} Received hop(s); {len(email_facts['attachments'])} attachment(s) listed (not opened)"))
+            checks.append(_check("email.authentication", Module.message, CheckStatus.succeeded if auth else CheckStatus.skipped, False,
+                                 f"SPF/DKIM/DMARC as recorded by {auth.get('authserv', '?')}" if auth else "no Authentication-Results header in the pasted source"))
+            text = body + ("\n" + "\n".join(dict.fromkeys(hrefs))[:4000] if hrefs else "")
         mf, items, facts, urls = analyse_text(text)
         findings += mf
+        if email_facts:
+            seen = {(t, k) for t, k, _ in items}
+            items += [(t, hmac_key(v), d) for t, v, d in email_items if (t, hmac_key(v)) not in seen]
+            facts["email"] = email_facts
         checks.append(_check("message.rules", Module.message, CheckStatus.succeeded, True, f"{len(mf)} pattern(s); {len(urls)} link(s) extracted"))
         for i, u in enumerate(urls):
             p = parse_url(u)
@@ -238,6 +253,14 @@ def analyse_message(rid: str, text: str, investigate_links: bool) -> None:
 
 def submit_message(text: str, investigate_links: bool = True):
     excerpt = redact(" ".join(text.split()))[:160]
+    if looks_like_email(text):
+        import email as _email
+        import email.policy as _policy
+
+        m = _email.message_from_string(text.lstrip()[:200_000], policy=_policy.default)
+        frm = str(m.get("From", ""))
+        dom = frm.rsplit("@", 1)[-1].strip("> ").lower() if "@" in frm else "unknown sender"
+        excerpt = redact(f"E-mail from {dom}: " + " ".join(str(m.get("Subject", "(no subject)")).split()))[:160]
     r = new_report("message", excerpt + ("…" if len(text) > 160 else ""), text)
     EXECUTOR.submit(analyse_message, r.id, text, investigate_links)
     return r

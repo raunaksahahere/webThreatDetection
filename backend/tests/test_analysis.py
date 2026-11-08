@@ -169,3 +169,33 @@ def test_job_wording_alone_stays_weak():
     from wtd.message.analyse import analyse_text
     fs = analyse_text("We have a part-time online job opening for students. Apply on our careers page.")[0]
     assert all(f.strength == "weak" for f in fs)
+
+
+# ------------------------------------------------------------------ raw e-mail analysis (synthetic fixtures)
+def _email_assessment(name):
+    from pathlib import Path
+    from wtd.message.analyse import analyse_text
+    from wtd.message.email_checks import analyse_email, looks_like_email
+    raw = (Path(__file__).parent / "fixtures" / name).read_text()
+    assert looks_like_email(raw)
+    ef, body, facts, items, hrefs = analyse_email(raw)
+    mf, *_ = analyse_text(body + "\n" + "\n".join(hrefs))
+    checks = [CheckResult(name="message.rules", module="message", status="succeeded", essential=True)]
+    return {f.code for f in ef + mf}, classify(ef + mf, checks), facts
+
+
+def test_spoofed_email_is_high_risk_with_specific_evidence():
+    codes, a, facts = _email_assessment("phish_paypal.eml")
+    assert {"email.dmarc_fail", "email.display_name_spoof", "email.reply_to_mismatch", "email.link_text_mismatch", "email.dangerous_attachment"} <= codes
+    assert a.classification == "High Risk"
+    assert facts["attachments"][0]["name"] == "Invoice_8812.pdf.html" and facts["from"].startswith("s•••@")
+
+
+def test_authenticated_service_email_stays_low_risk():
+    codes, a, facts = _email_assessment("benign_github.eml")
+    assert "email.auth_pass" in codes and a.classification == "Low Risk", (codes, a.classification)
+
+
+def test_plain_message_not_mistaken_for_email():
+    from wtd.message.email_checks import looks_like_email
+    assert not looks_like_email("From: your bank\nPlease update KYC today")

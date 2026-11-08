@@ -56,7 +56,7 @@ class UrlSubmission(BaseModel):
 
 class MessageSubmission(BaseModel):
     kind: Literal["message"]
-    text: str = Field(min_length=1, max_length=20000)
+    text: str = Field(min_length=1, max_length=150_000)  # raw e-mail source can be large; only redacted excerpts are stored
     investigate_links: bool = True
 
 

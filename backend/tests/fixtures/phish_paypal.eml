@@ -1,0 +1,26 @@
+Return-Path: <bounce@mailer-x.top>
+Received: from mailer-x.top (mailer-x.top [203.0.113.7]) by mx.example.net with ESMTP id abc; Sun, 08 Nov 2026 10:00:00 +0000
+Authentication-Results: mx.example.net; spf=fail smtp.mailfrom=mailer-x.top; dkim=none; dmarc=fail (p=reject) header.from=paypa1-alerts.com
+From: "PayPal Security" <support@paypa1-alerts.com>
+Reply-To: paypal.resolution.desk@gmail.com
+To: customer@example.org
+Subject: Your account has been limited - action required within 24 hours
+Date: Sun, 08 Nov 2026 10:00:00 +0000
+Message-ID: <synthetic-1@paypa1-alerts.com>
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="b1"
+
+--b1
+Content-Type: text/html; charset="utf-8"
+
+<html><body><p>Dear customer, we noticed unusual activity. Your PayPal account will be suspended today.</p>
+<p>Verify your account now: <a href="https://paypa1-alerts.com/login">https://www.paypal.com/signin</a></p>
+<p>Enter your password and the OTP to confirm.</p></body></html>
+
+--b1
+Content-Type: text/html; name="Invoice_8812.pdf.html"
+Content-Disposition: attachment; filename="Invoice_8812.pdf.html"
+Content-Transfer-Encoding: base64
+
+PGh0bWw+PGJvZHk+U1lOVEhFVElDIEZJWFRVUkU8L2JvZHk+PC9odG1sPg==
+--b1--

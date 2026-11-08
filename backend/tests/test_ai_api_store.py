@@ -124,7 +124,7 @@ def test_unusable_urls_rejected_with_422(client, url):
 
 
 def test_oversized_message_rejected(client):
-    r = client.post("/api/analyses", json={"kind": "message", "text": "a" * 20001}, headers={"X-WTD-Token": "test-token"})
+    r = client.post("/api/analyses", json={"kind": "message", "text": "a" * 150_001}, headers={"X-WTD-Token": "test-token"})
     assert r.status_code == 422
 
 

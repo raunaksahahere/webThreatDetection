@@ -6,7 +6,7 @@ import { FlowSteps } from '../components/FlowSteps';
 import { Notice } from '../components/Section';
 
 type Tab = 'url' | 'message';
-const MAX_MESSAGE = 20000;
+const MAX_MESSAGE = 150000;
 const MESSAGE_NOTICE = 'Paste the message text only. Remove passwords, OTPs, card numbers and personal details you do not want analysed.';
 
 export function InvestigatePage() {
@@ -86,7 +86,7 @@ export function InvestigatePage() {
               {MESSAGE_NOTICE}
             </Notice>
             <label className="field">
-              <span className="field-label">Message text</span>
+              <span className="field-label">Message text, or a raw e-mail (paste &ldquo;Show original&rdquo; / .eml source to check SPF, DKIM, DMARC, spoofing and attachments)</span>
               <textarea
                 rows={8}
                 spellCheck={false}
@@ -95,6 +95,23 @@ export function InvestigatePage() {
                 maxLength={MAX_MESSAGE}
                 onChange={(e) => setText(e.target.value)}
               />
+            </label>
+            <label className="eml-load">
+              <input
+                type="file"
+                accept=".eml,message/rfc822,text/plain"
+                onChange={async (e) => {
+                  const f = e.target.files?.[0];
+                  if (!f) return;
+                  if (f.size > MAX_MESSAGE) {
+                    setError(`That file is ${Math.round(f.size / 1024)} KB; the limit is ${Math.round(MAX_MESSAGE / 1024)} KB.`);
+                    return;
+                  }
+                  setText(await f.text()); // read locally as text; attachments inside are never opened
+                  e.target.value = '';
+                }}
+              />
+              <span>Load an .eml file</span>
             </label>
             <div className="field-row">
               <label className="check">

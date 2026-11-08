@@ -1492,6 +1492,19 @@ textarea {
   font-size: 0.82rem;
 }
 
+.eml-load {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  margin-top: -0.25rem;
+}
+.eml-load input {
+  font-size: 0.8rem;
+  max-width: 100%;
+}
+
 /* ---------- independent review ---------- */
 .review-box {
   border-top: 1px dashed var(--rule-strong);
