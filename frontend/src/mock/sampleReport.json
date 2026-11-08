@@ -1,0 +1,603 @@
+{
+  "schema_version": "wtd.report.v1",
+  "id": "3f6c2a9e-8b1d-4c57-9e2a-71d0b5f4c8a1",
+  "kind": "url",
+  "status": "complete",
+  "created_at": "2026-11-08T06:42:11Z",
+  "completed_at": "2026-11-08T06:42:21Z",
+  "input_display": "hxxps://sbi-kyc-update[.]top/verify/login.php?ref=sms",
+  "input_sha256": "33101c938f132e27756c8d383281390cf855282ef1385801a82c3957f53c2a5e",
+  "subject": {
+    "host": "sbi-kyc-update.top",
+    "host_unicode": "sbi-kyc-update.top",
+    "scheme": "https",
+    "port": 443,
+    "defanged": "hxxps://sbi-kyc-update[.]top/verify/login.php?ref=sms",
+    "registrable_domain": "sbi-kyc-update.top",
+    "subdomain": "",
+    "public_suffix": "top",
+    "official_brand": null
+  },
+  "redirects": [
+    {
+      "index": 0,
+      "url": "https://sbi-kyc-update.top/verify/login.php?ref=sms",
+      "host": "sbi-kyc-update.top",
+      "ip": "203.0.113.45",
+      "status": 302,
+      "location": "/kyc/step1?sid=8f2c",
+      "blocked_reason": null,
+      "tls_version": "TLSv1.3",
+      "duration_ms": 412
+    },
+    {
+      "index": 1,
+      "url": "https://sbi-kyc-update.top/kyc/step1?sid=8f2c",
+      "host": "sbi-kyc-update.top",
+      "ip": "203.0.113.45",
+      "status": 200,
+      "location": null,
+      "blocked_reason": null,
+      "tls_version": "TLSv1.3",
+      "duration_ms": 1388
+    }
+  ],
+  "tls": {
+    "version": "TLSv1.3",
+    "cipher": "TLS_AES_256_GCM_SHA384",
+    "subject_cn": "sbi-kyc-update.top",
+    "issuer": "R11 (Let's Encrypt)",
+    "not_before": "2026-11-05T00:00:00Z",
+    "not_after": "2027-02-03T23:59:59Z",
+    "age_days": 3,
+    "san": [
+      "sbi-kyc-update.top",
+      "www.sbi-kyc-update.top"
+    ],
+    "chain_valid": true,
+    "hostname_match": true,
+    "spki_sha256": "b0b590d3bfaa3ef28dc9876e31b995606f851246733bcbf985f6c55e5bcbbed5"
+  },
+  "web": {
+    "final_url": "https://sbi-kyc-update.top/kyc/step1?sid=8f2c",
+    "status": 200,
+    "content_type": "text/html; charset=utf-8",
+    "bytes": 48213,
+    "title": "SBI Online | Complete your KYC",
+    "forms": {
+      "count": 1,
+      "password_fields": 1,
+      "otp_fields": 1,
+      "action_hosts": [
+        "sbi-kyc-update.top"
+      ]
+    },
+    "external_script_hosts": [
+      "cdn.jsdelivr.net",
+      "code.jquery.com"
+    ],
+    "iframes": 0,
+    "meta_refresh": false,
+    "headers": {
+      "server": "nginx/1.24.0",
+      "strict-transport-security": null,
+      "content-security-policy": null
+    }
+  },
+  "indicators": [
+    {
+      "type": "url",
+      "display": "hxxps://sbi-kyc-update[.]top/verify/login.php?ref=sms",
+      "match_key": "https://sbi-kyc-update.top/verify/login.php?ref=sms",
+      "hashed": false
+    },
+    {
+      "type": "domain",
+      "display": "sbi-kyc-update[.]top",
+      "match_key": "sbi-kyc-update.top",
+      "hashed": false
+    },
+    {
+      "type": "ip",
+      "display": "203.0.113[.]45",
+      "match_key": "203.0.113.45",
+      "hashed": false
+    },
+    {
+      "type": "brand",
+      "display": "State Bank of India",
+      "match_key": "state-bank-of-india",
+      "hashed": false
+    },
+    {
+      "type": "cert_spki",
+      "display": "sha256:b0b590d3bfaa3ef2…",
+      "match_key": "b0b590d3bfaa3ef28dc9876e31b995606f851246733bcbf985f6c55e5bcbbed5",
+      "hashed": false
+    }
+  ],
+  "findings": [
+    {
+      "id": "url.brand_in_domain",
+      "code": "url.brand_in_domain",
+      "module": "url",
+      "title": "Domain contains a protected brand name but is not an official domain of that brand",
+      "observed": "The registrable domain sbi-kyc-update.top contains the token 'sbi' (State Bank of India). The official domains on record are sbi.co.in, onlinesbi.sbi and sbicard.com.",
+      "evidence": {
+        "brand": "State Bank of India",
+        "token": "sbi",
+        "registrable_domain": "sbi-kyc-update.top",
+        "official": [
+          "sbi.co.in",
+          "onlinesbi.sbi",
+          "sbicard.com"
+        ]
+      },
+      "source": "wtd.url_rules v1 (static analysis)",
+      "provenance": "live",
+      "observed_at": "2026-11-08T06:42:12Z",
+      "severity": "high",
+      "strength": "moderate",
+      "impact": "People read the brand name in the address and assume the page belongs to the bank.",
+      "recommendation": "Reach the bank only through an address you type yourself or its official app.",
+      "limitation": "Brand tokens are matched against a curated list of 40 brands; short tokens can occur in unrelated names."
+    },
+    {
+      "id": "content.brand_mismatch",
+      "code": "content.brand_mismatch",
+      "module": "content",
+      "title": "Page presents itself as State Bank of India on a non-official domain",
+      "observed": "The page title is 'SBI Online | Complete your KYC' and the page text mentions 'State Bank of India' 4 times, but the page is served from sbi-kyc-update.top.",
+      "evidence": {
+        "page_title": "SBI Online | Complete your KYC",
+        "brand": "State Bank of India",
+        "mentions": 4,
+        "served_from": "sbi-kyc-update.top"
+      },
+      "source": "wtd.content v1 (HTML features, isolated inspector)",
+      "provenance": "live",
+      "observed_at": "2026-11-08T06:42:17Z",
+      "severity": "high",
+      "strength": "moderate",
+      "impact": "A page that claims to be a bank while hosted elsewhere is the core pattern of a phishing page.",
+      "recommendation": "Do not enter any information on this page.",
+      "limitation": "Text matching cannot see images; a page could imitate a brand visually without naming it."
+    },
+    {
+      "id": "dns.new_domain",
+      "code": "dns.new_domain",
+      "module": "dns",
+      "title": "Domain was registered 6 days ago",
+      "observed": "RDAP reports the domain was registered on 2026-11-02, 6 days before this analysis.",
+      "evidence": {
+        "registered": "2026-11-02",
+        "age_days": 6,
+        "registrar": "Example Registrar Ltd",
+        "rdap_server": "rdap.nic.top",
+        "cached_at": "2026-11-08T04:40:02Z"
+      },
+      "source": "rdap.nic.top via wtd.dns v1",
+      "provenance": "cached",
+      "observed_at": "2026-11-08T06:42:13Z",
+      "severity": "medium",
+      "strength": "moderate",
+      "impact": "Phishing campaigns typically use domains for days or weeks; established services rarely move logins to brand-new domains.",
+      "recommendation": "Treat new domains asking for credentials or payments with extra caution.",
+      "limitation": "New domains are also used by legitimate new businesses. The RDAP answer was cached from an earlier lookup."
+    },
+    {
+      "id": "web.password_form",
+      "code": "web.password_form",
+      "module": "web",
+      "title": "Page asks for a password and a one-time password on the same form",
+      "observed": "The final page contains 1 form with a username field, a password field and a 6-digit OTP field. The form submits to sbi-kyc-update.top.",
+      "evidence": {
+        "forms": 1,
+        "password_fields": 1,
+        "otp_fields": 1,
+        "action_host": "sbi-kyc-update.top",
+        "field_names": [
+          "username",
+          "password",
+          "otp"
+        ]
+      },
+      "source": "wtd.web v1 (isolated inspector)",
+      "provenance": "live",
+      "observed_at": "2026-11-08T06:42:16Z",
+      "severity": "medium",
+      "strength": "moderate",
+      "impact": "Collecting a password and OTP together lets an attacker log in to the real account in real time.",
+      "recommendation": "Never type an OTP into a page you reached from a link in a message.",
+      "limitation": "Only the first page was inspected; later steps of the flow were not followed."
+    },
+    {
+      "id": "intel.demo_blocklist",
+      "code": "intel.demo_blocklist",
+      "module": "intel",
+      "title": "Host is listed in the local demo blocklist fixture",
+      "observed": "The host sbi-kyc-update.top appears in data/demo_blocklist.json, a fixture created for demonstrations.",
+      "evidence": {
+        "fixture": "data/demo_blocklist.json",
+        "entry": "sbi-kyc-update.top",
+        "fixture_version": "2026-11-08"
+      },
+      "source": "wtd.intel demo fixture",
+      "provenance": "synthetic",
+      "observed_at": "2026-11-08T06:42:14Z",
+      "severity": "medium",
+      "strength": "moderate",
+      "impact": "None in practice: this is not real threat intelligence.",
+      "recommendation": "Ignore this finding for real decisions; it exists to exercise the dashboard.",
+      "limitation": "Synthetic fixture for demos and tests. It is excluded from the classification."
+    },
+    {
+      "id": "url.keywords",
+      "code": "url.keywords",
+      "module": "url",
+      "title": "URL contains account-action keywords",
+      "observed": "The URL contains the words 'kyc', 'verify' and 'login'.",
+      "evidence": {
+        "keywords": [
+          "kyc",
+          "verify",
+          "login"
+        ]
+      },
+      "source": "wtd.url_rules v1 (static analysis)",
+      "provenance": "live",
+      "observed_at": "2026-11-08T06:42:12Z",
+      "severity": "low",
+      "strength": "weak",
+      "impact": "These words are used to make a link look like a required account step.",
+      "recommendation": "Be careful with links that urge you to verify or update an account.",
+      "limitation": "Many legitimate sites use these words; this signal is weak on its own."
+    },
+    {
+      "id": "url.risky_tld",
+      "code": "url.risky_tld",
+      "module": "url",
+      "title": "Domain uses a top-level domain with a high abuse rate",
+      "observed": "The domain ends in .top.",
+      "evidence": {
+        "tld": "top"
+      },
+      "source": "wtd.url_rules v1 (static analysis)",
+      "provenance": "live",
+      "observed_at": "2026-11-08T06:42:12Z",
+      "severity": "low",
+      "strength": "weak",
+      "impact": "Some cheap TLDs are disproportionately used for abuse, according to published abuse statistics.",
+      "recommendation": "Combine with other signals; do not judge a site on its TLD alone.",
+      "limitation": "Most .top domains are not malicious."
+    },
+    {
+      "id": "tls.new_certificate",
+      "code": "tls.new_certificate",
+      "module": "tls",
+      "title": "TLS certificate was issued 3 days ago",
+      "observed": "The certificate for sbi-kyc-update.top was issued on 2026-11-05 by R11 (Let's Encrypt).",
+      "evidence": {
+        "not_before": "2026-11-05T00:00:00Z",
+        "age_days": 3,
+        "issuer": "R11 (Let's Encrypt)"
+      },
+      "source": "wtd.tls v1 (live handshake)",
+      "provenance": "live",
+      "observed_at": "2026-11-08T06:42:15Z",
+      "severity": "low",
+      "strength": "weak",
+      "impact": "A fresh certificate on a fresh domain fits a recently created site.",
+      "recommendation": "A padlock only means the connection is encrypted, not that the site is trustworthy.",
+      "limitation": "Certificates are renewed every few months on many legitimate sites, so age is a weak signal."
+    },
+    {
+      "id": "correlation.shared_ip",
+      "code": "correlation.shared_ip",
+      "module": "correlation",
+      "title": "Same server address as an earlier High Risk report",
+      "observed": "The domain resolves to 203.0.113.45, which was also seen in report b7e19d42 (High Risk) on 2026-11-07.",
+      "evidence": {
+        "ip": "203.0.113.45",
+        "other_report_id": "b7e19d42-5a3c-4f8e-a1d6-2c9f0e8b3a57",
+        "other_classification": "High Risk"
+      },
+      "source": "wtd.correlation v1 (local report store)",
+      "provenance": "live",
+      "observed_at": "2026-11-08T06:42:18Z",
+      "severity": "low",
+      "strength": "moderate",
+      "impact": "Shared infrastructure suggests the same operator or campaign.",
+      "recommendation": "Review the related report for further context.",
+      "limitation": "Shared hosting can place unrelated sites on the same IP address."
+    },
+    {
+      "id": "intel.tranco_absent",
+      "code": "intel.tranco_absent",
+      "module": "intel",
+      "title": "Domain is not in the Tranco top-1M popularity list",
+      "observed": "sbi-kyc-update.top is not present in the Tranco list snapshot of 2026-11-01.",
+      "evidence": {
+        "list": "Tranco",
+        "snapshot": "2026-11-01",
+        "present": false
+      },
+      "source": "Tranco snapshot (local dataset)",
+      "provenance": "dataset",
+      "observed_at": "2026-11-08T06:42:14Z",
+      "severity": "info",
+      "strength": "weak",
+      "impact": "Popular, long-standing sites are usually in the list; absence is common for new or niche sites.",
+      "recommendation": "No action on its own.",
+      "limitation": "Absence from a popularity list says nothing about safety."
+    },
+    {
+      "id": "ai.urgency_language",
+      "code": "ai.urgency_language",
+      "module": "ai",
+      "title": "Page text uses urgency and account-suspension threats",
+      "observed": "The language model identified a verbatim warning that the account will be blocked within 24 hours.",
+      "evidence": {
+        "quote": "Your YONO account will be blocked within 24 hours",
+        "quote_verified": true
+      },
+      "source": "ai.explain (ollama/llama3.1:8b-instruct)",
+      "provenance": "ai",
+      "observed_at": "2026-11-08T06:42:19Z",
+      "severity": "info",
+      "strength": "weak",
+      "impact": "Time pressure pushes people to act before checking.",
+      "recommendation": "Pause and verify through an official channel before acting on deadlines.",
+      "limitation": "Language signals are produced by an AI model and are not verified facts; the quote was checked against the page text."
+    }
+  ],
+  "checks": [
+    {
+      "name": "url.parse",
+      "module": "url",
+      "status": "succeeded",
+      "essential": true,
+      "detail": "URL parsed and normalised; scheme https, host sbi-kyc-update.top",
+      "duration_ms": 2
+    },
+    {
+      "name": "url.static_rules",
+      "module": "url",
+      "status": "succeeded",
+      "essential": true,
+      "detail": "19 static rules evaluated; 3 produced findings",
+      "duration_ms": 4
+    },
+    {
+      "name": "dns.resolve",
+      "module": "dns",
+      "status": "succeeded",
+      "essential": true,
+      "detail": "A 203.0.113.45 (1 address); no AAAA record",
+      "duration_ms": 38
+    },
+    {
+      "name": "dns.rdap_age",
+      "module": "dns",
+      "status": "succeeded",
+      "essential": false,
+      "detail": "Registration date from cached RDAP answer (2 h old)",
+      "duration_ms": 3
+    },
+    {
+      "name": "intel.urlhaus",
+      "module": "intel",
+      "status": "succeeded",
+      "essential": true,
+      "detail": "No exact URL or host listing in URLhaus (queried live)",
+      "duration_ms": 233
+    },
+    {
+      "name": "intel.certpl",
+      "module": "intel",
+      "status": "unavailable",
+      "essential": false,
+      "detail": "CERT Polska warning list not configured on this server",
+      "duration_ms": 0
+    },
+    {
+      "name": "intel.demo_blocklist",
+      "module": "intel",
+      "status": "succeeded",
+      "essential": false,
+      "detail": "Synthetic demo fixture consulted",
+      "duration_ms": 1
+    },
+    {
+      "name": "tls.handshake",
+      "module": "tls",
+      "status": "succeeded",
+      "essential": true,
+      "detail": "TLSv1.3 handshake completed; chain valid; hostname matches",
+      "duration_ms": 121
+    },
+    {
+      "name": "web.fetch",
+      "module": "web",
+      "status": "succeeded",
+      "essential": true,
+      "detail": "2 hops, final status 200, 48213 bytes fetched in isolated inspector",
+      "duration_ms": 1840
+    },
+    {
+      "name": "web.http_upgrade",
+      "module": "web",
+      "status": "failed",
+      "essential": false,
+      "detail": "HTTP to HTTPS upgrade probe timed out after 5000 ms",
+      "duration_ms": 5003
+    },
+    {
+      "name": "content.html_features",
+      "module": "content",
+      "status": "succeeded",
+      "essential": false,
+      "detail": "1 form, 1 password field, 2 external script hosts",
+      "duration_ms": 22
+    },
+    {
+      "name": "content.visual_similarity",
+      "module": "content",
+      "status": "not_implemented",
+      "essential": false,
+      "detail": "Screenshot similarity comparison is not implemented in this version",
+      "duration_ms": 0
+    },
+    {
+      "name": "message.language",
+      "module": "message",
+      "status": "skipped",
+      "essential": false,
+      "detail": "Not applicable: input is a URL",
+      "duration_ms": 0
+    },
+    {
+      "name": "correlation.indicators",
+      "module": "correlation",
+      "status": "succeeded",
+      "essential": false,
+      "detail": "1 related report found by shared IP address",
+      "duration_ms": 9
+    },
+    {
+      "name": "ai.explain",
+      "module": "ai",
+      "status": "succeeded",
+      "essential": false,
+      "detail": "Explanation validated against 11 findings; 1 point removed",
+      "duration_ms": 2950
+    }
+  ],
+  "assessment": {
+    "classification": "Suspicious",
+    "rule_id": "R-SUSP-2",
+    "rule_text": "Two or more moderate-strength signals and no strong or authoritative signal; essential checks completed.",
+    "basis_finding_ids": [
+      "url.brand_in_domain",
+      "content.brand_mismatch",
+      "dns.new_domain",
+      "web.password_form"
+    ],
+    "rationale": [
+      "4 moderate-strength signals: brand name in a non-official domain, brand named on the page, domain registered 6 days ago, password and OTP form.",
+      "No strong or authoritative signal: no listing in URLhaus; the CERT Polska list was unavailable.",
+      "Synthetic fixture finding intel.demo_blocklist is excluded from the classification."
+    ],
+    "contradictions": [
+      "The certificate chain is valid and the hostname matches. This is expected for phishing sites using free certificates and is not evidence of legitimacy."
+    ],
+    "coverage": {
+      "applicable": 13,
+      "succeeded": 11,
+      "failed": 1,
+      "unavailable": 1,
+      "skipped": 0,
+      "essential_missing": []
+    }
+  },
+  "ai": {
+    "status": "ok",
+    "provider": "ollama",
+    "model": "llama3.1:8b-instruct",
+    "latency_ms": 2950,
+    "summary": "This link imitates State Bank of India. The address contains 'sbi' but is not an official SBI domain, the domain is 6 days old, and the page asks for a username, password and OTP together. These are the usual signs of a KYC-update phishing page.",
+    "points": [
+      {
+        "finding_ids": [
+          "url.brand_in_domain",
+          "content.brand_mismatch"
+        ],
+        "explanation": "The site uses SBI's name in both its address and its page title, but sbi-kyc-update.top is not one of SBI's official domains."
+      },
+      {
+        "finding_ids": [
+          "dns.new_domain",
+          "tls.new_certificate"
+        ],
+        "explanation": "The domain was registered 6 days ago and its certificate issued 3 days ago. Banks do not move customer logins to brand-new domains."
+      },
+      {
+        "finding_ids": [
+          "web.password_form"
+        ],
+        "explanation": "Asking for a password and a one-time password on one form would let someone log in to the real account immediately."
+      },
+      {
+        "finding_ids": [
+          "correlation.shared_ip",
+          "ai.urgency_language"
+        ],
+        "explanation": "The same server hosted an earlier High Risk report, and the page pressures visitors with a 24-hour blocking threat."
+      }
+    ],
+    "observations": [
+      {
+        "technique": "Urgency / threat of account suspension",
+        "quote": "Your YONO account will be blocked within 24 hours",
+        "rationale": "Creates time pressure so the visitor acts before checking.",
+        "quote_verified": true
+      },
+      {
+        "technique": "Appeal to authority",
+        "quote": "As per RBI guidelines KYC must be updated immediately",
+        "rationale": "Invokes the regulator to make the request look mandatory.",
+        "quote_verified": false
+      }
+    ],
+    "recommended_actions": [
+      "Do not enter any details on this page.",
+      "If you already entered details, contact your bank using the number on your card or passbook and ask them to block access.",
+      "Report the link at cybercrime.gov.in or call 1930."
+    ],
+    "uncertainty": "The page was observed once from one network location; it may show different content to other visitors. A missing threat-intelligence listing does not mean the site is safe.",
+    "injection_attempt_observed": false,
+    "validation_notes": [
+      "Removed 1 point that cited an unknown finding id (web.hidden_iframe).",
+      "Observation 2: quote not found verbatim in the page text; marked unverified."
+    ],
+    "error": null
+  },
+  "correlations": [
+    {
+      "other_report_id": "b7e19d42-5a3c-4f8e-a1d6-2c9f0e8b3a57",
+      "other_created_at": "2026-11-07T18:03:55Z",
+      "other_classification": "High Risk",
+      "shared": [
+        "ip: 203.0.113[.]45",
+        "brand: State Bank of India"
+      ],
+      "method": "infrastructure",
+      "score": null
+    }
+  ],
+  "recommended_actions": [
+    "Do not enter credentials, OTPs or card details on this site.",
+    "Reach SBI only through an address you type yourself (sbi.co.in or onlinesbi.sbi) or the official app.",
+    "If you already entered details: contact your bank through its official number, change your password from the official site, and report at cybercrime.gov.in or call 1930."
+  ],
+  "limitations": [
+    "Page content was observed once from a single network location; cloaked sites can show different content to other visitors.",
+    "The CERT Polska warning list was unavailable for this analysis.",
+    "Visual (screenshot) similarity comparison is not implemented.",
+    "No automated check can prove a site or message is safe."
+  ],
+  "registry": [
+    {
+      "chain_id": 31337,
+      "contract": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+      "report_id_hex": "0x8b409a47cd64e9f9c99b39fd187fe8da156df4388dbb093c2589785dd66fb0de",
+      "commitment": "0xa1b2684ea8844f7a624f77218fe4c430093b8fa9eaee3e5d38d49936779e32ba",
+      "revision": 0,
+      "tx_hash": "0xd3ce561bfba04074aeff91efc5a400a9fd47831385d497a12162e2a79a12050d",
+      "block_number": 7,
+      "registered_at": "2026-11-08T06:43:05Z",
+      "canonicalization": "RFC8785-JCS"
+    }
+  ],
+  "error": null
+}
