@@ -12,5 +12,12 @@ start() {
   for _ in $(seq 1 30); do curl -s -m 1 -o /dev/null "http://127.0.0.1:${WTD_PORT:-8000}/api/health" && { echo "api running: http://127.0.0.1:${WTD_PORT:-8000}/ (pid $(cat "$PID"))"; return; }; sleep 0.5; done
   echo "api did not become ready; see $LOG"; exit 1
 }
-stop() { if [ -f "$PID" ]; then kill "$(cat "$PID")" 2>/dev/null || true; rm -f "$PID"; echo "api stopped"; fi; }
+stop() {
+  if [ -f "$PID" ]; then
+    local p; p="$(cat "$PID")"
+    kill "$p" 2>/dev/null || true
+    for _ in $(seq 1 40); do kill -0 "$p" 2>/dev/null || break; sleep 0.25; done  # wait so a restart never probes the old server
+    rm -f "$PID"; echo "api stopped"
+  fi
+}
 case "${1:-start}" in start) start;; stop) stop;; restart) stop; sleep 1; start;; status) [ -f "$PID" ] && kill -0 "$(cat "$PID")" 2>/dev/null && echo running || echo stopped;; esac

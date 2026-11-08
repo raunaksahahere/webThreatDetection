@@ -23,6 +23,12 @@ services:
         sync: false
       - key: WTD_CHAIN              # embedded = private anvil chain inside the container (resets on restart)
         value: embedded
+      - key: WTD_PUBLIC_DEMO        # 1 = anyone can use the dashboard without the token (judging). Set 0 to lock it again.
+        value: "1"
+      - key: WTD_PUBLIC_SESSION_LIMIT   # analyses per browser session in the public demo
+        value: "15"
+      - key: WTD_PUBLIC_DAILY_LIMIT     # analyses per visitor address per UTC day (a new tab is a new session)
+        value: "60"
       # For the public Sepolia registry instead (after scripts/testnet.sh deploy and committing deployments/sepolia.json):
       # - key: WTD_CHAIN
       #   value: external

@@ -1,6 +1,8 @@
 import { useEffect, useState, useSyncExternalStore } from 'react';
 import { Clock, KeyRound, Lock, Monitor, Moon, Network, ScanSearch, Sun } from 'lucide-react';
-import { MOCK_MODE, getHealth, getToken, clearToken, onTokenChange, requestTokenManually, errorMessage } from '../api';
+import { MOCK_MODE, getHealth, getToken, clearToken, onTokenChange, requestTokenManually, errorMessage, setUrlhausDialogOpen } from '../api';
+import { useUrlhausKey } from './UrlhausKeyDialog';
+import { useAccess } from './PublicDemo';
 import type { Health } from '../types';
 import { href, usePath } from '../router';
 import { Pill } from './Badges';
@@ -49,13 +51,15 @@ function useToken(): string | null {
 
 function TokenButton() {
   const token = useToken();
+  const access = useAccess();
   if (MOCK_MODE) return null;
+  const setTitle = access?.mode === 'public_demo' ? 'Public demo: no token needed. The operator can set the token to lift the limits.' : 'Set operator token';
   return token ? (
     <button type="button" className="icon-btn" onClick={() => clearToken()} title="Operator token set for this tab. Click to forget it." aria-label="Forget operator token">
       <Lock size={16} aria-hidden />
     </button>
   ) : (
-    <button type="button" className="icon-btn" onClick={() => requestTokenManually().catch(() => undefined)} title="Set operator token" aria-label="Set operator token">
+    <button type="button" className="icon-btn" onClick={() => requestTokenManually().catch(() => undefined)} title={setTitle} aria-label={setTitle}>
       <KeyRound size={16} aria-hidden />
     </button>
   );
@@ -81,6 +85,7 @@ function healthState(v: unknown): { on: boolean; text: string } {
 }
 
 function StatusPills() {
+  const ownUrlhaus = useUrlhausKey();
   const [health, setHealth] = useState<Health | null>(null);
   const [err, setErr] = useState<string | null>(null);
   useEffect(() => {
@@ -139,6 +144,18 @@ function StatusPills() {
       </Pill>
       {intel.map(([name, v]) => {
         const s = healthState(v);
+        if (name === 'urlhaus' && !MOCK_MODE) {
+          const title = ownUrlhaus
+            ? 'URLhaus: using your own key for new analyses (this tab only). Click to change or remove it.'
+            : s.on
+              ? 'URLhaus: configured on the server. Click to use your own key instead.'
+              : 'URLhaus: not configured on this server. Click to add your own free abuse.ch key.';
+          return (
+            <button key={name} type="button" className="pill-btn" onClick={() => setUrlhausDialogOpen(true)} title={title} aria-label={title}>
+              <Pill tone={ownUrlhaus || s.on ? 'good' : 'muted'}>{ownUrlhaus ? 'urlhaus · your key' : s.on ? 'urlhaus' : 'urlhaus · add key'}</Pill>
+            </button>
+          );
+        }
         return (
           <Pill key={name} tone={s.on ? 'good' : 'muted'} title={`Threat intel source ${name}: ${s.text}`}>
             {name}

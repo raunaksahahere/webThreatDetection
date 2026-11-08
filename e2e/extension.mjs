@@ -46,7 +46,14 @@ let extId;
     await step("Extension loads; service worker starts", async () => `id ${extId}`);
 
     await step("Context-menu item 'Check this link with WTD' is registered", async () => {
-      await worker.evaluate(() => chrome.contextMenus.update("wtd-check-link", { title: "Check this link with WTD (without opening it)" })); // rejects if missing
+      // onInstalled creates the item right after the worker starts; allow it up to 5 s. update() rejects while it is missing.
+      let last;
+      for (let i = 0; i < 25; i++) {
+        last = await worker.evaluate(() => chrome.contextMenus.update("wtd-check-link", { title: "Check this link with WTD (without opening it)" }).then(() => null, (e) => String(e.message || e)));
+        if (!last) return i ? `registered after ${i * 200} ms` : "";
+        await sleep(200);
+      }
+      throw new Error(last);
     });
 
     await step("Without a token, a link check fails with a clear message (badge '!')", async () => {
@@ -102,7 +109,7 @@ let extId;
       if ((await browser.pages()).some((p) => p.url().includes("paypa1.com"))) throw new Error("the browser navigated to the checked link");
       const report = await t.asPage();
       await report.setViewport({ width: 1200, height: 800 });
-      const tokenInput = await report.waitForSelector('input[placeholder="Paste the operator token"]', { timeout: 10000 }).catch(() => null);
+      const tokenInput = await report.waitForSelector('dialog[open] input[placeholder="Paste the operator token"]', { timeout: 10000 }).catch(() => null);
       if (tokenInput) {
         await tokenInput.type(TOKEN); // the dashboard tab keeps its own token in sessionStorage
         await report.click("::-p-text(Use token)");

@@ -8,6 +8,20 @@ export async function settings() {
   return s;
 }
 
+// Headers for the WTD API. The token is optional when the server runs as a public demo (WTD_PUBLIC_DEMO=1);
+// the session id (random, per browser session) is what the demo's per-session limit counts.
+async function apiHeaders(token, json = false) {
+  let { session } = await chrome.storage.session.get("session");
+  if (!session) {
+    session = crypto.randomUUID();
+    await chrome.storage.session.set({ session });
+  }
+  const h = { "X-WTD-Session": session };
+  if (token) h["X-WTD-Token"] = token;
+  if (json) h["Content-Type"] = "application/json";
+  return h;
+}
+
 // Only http(s) URLs with a host are ever submitted, and only after an explicit user action.
 export function checkableUrl(u) {
   try {
@@ -23,15 +37,15 @@ export function checkableUrl(u) {
 
 export async function submitUrl(url) {
   const { base, token } = await settings();
-  if (!token) throw new Error("Set the operator token in the extension options first.");
   const r = await fetch(`${base}/api/analyses`, {
     method: "POST",
-    headers: { "Content-Type": "application/json", "X-WTD-Token": token },
+    headers: await apiHeaders(token, true),
     body: JSON.stringify({ kind: "url", url }),
   });
-  if (r.status === 401) throw new Error("The WTD server rejected the token (check the extension options).");
+  if (r.status === 401)
+    throw new Error(token ? "The WTD server rejected the token (check the extension options)." : "Set the operator token in the extension options first.");
   if (r.status === 422) throw new Error((await r.json()).detail || "This address cannot be investigated.");
-  if (r.status === 429) throw new Error("Rate limited by the WTD server; try again in a minute.");
+  if (r.status === 429) throw new Error((await r.json().catch(() => ({}))).detail || "Rate limited by the WTD server; try again in a minute.");
   if (!r.ok) throw new Error(`WTD server error (HTTP ${r.status}).`);
   const j = await r.json();
   if (typeof j.id !== "string" || !/^[0-9a-f-]{36}$/.test(j.id)) throw new Error("Unexpected response from the WTD server.");
@@ -42,7 +56,7 @@ export async function submitUrl(url) {
 export async function getReport(id) {
   if (!/^[0-9a-f-]{36}$/.test(id)) throw new Error("bad id");
   const { base, token } = await settings();
-  const r = await fetch(`${base}/api/analyses/${id}`, { headers: { "X-WTD-Token": token } });
+  const r = await fetch(`${base}/api/analyses/${id}`, { headers: await apiHeaders(token) });
   if (!r.ok) throw new Error(`WTD server error (HTTP ${r.status}).`);
   return r.json();
 }
@@ -89,13 +103,12 @@ export async function realtimeEnabled() {
 /** Address-only verdict (URL rules + local threat list on the WTD server; nothing goes to third parties). */
 export async function quickCheck(url, timeoutMs = 3000) {
   const { base, token } = await settings();
-  if (!token) return null;
   const ctl = new AbortController();
   const t = setTimeout(() => ctl.abort(), timeoutMs);
   try {
     const r = await fetch(`${base}/api/quick-check`, {
       method: "POST",
-      headers: { "Content-Type": "application/json", "X-WTD-Token": token },
+      headers: await apiHeaders(token, true),
       body: JSON.stringify({ url }),
       signal: ctl.signal,
     });

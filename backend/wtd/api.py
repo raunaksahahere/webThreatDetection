@@ -14,7 +14,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import intel, pipeline
+from . import access, intel, pipeline
 from .config import ROOT, SETTINGS
 from .models import iso
 from .netguard import UrlRejected, defang, parse_url
@@ -30,7 +30,7 @@ if _cors:
     from fastapi.middleware.cors import CORSMiddleware
 
     app.add_middleware(CORSMiddleware, allow_origins=_cors, allow_methods=["GET", "POST"], allow_credentials=False,
-                       allow_headers=["Content-Type", "X-WTD-Token", "Accept"], expose_headers=["Content-Disposition"], max_age=600)
+                       allow_headers=["Content-Type", "X-WTD-Token", "X-URLhaus-Key", "X-WTD-Session", "Accept"], expose_headers=["Content-Disposition"], max_age=600)
 _hits: dict[str, deque] = defaultdict(deque)
 
 
@@ -43,10 +43,39 @@ def _startup() -> None:
     log.info("API token file: data/api_token (or WTD_API_TOKEN). Dashboard: http://127.0.0.1:8000/")
 
 
-def require_token(request: Request) -> None:
+def is_operator(request: Request) -> bool:
     tok = request.headers.get("x-wtd-token", "")
-    if not hmac.compare_digest(tok.encode(), SETTINGS.api_token.encode()):
+    return bool(tok) and hmac.compare_digest(tok.encode(), SETTINGS.api_token.encode())
+
+
+def require_token(request: Request) -> None:
+    """Operator token, unless the server runs as a public demo (WTD_PUBLIC_DEMO=1)."""
+    if access.public_demo():
+        return
+    if not is_operator(request):
         raise HTTPException(401, "missing or invalid X-WTD-Token")
+
+
+def require_chain_writer(request: Request) -> None:
+    """Register/revise/review: open in the public demo only on the local/embedded chain; public chains need the token."""
+    if access.public_demo() and access.local_chain():
+        return
+    if not is_operator(request):
+        raise HTTPException(401, "missing or invalid X-WTD-Token" + (" (on-chain actions on a public chain need the operator token)" if access.public_demo() else ""))
+
+
+def _client(request: Request) -> str:
+    return request.client.host if request.client else "unknown"
+
+
+def user_urlhaus_key(request: Request) -> str | None:
+    """Optional investigator-supplied abuse.ch key (X-URLhaus-Key). Used for one analysis only; never stored or logged."""
+    k = request.headers.get("x-urlhaus-key", "").strip()
+    if not k:
+        return None
+    if not intel.valid_user_key(k):
+        raise HTTPException(422, "X-URLhaus-Key must be an abuse.ch Auth-Key (letters and digits only)")
+    return k
 
 
 def rate_limit(request: Request) -> None:
@@ -93,21 +122,58 @@ def health() -> dict:
             "ai": {"provider": "openrouter (free model)" if SETTINGS.ai_enabled else "disabled", "model": SETTINGS.ai_model,
                    "status": "configured" if SETTINGS.ai_enabled else "disabled"},
             "intel": {"urlhaus": "configured" if intel.urlhaus_key() else "not configured",
-                      "certpl": f"{len(intel.CERTPL.domains)} domains" if intel.CERTPL.domains else "not loaded"}}
+                      "certpl": f"{len(intel.CERTPL.domains)} domains" if intel.CERTPL.domains else "not loaded"},
+            "access": ({"mode": "public_demo", "session_limit": access.session_limit(), "daily_limit": access.daily_limit(),
+                        "chain_actions": "open" if access.local_chain() else "operator token"}
+                       if access.public_demo() else {"mode": "operator_token"})}
+
+
+@app.get("/api/quota")
+def quota(request: Request) -> dict:
+    """Analyses left for this browser session (X-WTD-Session) in the public demo. Public; reveals only these counters."""
+    if not access.public_demo():
+        return {"public_demo": False}
+    if is_operator(request):
+        return {"public_demo": True, "operator": True}
+    sk = access.session_key(request.headers.get("x-wtd-session"), _client(request))
+    return {"public_demo": True, "operator": False, **access.QUOTA.snapshot(sk, _client(request))}
 
 
 @app.post("/api/analyses", status_code=202, dependencies=[Depends(require_token), Depends(rate_limit)])
-def submit(body: UrlSubmission | MessageSubmission) -> dict:
+def submit(body: UrlSubmission | MessageSubmission, request: Request, urlhaus_key: str | None = Depends(user_urlhaus_key)) -> dict:
+    limited = access.public_demo() and not is_operator(request)
+    ip = _client(request)
+    sk = access.session_key(request.headers.get("x-wtd-session"), ip)
+    left = None
+    if limited:
+        try:
+            left = access.QUOTA.take(sk, ip)
+        except access.QuotaExceeded as e:
+            raise HTTPException(429, str(e))
     try:
         if body.kind == "url":
-            r = pipeline.submit_url(body.url, body.via)
+            r = pipeline.submit_url(body.url, body.via, urlhaus_key)
         else:
             from .message import analyse as msg
 
-            r = msg.submit_message(body.text, body.investigate_links, body.via)
+            r = msg.submit_message(body.text, body.investigate_links, body.via, urlhaus_key)
     except UrlRejected as e:
+        if limited:
+            access.QUOTA.refund(sk, ip)  # a rejected address does not use up the visitor's quota
         raise HTTPException(422, str(e))
-    return {"id": r.id, "status": r.status}
+    out = {"id": r.id, "status": r.status}
+    if left is not None:
+        out["quota"] = left
+    return out
+
+
+@app.post("/api/intel/urlhaus/check", dependencies=[Depends(require_token), Depends(rate_limit)])
+def urlhaus_key_check(urlhaus_key: str | None = Depends(user_urlhaus_key)) -> dict:
+    """Lets an investigator test their own URLhaus key before using it. The key is not stored."""
+    if not urlhaus_key:
+        raise HTTPException(422, "send the key in the X-URLhaus-Key header")
+    ok, message = intel.check_urlhaus_key(urlhaus_key)
+    return {"accepted": ok, "message": message}
 
 
 _quick_hits: dict[str, list[float]] = {}
@@ -167,14 +233,14 @@ def get_analysis(rid: str) -> JSONResponse:
     return JSONResponse(r.model_dump(mode="json"))
 
 
-@app.post("/api/analyses/{rid}/threat-report", dependencies=[Depends(require_token)])
+@app.post("/api/analyses/{rid}/threat-report", dependencies=[Depends(require_chain_writer)])
 def register(rid: str, body: ThreatReportRequest) -> dict:
     from .registry import service
 
     return service.register(rid, body.submitter)
 
 
-@app.post("/api/analyses/{rid}/threat-report/revise", dependencies=[Depends(require_token)])
+@app.post("/api/analyses/{rid}/threat-report/revise", dependencies=[Depends(require_chain_writer)])
 def revise(rid: str, body: ReviseRequest) -> dict:
     from .registry import service
 
@@ -186,7 +252,7 @@ class ReviewRequest(BaseModel):
     note: str = Field(default="", max_length=500)
 
 
-@app.post("/api/analyses/{rid}/threat-report/review", dependencies=[Depends(require_token)])
+@app.post("/api/analyses/{rid}/threat-report/review", dependencies=[Depends(require_chain_writer)])
 def review(rid: str, body: ReviewRequest) -> dict:
     """Independent reviewer decision, signed by the reviewer account (contract forbids reviewing your own report)."""
     from .registry import service

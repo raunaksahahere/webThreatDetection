@@ -1,6 +1,8 @@
 import { useRoute, href } from './router';
 import { Header, MockBanner } from './components/Header';
 import { TokenDialog } from './components/TokenDialog';
+import { UrlhausKeyDialog } from './components/UrlhausKeyDialog';
+import { PublicDemoBanner } from './components/PublicDemo';
 import { InvestigatePage } from './pages/InvestigatePage';
 import { ReportPage } from './pages/ReportPage';
 import { HistoryPage } from './pages/HistoryPage';
@@ -36,6 +38,7 @@ export function App() {
   return (
     <>
       <MockBanner />
+      <PublicDemoBanner />
       <Header />
       <main className="main" id="main">
         {page}
@@ -45,6 +48,7 @@ export function App() {
         <span>No automated check can prove a site or message is safe.</span>
       </footer>
       <TokenDialog />
+      <UrlhausKeyDialog />
     </>
   );
 }

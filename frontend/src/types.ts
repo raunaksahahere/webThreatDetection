@@ -163,6 +163,29 @@ export interface Health {
   chain?: { connected?: boolean; chain_id?: number | null; contract?: string | null };
   ai?: { provider?: string | null; model?: string | null; status?: string | null };
   intel?: { [source: string]: unknown };
+  access?: AccessInfo;
+}
+
+/** Server access mode: operator token (default) or open public demo with per-session quotas. */
+export interface AccessInfo {
+  mode: 'public_demo' | 'operator_token';
+  session_limit?: number;
+  daily_limit?: number;
+  chain_actions?: string;
+}
+
+export interface QuotaCounter {
+  used: number;
+  limit: number;
+  remaining: number;
+}
+
+export interface QuotaInfo {
+  public_demo: boolean;
+  operator?: boolean;
+  session?: QuotaCounter;
+  daily?: QuotaCounter;
+  remaining?: number;
 }
 
 export type AnalysisRequest =

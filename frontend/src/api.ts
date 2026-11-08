@@ -4,6 +4,8 @@
 // - A 401 clears the token and asks the operator again, then retries.
 // - In mock mode (?mock=1) every call is answered locally from src/mock and no request is made.
 import type {
+  AccessInfo,
+  QuotaInfo,
   AnalysisCreated,
   AnalysisRequest,
   AnalysisSummary,
@@ -131,12 +133,119 @@ export function requestTokenManually(): Promise<string> {
   return obtainToken('manual');
 }
 
+// ---------------- investigator's own URLhaus key ----------------
+// Optional abuse.ch Auth-Key a visitor (e.g. a judge) supplies when the server has none or they prefer their own.
+// Kept in sessionStorage for this tab only, sent as X-URLhaus-Key with each analysis, never stored by the server.
+
+const URLHAUS_KEY = 'wtd.urlhausKey';
+export const URLHAUS_KEY_RE = /^[A-Za-z0-9]{20,100}$/;
+let memoryUrlhaus: string | null = null;
+const urlhausListeners = new Set<() => void>();
+
+export function getUrlhausKey(): string | null {
+  try {
+    return window.sessionStorage.getItem(URLHAUS_KEY) ?? memoryUrlhaus;
+  } catch {
+    return memoryUrlhaus;
+  }
+}
+
+export function setUrlhausKey(key: string): void {
+  memoryUrlhaus = key;
+  try {
+    window.sessionStorage.setItem(URLHAUS_KEY, key);
+  } catch {
+    /* storage blocked: keep in memory for this page only */
+  }
+  urlhausListeners.forEach((l) => l());
+}
+
+export function clearUrlhausKey(): void {
+  memoryUrlhaus = null;
+  try {
+    window.sessionStorage.removeItem(URLHAUS_KEY);
+  } catch {
+    /* ignore */
+  }
+  urlhausListeners.forEach((l) => l());
+}
+
+export function onUrlhausKeyChange(l: () => void): () => void {
+  urlhausListeners.add(l);
+  return () => urlhausListeners.delete(l);
+}
+
+// Open/close state for <UrlhausKeyDialog/>, so the header pill and the Investigate page can both open it.
+let urlhausDialogOpen = false;
+const urlhausDialogListeners = new Set<() => void>();
+export function isUrlhausDialogOpen(): boolean {
+  return urlhausDialogOpen;
+}
+export function setUrlhausDialogOpen(open: boolean): void {
+  urlhausDialogOpen = open;
+  urlhausDialogListeners.forEach((l) => l());
+}
+export function subscribeUrlhausDialog(l: () => void): () => void {
+  urlhausDialogListeners.add(l);
+  return () => urlhausDialogListeners.delete(l);
+}
+
+// ---------------- public demo: access mode and browser session ----------------
+
+let accessPromise: Promise<AccessInfo> | null = null;
+
+/** Access mode from /api/health, fetched once per page load. */
+export function accessInfo(): Promise<AccessInfo> {
+  if (MOCK_MODE) return Promise.resolve({ mode: 'operator_token' });
+  if (!accessPromise)
+    accessPromise = getHealth()
+      .then((h) => h.access ?? { mode: 'operator_token' as const })
+      .catch((e: unknown) => {
+        accessPromise = null;
+        throw e;
+      });
+  return accessPromise;
+}
+
+async function isPublicDemo(): Promise<boolean> {
+  try {
+    return (await accessInfo()).mode === 'public_demo';
+  } catch {
+    return false;
+  }
+}
+
+const SESSION_KEY = 'wtd.session';
+let memorySession: string | null = null;
+
+function randomId(): string {
+  if (typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+  const b = crypto.getRandomValues(new Uint8Array(16));
+  return Array.from(b, (x) => x.toString(16).padStart(2, '0')).join('');
+}
+
+/** Random id for this browser tab's session (sessionStorage), used by the public demo's per-session limit. */
+export function getSessionId(): string {
+  try {
+    let id = window.sessionStorage.getItem(SESSION_KEY);
+    if (!id) {
+      id = randomId();
+      window.sessionStorage.setItem(SESSION_KEY, id);
+    }
+    return id;
+  } catch {
+    memorySession ??= randomId();
+    return memorySession;
+  }
+}
+
 // ---------------- core request ----------------
 
 interface RequestOpts {
   method?: 'GET' | 'POST';
   body?: unknown;
   auth?: boolean;
+  headers?: Record<string, string>;
 }
 
 async function errorFromResponse(res: Response): Promise<ApiError> {
@@ -166,12 +275,13 @@ export const API_BASE: string = ((import.meta.env.VITE_API_BASE as string | unde
 
 async function request(path: string, opts: RequestOpts = {}, attempt = 0): Promise<Response> {
   const { method = 'GET', body, auth = true } = opts;
-  const headers = new Headers({ Accept: 'application/json' });
+  const headers = new Headers({ Accept: 'application/json', ...(opts.headers ?? {}) });
   if (body !== undefined) headers.set('Content-Type', 'application/json');
   let sent: string | null = null;
   if (auth) {
-    sent = getToken() ?? (await obtainToken('missing'));
-    headers.set('X-WTD-Token', sent);
+    // In the public demo the token is optional; the operator can still set one to lift the limits.
+    sent = getToken() ?? ((await isPublicDemo()) ? null : await obtainToken('missing'));
+    if (sent) headers.set('X-WTD-Token', sent);
   }
   let res: Response;
   try {
@@ -191,7 +301,7 @@ async function request(path: string, opts: RequestOpts = {}, attempt = 0): Promi
     // Only discard the token we actually sent; another request may already have replaced it.
     if (getToken() === sent) {
       clearToken();
-      await obtainToken('rejected');
+      await obtainToken(sent ? 'rejected' : 'missing');
     }
     return request(path, opts, attempt + 1);
   }
@@ -215,7 +325,23 @@ export function getHealth(): Promise<Health> {
 
 export function createAnalysis(body: AnalysisRequest): Promise<AnalysisCreated> {
   if (MOCK_MODE) return mock.createAnalysis(body);
-  return json<AnalysisCreated>('/api/analyses', { method: 'POST', body });
+  // Custom headers only where needed: the session id is what the public demo's per-session limit counts.
+  const own = getUrlhausKey();
+  const headers: Record<string, string> = { 'X-WTD-Session': getSessionId() };
+  if (own) headers['X-URLhaus-Key'] = own;
+  return json<AnalysisCreated>('/api/analyses', { method: 'POST', body, headers });
+}
+
+/** Analyses left for this browser session in the public demo. */
+export function getQuota(): Promise<QuotaInfo> {
+  if (MOCK_MODE) return Promise.resolve({ public_demo: false });
+  return json<QuotaInfo>('/api/quota', { auth: false, headers: { 'X-WTD-Session': getSessionId() } });
+}
+
+/** Asks the server to test a URLhaus key with one harmless lookup. The key is not saved anywhere by the server. */
+export function checkUrlhausKey(key: string): Promise<{ accepted: boolean; message: string }> {
+  if (MOCK_MODE) return Promise.reject(new ApiError(0, 'Not available in mock mode', 'network'));
+  return json<{ accepted: boolean; message: string }>('/api/intel/urlhaus/check', { method: 'POST', headers: { 'X-URLhaus-Key': key } });
 }
 
 export function listAnalyses(limit = 50): Promise<AnalysisSummary[]> {

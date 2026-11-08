@@ -305,6 +305,35 @@ button {
   padding: 0.05rem 0.5rem;
 }
 
+.public-banner {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  padding: 0.45rem 1rem;
+  font-size: 0.85rem;
+  color: var(--ink);
+  background: var(--accent-soft);
+  border-bottom: 1px solid var(--rule-strong);
+  text-align: center;
+}
+.public-banner strong {
+  font-family: var(--font-display);
+  font-stretch: 115%;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+}
+.intake-quota {
+  margin: 0;
+  padding: 0 1.25rem 0.6rem;
+}
+.intake-quota.is-empty {
+  color: var(--bad);
+  font-weight: 700;
+}
+
 .mock-tag {
   font-family: var(--font-display);
   font-weight: 800;
@@ -460,6 +489,23 @@ button {
 }
 .pill-muted {
   color: #9aa0aa;
+}
+.pill-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-radius: 999px;
+}
+.pill-btn:hover .pill {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.24);
+}
+.pill-btn:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
 }
 
 /* ---------- layout ---------- */
@@ -1297,6 +1343,28 @@ textarea {
 .dialog-warn {
   color: var(--bad);
   font-weight: 700;
+}
+.dialog-ok {
+  color: var(--good);
+  font-weight: 700;
+}
+.link-btn {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+.link-btn:focus-visible {
+  outline: 2px solid var(--signal);
+  outline-offset: 2px;
+}
+.intake-intel {
+  margin: 0;
+  padding: 0 1.25rem 1.1rem;
 }
 .dialog-fine {
   font-size: 0.8rem;

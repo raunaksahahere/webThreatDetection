@@ -1,7 +1,9 @@
 """Threat-intelligence lookups (fixed, trusted endpoints; never user-controlled URLs).
 
 Sources and their actual scope (shown in every finding):
-- URLhaus (abuse.ch): malware-download URLs only. Needs URLHAUS_AUTH_KEY. Not-for-profit use.
+- URLhaus (abuse.ch): malware-download URLs only. Needs URLHAUS_AUTH_KEY, or an investigator's own key sent with
+  the request (X-URLhaus-Key): used for that analysis only, never stored, logged or written into a report.
+  Not-for-profit use.
   Data is never stored beyond a short cache and never committed to the repository.
 - CERT Polska Warning List: phishing/fraud domains targeting users in Poland. "Any purpose,
   including commercial"; no key. Local copy refreshed every 30 minutes.
@@ -10,6 +12,7 @@ A no-hit means "not listed in that source" (unknown), never "clean".
 from __future__ import annotations
 
 import os
+import re
 import threading
 import time
 from dataclasses import dataclass, field
@@ -117,6 +120,27 @@ def urlhaus_key() -> str | None:
     return k or None
 
 
+_USER_KEY_RE = re.compile(r"[A-Za-z0-9]{20,100}")
+
+
+def valid_user_key(k: str) -> bool:
+    """Shape check for an investigator-supplied abuse.ch Auth-Key (letters and digits only, so it can never inject headers)."""
+    return bool(_USER_KEY_RE.fullmatch(k))
+
+
+def check_urlhaus_key(key: str) -> tuple[bool, str]:
+    """Test a key with one harmless host query (bypasses the cache). Returns (accepted, message)."""
+    try:
+        r = httpx.post(f"{URLHAUS_API}/host/", data={"host": "example.com"}, timeout=12, headers={"Auth-Key": key, "User-Agent": UA})
+    except httpx.HTTPError as e:
+        return False, f"URLhaus not reachable ({type(e).__name__})"
+    if r.status_code in (401, 403):
+        return False, f"URLhaus rejected this key (HTTP {r.status_code})"
+    if r.status_code != 200:
+        return False, f"URLhaus returned HTTP {r.status_code}; try again later"
+    return True, "URLhaus accepted this key"
+
+
 def _urlhaus(kind: str, value: str, key: str) -> dict:
     ck = (kind, value)
     hit = _cache.get(ck)
@@ -141,8 +165,11 @@ def _recent(date_str: str | None) -> bool:
     return datetime.now(timezone.utc) - d < timedelta(days=FRESH_DAYS)
 
 
-def lookup(url: str | None, hosts: list[str], shared_hosting: set[str] | None = None, remote: bool = True) -> IntelOutcome:
+def lookup(url: str | None, hosts: list[str], shared_hosting: set[str] | None = None, remote: bool = True,
+           user_urlhaus_key: str | None = None) -> IntelOutcome:
     """Look up the submitted URL and up to 5 distinct hosts (submitted, redirects, final).
+
+    user_urlhaus_key: an investigator's own abuse.ch key for this analysis; it takes precedence over the server key.
 
     remote=False uses only local data (CERT Polska snapshot) so nothing about the lookup leaves this machine;
     used by the real-time quick check, where every visited address would otherwise be sent to a third party."""
@@ -183,14 +210,16 @@ def lookup(url: str | None, hosts: list[str], shared_hosting: set[str] | None = 
                                       detail=CERTPL.error or "list not available"))
 
     # URLhaus
-    key = urlhaus_key()
+    own = (user_urlhaus_key or "").strip() or None
+    key = own or urlhaus_key()
+    whose = " with the investigator's own key (not stored)" if own else ""
     if not remote:
         out.checks.append(CheckResult(name="intel.urlhaus", module=Module.intel, status=CheckStatus.skipped, essential=False,
                                       detail="not queried in quick-check mode (no third-party lookups for browsing)"))
         return out
     if not key:
         out.checks.append(CheckResult(name="intel.urlhaus", module=Module.intel, status=CheckStatus.unavailable, essential=False,
-                                      detail="URLHAUS_AUTH_KEY not configured"))
+                                      detail="URLHAUS_AUTH_KEY not configured on the server and no personal key supplied"))
         return out
     t0 = time.monotonic()
     try:
@@ -255,9 +284,10 @@ def lookup(url: str | None, hosts: list[str], shared_hosting: set[str] | None = 
                 impact="No conclusion: URLhaus only tracks malware-download URLs.",
                 recommendation="Absence from a list is not evidence of safety.", limitation="Malware-download scope only."))
         out.checks.append(CheckResult(name="intel.urlhaus", module=Module.intel, status=CheckStatus.succeeded, essential=False,
-                                      detail=f"URL + {len(hosts)} host lookup(s)", duration_ms=int((time.monotonic() - t0) * 1000)))
+                                      detail=f"URL + {len(hosts)} host lookup(s){whose}", duration_ms=int((time.monotonic() - t0) * 1000)))
     except PermissionError as e:
-        out.checks.append(CheckResult(name="intel.urlhaus", module=Module.intel, status=CheckStatus.unavailable, essential=False, detail=str(e)))
+        out.checks.append(CheckResult(name="intel.urlhaus", module=Module.intel, status=CheckStatus.unavailable, essential=False,
+                                      detail=str(e).replace("the Auth-Key", "the investigator's own key" if own else "the server's Auth-Key")))
     except Exception as e:
         out.checks.append(CheckResult(name="intel.urlhaus", module=Module.intel, status=CheckStatus.failed, essential=False,
                                       detail=f"{type(e).__name__}: {str(e)[:120]}", duration_ms=int((time.monotonic() - t0) * 1000)))

@@ -46,8 +46,8 @@ try {
     await page.click("#tab-msg");
     await page.type("#panel-msg textarea", MESSAGE);
     await page.click("button[type=submit]");
-    await page.waitForSelector('input[placeholder="Paste the operator token"]', { timeout: 10000 });
-    await page.type('input[placeholder="Paste the operator token"]', TOKEN);
+    await page.waitForSelector('dialog[open] input[placeholder="Paste the operator token"]', { timeout: 10000 });
+    await page.type('dialog[open] input[placeholder="Paste the operator token"]', TOKEN);
     await page.click("::-p-text(Use token)");
     await page.waitForFunction(() => location.hash.startsWith("#/r/"), { timeout: 20000 });
     reportId = decodeURIComponent((await page.evaluate(() => location.hash)).slice(4));
