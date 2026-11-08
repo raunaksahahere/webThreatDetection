@@ -215,7 +215,7 @@ def analyse_url(p: ParsedUrl) -> tuple[list[Finding], dict]:
                 if dist <= (1 if len(od_label) < 7 else 2):
                     out.append(_f("url.typosquat", f"Domain is a near-miss spelling of {b['name']}",
                                   f"'{parts.registrable}' differs from the official '{od}' by {dist} character edit(s).",
-                                  Severity.high, Strength.strong if dist == 1 else Strength.moderate,
+                                  Severity.high, Strength.strong if dist <= 1 else Strength.moderate,
                                   "Typosquatting domains catch users who mistype or misread the real address.",
                                   f"Use {b['name']}'s official domain ({od}).",
                                   "Edit distance can match unrelated legitimate names; the protected-brand list is small.",

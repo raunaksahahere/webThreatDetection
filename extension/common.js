@@ -67,3 +67,53 @@ export async function recentJobs() {
 export function defang(u) {
   return u.replace(/^http/i, "hxxp").replace(/^([a-z]+:\/\/)([^/?#]*)/i, (_, s, h) => s + h.replaceAll(".", "[.]"));
 }
+
+// ---------------------------------------------------------------- real-time mode (opt-in)
+// Hosts never sent for real-time checks: local/private names and the WTD server itself.
+export function skipRealtime(u) {
+  try {
+    const h = new URL(u).hostname.toLowerCase();
+    if (!h.includes(".") || h === "localhost" || h.endsWith(".local") || h.endsWith(".localhost") || h.endsWith(".internal")) return true;
+    if (/^(127\.|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|169\.254\.|\[)/.test(h)) return true;
+    return false;
+  } catch {
+    return true;
+  }
+}
+
+export async function realtimeEnabled() {
+  const { realtime = false } = await chrome.storage.local.get("realtime");
+  return realtime === true;
+}
+
+/** Address-only verdict (URL rules + local threat list on the WTD server; nothing goes to third parties). */
+export async function quickCheck(url, timeoutMs = 3000) {
+  const { base, token } = await settings();
+  if (!token) return null;
+  const ctl = new AbortController();
+  const t = setTimeout(() => ctl.abort(), timeoutMs);
+  try {
+    const r = await fetch(`${base}/api/quick-check`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-WTD-Token": token },
+      body: JSON.stringify({ url }),
+      signal: ctl.signal,
+    });
+    return r.ok ? await r.json() : null;
+  } catch {
+    return null; // server down or slow: never block browsing
+  } finally {
+    clearTimeout(t);
+  }
+}
+
+export async function allowedForSession(host) {
+  const { allow = [] } = await chrome.storage.session.get("allow");
+  return allow.some((a) => host === a || host.endsWith(`.${a}`)); // "continue" on a site also covers its subdomains
+}
+
+export async function allowForSession(host) {
+  host = host.replace(/^www\./, "");
+  const { allow = [] } = await chrome.storage.session.get("allow");
+  await chrome.storage.session.set({ allow: [...new Set([host, ...allow])].slice(0, 200) });
+}

@@ -13,3 +13,25 @@ document.getElementById("save").addEventListener("click", async () => {
     status.textContent = "Saved, but the WTD server is not reachable (is scripts/api.sh running?).";
   }
 });
+
+const rt = document.getElementById("realtime");
+const rtStatus = document.getElementById("rt-status");
+chrome.storage.local.get({ realtime: false }).then(async (s) => {
+  rt.checked = s.realtime && (await chrome.permissions.contains({ permissions: ["webNavigation"] }));
+});
+rt.addEventListener("change", async () => {
+  if (rt.checked) {
+    const granted = await chrome.permissions.request({ permissions: ["webNavigation"] }); // needs this click (user gesture)
+    if (!granted) {
+      rt.checked = false;
+      rtStatus.textContent = "Permission not granted; real-time warnings stay off.";
+      return;
+    }
+    await chrome.storage.local.set({ realtime: true });
+    rtStatus.textContent = "On. Risky pages will be replaced by a warning.";
+  } else {
+    await chrome.storage.local.set({ realtime: false });
+    await chrome.permissions.remove({ permissions: ["webNavigation"] });
+    rtStatus.textContent = "Off. Permission removed.";
+  }
+});

@@ -1,12 +1,17 @@
 <!doctype html>
 <html lang="en">
 <head><meta charset="utf-8"><title>WTD Companion settings</title><link rel="stylesheet" href="popup.css"></head>
-<body style="width:auto;max-width:520px">
+<body style="width:auto;max-width:560px">
   <h2>WTD Companion settings</h2>
-  <p class="note">The extension talks only to your local WTD server at http://127.0.0.1:8000. It sends a URL only when you click "Check this page" or "Check this link". It never reads page content, cookies, form data or browsing history.</p>
+  <p class="note">The extension talks only to your local WTD server at http://127.0.0.1:8000. By default it sends a URL only when you click "Check this page" or "Check this link". It never reads page content, cookies or form data.</p>
   <label>Operator token (from <code>data/api_token</code>)<br><input id="token" type="password" autocomplete="off" style="width:100%"></label>
   <p><button id="save" type="button">Save</button></p>
   <p id="status" class="small"></p>
+  <hr>
+  <h3>Warn before opening risky pages (optional)</h3>
+  <p class="note">When on, the address of every page you open in a tab is sent to <b>your local</b> WTD server for an address-only check (URL rules and the local CERT Polska list; the page is not fetched and nothing goes to third parties). Local and private addresses are never sent. High Risk or Confirmed Malicious pages are replaced by a warning. The browser will ask for the "read your browsing history" permission, which is needed to see page addresses; you can turn this off at any time.</p>
+  <label class="toggle"><input id="realtime" type="checkbox"> Warn me before risky pages load</label>
+  <p id="rt-status" class="small"></p>
   <script type="module" src="options.js"></script>
 </body>
 </html>

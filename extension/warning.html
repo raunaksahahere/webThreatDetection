@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><title>WTD warning: risky page</title><link rel="stylesheet" href="warning.css"></head>
+<body>
+  <main>
+    <p class="eyebrow">WTD Companion</p>
+    <h1 id="verdict">Risky page</h1>
+    <p class="lede">WTD stopped this page before you used it. The check looked only at the address (and a local list of known phishing domains); the page itself was not analysed.</p>
+    <p class="mono" id="target"></p>
+    <ul id="findings"></ul>
+    <p class="small" id="rule"></p>
+    <div class="actions">
+      <button id="back" type="button" class="primary">Go back to safety</button>
+      <button id="investigate" type="button">Run a full investigation</button>
+      <button id="proceed" type="button" class="ghost">I understand the risk, continue</button>
+    </div>
+    <p class="small" id="msg"></p>
+    <p class="small">An address check cannot prove a page is malicious or safe. "Continue" allows this site for the rest of the browser session.</p>
+  </main>
+  <script type="module" src="warning.js"></script>
+</body>
+</html>

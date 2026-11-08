@@ -141,8 +141,11 @@ def _recent(date_str: str | None) -> bool:
     return datetime.now(timezone.utc) - d < timedelta(days=FRESH_DAYS)
 
 
-def lookup(url: str | None, hosts: list[str], shared_hosting: set[str] | None = None) -> IntelOutcome:
-    """Look up the submitted URL and up to 5 distinct hosts (submitted, redirects, final)."""
+def lookup(url: str | None, hosts: list[str], shared_hosting: set[str] | None = None, remote: bool = True) -> IntelOutcome:
+    """Look up the submitted URL and up to 5 distinct hosts (submitted, redirects, final).
+
+    remote=False uses only local data (CERT Polska snapshot) so nothing about the lookup leaves this machine;
+    used by the real-time quick check, where every visited address would otherwise be sent to a third party."""
     out = IntelOutcome()
     shared_hosting = shared_hosting or set()
     hosts = list(dict.fromkeys(h for h in hosts if h))[:5]
@@ -181,6 +184,10 @@ def lookup(url: str | None, hosts: list[str], shared_hosting: set[str] | None = 
 
     # URLhaus
     key = urlhaus_key()
+    if not remote:
+        out.checks.append(CheckResult(name="intel.urlhaus", module=Module.intel, status=CheckStatus.skipped, essential=False,
+                                      detail="not queried in quick-check mode (no third-party lookups for browsing)"))
+        return out
     if not key:
         out.checks.append(CheckResult(name="intel.urlhaus", module=Module.intel, status=CheckStatus.unavailable, essential=False,
                                       detail="URLHAUS_AUTH_KEY not configured"))

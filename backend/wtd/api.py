@@ -15,7 +15,8 @@ from pydantic import BaseModel, Field
 
 from . import intel, pipeline
 from .config import ROOT, SETTINGS
-from .netguard import UrlRejected
+from .models import iso
+from .netguard import UrlRejected, defang, parse_url
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
 log = logging.getLogger("wtd.api")
@@ -60,6 +61,10 @@ class MessageSubmission(BaseModel):
     investigate_links: bool = True
 
 
+class QuickCheckRequest(BaseModel):
+    url: str = Field(min_length=1, max_length=2048)
+
+
 class ThreatReportRequest(BaseModel):
     submitter: str = Field(default="wtd-operator", max_length=60)
 
@@ -91,6 +96,50 @@ def submit(body: UrlSubmission | MessageSubmission) -> dict:
     except UrlRejected as e:
         raise HTTPException(422, str(e))
     return {"id": r.id, "status": r.status}
+
+
+_quick_hits: dict[str, list[float]] = {}
+_quick_cache: dict[str, tuple[float, dict]] = {}
+
+
+@app.post("/api/quick-check", dependencies=[Depends(require_token)])
+def quick_check(body: QuickCheckRequest, request: Request) -> dict:
+    """Fast address-only verdict for the browser companion's opt-in real-time mode.
+
+    URL rules + the local CERT Polska snapshot only: no page fetch, no DNS, and no third-party lookup, so browsing
+    history never leaves this machine. Results are cached for 10 minutes; nothing is stored in the database."""
+    import time as _t
+
+    from .checks import url_rules
+    from .classify import classify
+    from .models import CheckResult as _CR
+
+    now = _t.monotonic()
+    key = request.client.host if request.client else "unknown"
+    hits = [t for t in _quick_hits.get(key, []) if now - t < 60]
+    if len(hits) >= 300:
+        raise HTTPException(429, "quick-check rate limit")
+    _quick_hits[key] = hits + [now]
+    try:
+        p = parse_url(body.url)
+    except UrlRejected as e:
+        raise HTTPException(422, str(e))
+    cached = _quick_cache.get(p.href)
+    if cached and now - cached[0] < 600:
+        return {**cached[1], "cached": True}
+    fs, _ = url_rules.analyse_url(p)
+    io = intel.lookup(p.href, [p.host], set(url_rules.brand_data()["shared_hosting"]), remote=False)
+    checks = [_CR(name="url.rules", module="url", status="succeeded", essential=True)] + io.checks
+    a = classify(fs + io.findings, checks)
+    res = {"url": defang(p.href), "classification": a.classification, "rule_id": a.rule_id, "rule_text": a.rule_text,
+           "findings": [{"code": f.code, "title": f.title, "severity": f.severity, "strength": f.strength}
+                        for f in fs + io.findings if f.severity != "info"][:6],
+           "scope": "Address and local threat-list check only; the page was not fetched and nothing was sent to third parties.",
+           "checked_at": iso(), "cached": False}
+    _quick_cache[p.href] = (now, res)
+    if len(_quick_cache) > 5000:
+        _quick_cache.clear()
+    return res
 
 
 @app.get("/api/analyses", dependencies=[Depends(require_token)])

@@ -199,3 +199,16 @@ def test_review_validation(client):
     assert client.post("/api/analyses/x/threat-report/review", json={"status": "Disputed", "note": ""}, headers=h).status_code == 422
     assert client.post("/api/analyses/nope/threat-report/review", json={"status": "Validated"}, headers=h).status_code == 409
     assert client.post("/api/analyses/x/threat-report/review", json={"status": "Validated"}).status_code == 401
+
+
+def test_quick_check_is_local_and_fast(client, monkeypatch):
+    from wtd import intel
+    calls = []
+    monkeypatch.setattr(intel, "_urlhaus", lambda *a, **k: calls.append(a) or {})
+    h = {"X-WTD-Token": "test-token"}
+    r = client.post("/api/quick-check", json={"url": "https://paypa1.com/signin"}, headers=h)
+    assert r.status_code == 200 and r.json()["classification"] == "High Risk"
+    assert any(f["code"] == "url.typosquat" for f in r.json()["findings"])
+    assert calls == []  # no third-party lookup for browsing
+    assert client.post("/api/quick-check", json={"url": "javascript:alert(1)"}, headers=h).status_code == 422
+    assert client.post("/api/quick-check", json={"url": "https://example.com"}).status_code == 401
