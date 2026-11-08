@@ -17,7 +17,11 @@ services:
         generateValue: true
       - key: WTD_CORS_ORIGINS       # your Vercel URL, e.g. https://wtd.vercel.app (comma-separate several)
         sync: false
-      - key: OPENROUTER_API_KEY     # free OpenRouter models only (enforced in code); leave empty for "AI unavailable"
+      - key: GEMINI_API_KEY         # Google AI Studio key; AI explanations and campaign briefs (free tier)
+        sync: false
+      - key: WTD_GEMINI_MODELS      # tried in order; a model over its daily quota (429) hands over to the next
+        value: gemini-3.5-flash-lite,gemini-3.1-flash-lite
+      - key: OPENROUTER_API_KEY     # optional second provider: free OpenRouter models only (enforced in code)
         sync: false
       - key: URLHAUS_AUTH_KEY       # optional abuse.ch key
         sync: false

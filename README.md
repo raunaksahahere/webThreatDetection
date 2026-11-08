@@ -13,7 +13,7 @@ Hackathon prototype (AI · Cybersecurity · Web3).
 | URL/domain investigation | `backend/wtd/pipeline.py`, isolated inspector (`inspector.py`, `fetcher.py`, `netguard.py`) |
 | Phishing and impersonation indicators | homographs, typosquats, brand-in-domain/subdomain, fake-TLD labels, credential forms posting elsewhere, brand assets hot-linked, new domains (`checks/url_rules.py`, `checks/web_checks.py`, `checks/dns_checks.py`). **False positives measured** on real lists: [`docs/EVALUATION.md`](docs/EVALUATION.md) |
 | HTTPS/TLS analysis and trust issues | `checks/tls_checks.py`: independent path verification, expiry, hostname, weak crypto, lifetime, CT, distrust lists (Chromium, Mozilla OneCRL, eMudhra fingerprints from Bugzilla 2083449) |
-| AI evidence-grounded explanations | `ai/explain.py`: free OpenRouter model → local Ollama fallback; strict JSON schema; cited IDs, quotes and classification validated in code |
+| AI evidence-grounded explanations | `ai/explain.py`: Gemini (Flash Lite, with a second model when the first is over quota) → free OpenRouter model → local Ollama; strict JSON schema; cited IDs, quotes and classification validated in code |
 | Scam-message analysis | `message/analyse.py`: indicator extraction (URLs, emails, phones, UPI, wallets) and social-engineering rules; urgency alone is never fraud |
 | E-mail security analysis | `message/email_checks.py`: paste or load raw `.eml`; receiving-server SPF/DKIM/DMARC, display-name and look-alike senders, Reply-To divergence, disguised links, risky attachments (never opened) |
 | QR-code scam detection | Dashboard **QR code** tab: decoded locally (jsQR); web addresses get the full investigation; `upi://pay` codes flagged when presented as "scan to receive money" |
@@ -117,7 +117,7 @@ Weak signals (urgent wording, keywords, AI observations, missing security header
 
 ## Disclosures
 - Open-source components and data sources are listed with licences in [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md).
-- At runtime the product uses AI models (OpenRouter free model; optional local Qwen3 4B) for explanations only.
+- At runtime the product uses AI models (Gemini Flash Lite; optionally a free OpenRouter model or local Qwen3 4B) for explanations only.
 - Development was assisted by AI coding tools.
 
 Licence: Apache License 2.0 for original code in this repository (see `LICENSE` and `NOTICE`); third-party components keep their own licences.

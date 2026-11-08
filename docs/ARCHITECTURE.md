@@ -10,7 +10,7 @@
   ├─ pipeline.py ── url_rules ── intel (CERT Polska, URLhaus) ── classify ── correlate ── ai/explain
   │       │                                                                    │
   │       ▼                                                                    ▼
-  │  inspector.py  (child process: rlimits, scrubbed env, wall-clock kill)   OpenRouter free model → local Ollama
+  │  inspector.py  (child process: rlimits, scrubbed env, wall-clock kill)   Gemini → OpenRouter free → local Ollama
   │       └─ fetcher.py ── netguard.py (ada-url, IANA blocklist, DNS validation, pinned IP connect)
   │                         └─ Internet (only validated public addresses)
   ├─ message/ (analyse.py: messages; email_checks.py: raw e-mail headers, links, attachments)

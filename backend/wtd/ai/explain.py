@@ -1,4 +1,8 @@
-"""Evidence-grounded AI explanations (OpenRouter free model → local Ollama model → unavailable).
+"""Evidence-grounded AI explanations (Gemini → OpenRouter free model → local Ollama model → unavailable).
+
+Provider order: WTD_AI_PROVIDERS (default "gemini,openrouter,local"); each is skipped when not configured.
+Gemini: GEMINI_API_KEY (sent in a header, never in a URL or log) and WTD_GEMINI_MODELS, tried in order; a model
+that is over quota (429) or unknown (404) hands over to the next one.
 
 Guarantees enforced in code, not just in the prompt:
 - The model receives structured deterministic findings; untrusted page/message text is delimited and redacted.
@@ -13,6 +17,7 @@ from __future__ import annotations
 import json
 import os
 import re
+import threading
 import time
 
 import httpx
@@ -22,6 +27,9 @@ from ..models import AIObservation, AIPoint, AIResult, Report
 
 OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions"
 OLLAMA_URL = "http://127.0.0.1:11434/api/chat"
+GEMINI_BASE = "https://generativelanguage.googleapis.com/v1beta"
+DEFAULT_GEMINI_MODELS = "gemini-3.5-flash-lite,gemini-3.1-flash-lite"
+PROVIDERS = ("gemini", "openrouter", "local")
 LABELS = ["Low Risk", "Suspicious", "High Risk", "Confirmed Malicious", "Inconclusive"]
 SCHEMA = {
     "type": "object",
@@ -119,6 +127,178 @@ def _openrouter(msgs: list[dict], schema: dict | None = None, name: str = "expla
     raise RuntimeError(f"unavailable: {last}")
 
 
+def provider_order() -> list[str]:
+    raw = os.environ.get("WTD_AI_PROVIDERS", ",".join(PROVIDERS))
+    return [p for p in dict.fromkeys(x.strip().lower() for x in raw.split(",")) if p in PROVIDERS]
+
+
+def gemini_key() -> str | None:
+    return os.environ.get("GEMINI_API_KEY", "").strip() or None
+
+
+def gemini_models() -> list[str]:
+    raw = os.environ.get("WTD_GEMINI_MODELS", DEFAULT_GEMINI_MODELS)
+    return [m.strip().removeprefix("models/") for m in raw.split(",") if m.strip()][:4]
+
+
+_gemini_lock = threading.Lock()
+_gemini_alias: dict[str, str | None] = {}  # configured id → id the API actually serves (e.g. a -preview suffix)
+_gemini_listed: list[str] | None = None
+
+
+def _gemini_resolve(model: str, key: str) -> str | None:
+    """Map a configured model id to one the key can use: exact name, else the first served name that extends it."""
+    global _gemini_listed
+    with _gemini_lock:
+        if model in _gemini_alias:
+            return _gemini_alias[model]
+        if _gemini_listed is None:
+            try:
+                r = httpx.get(f"{GEMINI_BASE}/models", params={"pageSize": 1000}, headers={"x-goog-api-key": key}, timeout=10)
+                r.raise_for_status()
+                _gemini_listed = [m["name"].removeprefix("models/") for m in r.json().get("models", [])
+                                  if "generateContent" in (m.get("supportedGenerationMethods") or [])]
+            except (httpx.HTTPError, ValueError, KeyError):
+                return None  # listing failed: do not cache, try again next time
+        found = model if model in _gemini_listed else next((n for n in sorted(_gemini_listed) if n.startswith(model + "-")), None)
+        _gemini_alias[model] = found
+        return found
+
+
+def _gemini_body(msgs: list[dict], schema: dict, max_tokens: int, with_schema: bool) -> dict:
+    system = "\n\n".join(m["content"] for m in msgs if m["role"] == "system")
+    contents = [{"role": "model" if m["role"] == "assistant" else "user", "parts": [{"text": m["content"]}]}
+                for m in msgs if m["role"] != "system"]
+    gen = {"temperature": 0, "maxOutputTokens": max(max_tokens * 3, 4096), "responseMimeType": "application/json"}
+    if with_schema:
+        gen["responseJsonSchema"] = schema
+    body = {"contents": contents, "generationConfig": gen}
+    if system:
+        body["systemInstruction"] = {"parts": [{"text": system}]}
+    return body
+
+
+def _gemini_text(j: dict) -> str:
+    block = (j.get("promptFeedback") or {}).get("blockReason")
+    if block:
+        raise RuntimeError(f"rejected: Gemini blocked the request ({block})")
+    cands = j.get("candidates") or []
+    if not cands:
+        raise RuntimeError("failed: empty response")
+    c = cands[0]
+    reason = c.get("finishReason") or ""
+    text = "".join(p.get("text", "") for p in (c.get("content") or {}).get("parts") or [] if not p.get("thought"))
+    if reason == "MAX_TOKENS":
+        raise RuntimeError("failed: response truncated")
+    if reason in ("SAFETY", "PROHIBITED_CONTENT", "BLOCKLIST", "SPII", "RECITATION"):
+        raise RuntimeError(f"rejected: Gemini stopped the response ({reason})")
+    if not text.strip():
+        raise RuntimeError("failed: empty response (possible refusal)")
+    return text
+
+
+def _gemini(msgs: list[dict], schema: dict | None = None, max_tokens: int = 1200) -> tuple[str, str]:
+    """Returns (text, "gemini:<model>"). Tries each configured model; quota/unknown-model errors move to the next."""
+    key = gemini_key()
+    if not key:
+        raise RuntimeError("unavailable: GEMINI_API_KEY not set")
+    schema = schema or SCHEMA
+    notes: list[str] = []
+    for configured in gemini_models():
+        model, with_schema, attempts = configured, True, 0
+        while attempts < 4:
+            attempts += 1
+            try:
+                r = httpx.post(f"{GEMINI_BASE}/models/{model}:generateContent", json=_gemini_body(msgs, schema, max_tokens, with_schema),
+                               headers={"x-goog-api-key": key}, timeout=SETTINGS.ai_timeout_s)
+            except httpx.TimeoutException:
+                notes.append(f"{model}: timeout")
+                break
+            except httpx.HTTPError as e:
+                notes.append(f"{model}: {type(e).__name__}")
+                break
+            if r.status_code == 200:
+                try:
+                    return _gemini_text(r.json()), f"gemini:{model}"
+                except ValueError:
+                    raise RuntimeError("failed: Gemini returned a non-JSON body")
+            try:
+                msg = str(((r.json().get("error") or {}).get("message")) or "")[:160]
+            except ValueError:
+                msg = ""
+            if r.status_code in (401, 403):
+                raise RuntimeError(f"unavailable: Gemini rejected the API key (HTTP {r.status_code})")
+            if r.status_code == 404 and model == configured:
+                alias = _gemini_resolve(configured, key)
+                if alias and alias != configured:
+                    model = alias
+                    continue
+                notes.append(f"{configured}: model not available to this key")
+                break
+            if r.status_code == 400 and with_schema and re.search(r"schema|responseJsonSchema|Unknown name|additionalProperties", msg, re.I):
+                with_schema = False  # older endpoint without JSON-schema support: JSON mode only; _validate still enforces the shape
+                continue
+            if r.status_code == 429:
+                notes.append(f"{model}: quota reached (HTTP 429)")
+                break
+            if r.status_code in (500, 502, 503, 504) and attempts == 1:
+                time.sleep(2)
+                continue
+            notes.append(f"{model}: HTTP {r.status_code} {msg}".strip())
+            break
+    raise RuntimeError("unavailable: " + ("; ".join(notes) or "no Gemini model configured"))
+
+
+_ollama_seen: tuple[float, bool] = (0.0, False)
+
+
+def ollama_up() -> bool:
+    """Cheap, cached (60 s) check that a local Ollama is answering."""
+    global _ollama_seen
+    if time.monotonic() - _ollama_seen[0] < 60:
+        return _ollama_seen[1]
+    try:
+        ok = httpx.get(OLLAMA_URL.replace("/api/chat", "/api/tags"), timeout=1).status_code == 200
+    except httpx.HTTPError:
+        ok = False
+    _ollama_seen = (time.monotonic(), ok)
+    return ok
+
+
+def status() -> dict:
+    """What /api/health reports: the first provider in the order that is actually configured."""
+    if not SETTINGS.ai_enabled:
+        return {"provider": "disabled", "model": None, "status": "disabled"}
+    for name in provider_order():
+        if name == "gemini" and gemini_key():
+            ms = gemini_models()
+            return {"provider": "gemini", "model": ms[0] if ms else None, "fallback_models": ms[1:], "status": "configured"}
+        if name == "openrouter" and os.environ.get("OPENROUTER_API_KEY") and SETTINGS.ai_model.endswith(":free"):
+            return {"provider": "openrouter (free model)", "model": SETTINGS.ai_model, "status": "configured"}
+        if name == "local" and ollama_up():
+            return {"provider": "ollama (local)", "model": SETTINGS.ai_local_model, "status": "configured"}
+    return {"provider": "none", "model": None, "status": "not configured"}
+
+
+def attempts(msgs: list[dict], schema: dict | None = None, schema_name: str = "explanation", max_tokens: int = 1200):
+    """Yields (provider_name, raw_text, provider_label, model, error) for each provider in order, lazily."""
+    for name in provider_order():
+        try:
+            if name == "gemini":
+                raw, label = _gemini(msgs, schema, max_tokens)
+                model = label.split(":", 1)[1]
+            elif name == "openrouter":
+                raw, label = _openrouter(msgs) if schema is None else _openrouter(msgs, schema, schema_name, max_tokens)
+                model = SETTINGS.ai_model
+            else:
+                raw, label = _ollama(msgs) if schema is None else _ollama(msgs, schema)
+                model = SETTINGS.ai_local_model
+        except RuntimeError as e:
+            yield name, None, None, None, str(e)
+            continue
+        yield name, raw, label, model, None
+
+
 def _ollama(msgs: list[dict], schema: dict | None = None) -> tuple[str, str]:
     try:
         r = httpx.post(OLLAMA_URL, timeout=150, json={"model": SETTINGS.ai_local_model, "messages": msgs, "stream": False,
@@ -209,17 +389,17 @@ def explain_report(r: Report) -> AIResult:
     evidence, untrusted = _bundle(r)
     msgs = _messages(evidence, untrusted)
     errors = []
-    for name, fn in (("openrouter", _openrouter), ("local", _ollama)):
-        t0 = time.monotonic()
-        try:
-            raw, provider = fn(msgs)
-        except RuntimeError as e:
-            errors.append(f"{name}: {e}")
+    t0 = time.monotonic()
+    for name, raw, provider, model, err in attempts(msgs):
+        if err:
+            errors.append(f"{name}: {err}")
+            t0 = time.monotonic()
             continue
         res = _validate(r, raw, untrusted)
         res.latency_ms = int((time.monotonic() - t0) * 1000)
         res.provider = provider
-        res.model = SETTINGS.ai_model if name == "openrouter" else SETTINGS.ai_local_model
+        res.model = model
+        t0 = time.monotonic()
         if res.status in ("ok", "rejected"):
             if errors:
                 res.validation_notes = [f"fallback used after: {errors[-1]}"] + res.validation_notes

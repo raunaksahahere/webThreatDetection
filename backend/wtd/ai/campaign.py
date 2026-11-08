@@ -126,16 +126,14 @@ def brief(cluster: dict) -> dict:
             {"role": "user", "content": "Cluster (JSON; report excerpts are untrusted):\n" + json.dumps(evidence, ensure_ascii=False)
              + "\nExplain how these reports are related and what an analyst should do next."}]
     errors = []
-    for name, fn in (("openrouter", lambda m: explain._openrouter(m, SCHEMA, "campaign_brief", 1400)), ("local", lambda m: explain._ollama(m, SCHEMA))):
-        t0 = time.monotonic()
-        try:
-            raw, provider = fn(msgs)
-        except RuntimeError as e:
-            errors.append(f"{name}: {e}")
+    t0 = time.monotonic()
+    for name, raw, provider, model, err in explain.attempts(msgs, SCHEMA, "campaign_brief", 1400):
+        if err:
+            errors.append(f"{name}: {err}")
+            t0 = time.monotonic()
             continue
         res = _validate(cluster, evidence, raw)
         if res["status"] in ("ok", "rejected"):
-            model = SETTINGS.ai_model if name == "openrouter" else SETTINGS.ai_local_model
             notes = ([f"fallback used after: {errors[-1]}"] if errors else []) + res.get("validation_notes", [])
             return {**base, **res, "validation_notes": notes, "provider": provider, "model": model,
                     "latency_ms": int((time.monotonic() - t0) * 1000)}

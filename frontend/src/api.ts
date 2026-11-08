@@ -78,7 +78,7 @@ export function onTokenChange(l: () => void): () => void {
   return () => tokenListeners.delete(l);
 }
 
-export type TokenReason = 'missing' | 'rejected' | 'manual';
+export type TokenReason = 'missing' | 'rejected';
 
 // The prompt is a tiny external store so it works no matter which component mounts first.
 let prompt: { reason: TokenReason } | null = null;
@@ -129,9 +129,6 @@ function obtainToken(reason: TokenReason): Promise<string> {
   return pendingToken;
 }
 
-export function requestTokenManually(): Promise<string> {
-  return obtainToken('manual');
-}
 
 // ---------------- investigator's own URLhaus key ----------------
 // Optional abuse.ch Auth-Key a visitor (e.g. a judge) supplies when the server has none or they prefer their own.

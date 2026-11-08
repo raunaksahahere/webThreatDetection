@@ -1,8 +1,7 @@
-import { useEffect, useState, useSyncExternalStore } from 'react';
-import { Clock, KeyRound, Lock, Monitor, Moon, Network, ScanSearch, Sun } from 'lucide-react';
-import { MOCK_MODE, getHealth, getToken, clearToken, onTokenChange, requestTokenManually, errorMessage, setUrlhausDialogOpen } from '../api';
+import { useEffect, useState } from 'react';
+import { Clock, Monitor, Moon, Network, ScanSearch, Sun } from 'lucide-react';
+import { MOCK_MODE, getHealth, errorMessage, setUrlhausDialogOpen } from '../api';
 import { useUrlhausKey } from './UrlhausKeyDialog';
-import { useAccess } from './PublicDemo';
 import type { Health } from '../types';
 import { href, usePath } from '../router';
 import { Pill } from './Badges';
@@ -41,26 +40,6 @@ function ThemeToggle() {
   return (
     <button type="button" className="icon-btn" onClick={() => setTheme(next[theme])} title={`Theme: ${theme} (click to change)`} aria-label={`Theme: ${theme}. Change theme`}>
       <Icon size={16} aria-hidden />
-    </button>
-  );
-}
-
-function useToken(): string | null {
-  return useSyncExternalStore(onTokenChange, getToken, () => null);
-}
-
-function TokenButton() {
-  const token = useToken();
-  const access = useAccess();
-  if (MOCK_MODE) return null;
-  const setTitle = access?.mode === 'public_demo' ? 'Public demo: no token needed. The operator can set the token to lift the limits.' : 'Set operator token';
-  return token ? (
-    <button type="button" className="icon-btn" onClick={() => clearToken()} title="Operator token set for this tab. Click to forget it." aria-label="Forget operator token">
-      <Lock size={16} aria-hidden />
-    </button>
-  ) : (
-    <button type="button" className="icon-btn" onClick={() => requestTokenManually().catch(() => undefined)} title={setTitle} aria-label={setTitle}>
-      <KeyRound size={16} aria-hidden />
     </button>
   );
 }
@@ -201,7 +180,6 @@ export function Header() {
         </nav>
         <div className="topbar-right">
           <StatusPills />
-          <TokenButton />
           <ThemeToggle />
         </div>
       </div>

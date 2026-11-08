@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from . import access, intel, pipeline
+from .ai.explain import status as explain_status
 from .config import ROOT, SETTINGS
 from .models import iso
 from .netguard import UrlRejected, defang, parse_url
@@ -119,8 +120,7 @@ def health() -> dict:
     from .registry import chain
 
     return {"ok": True, "version": app.version, "chain": chain.status(),
-            "ai": {"provider": "openrouter (free model)" if SETTINGS.ai_enabled else "disabled", "model": SETTINGS.ai_model,
-                   "status": "configured" if SETTINGS.ai_enabled else "disabled"},
+            "ai": explain_status(),
             "intel": {"urlhaus": "configured" if intel.urlhaus_key() else "not configured",
                       "certpl": f"{len(intel.CERTPL.domains)} domains" if intel.CERTPL.domains else "not loaded"},
             "access": ({"mode": "public_demo", "session_limit": access.session_limit(), "daily_limit": access.daily_limit(),
