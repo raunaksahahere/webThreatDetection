@@ -38,6 +38,12 @@ One backend, one datastore, one analysis pipeline, one contract. No queues, vect
    - embedded SCTs.
 
    **Distrust matching** checks fingerprints, SPKI hashes and issuer+serial against the Chromium SPKI blocklist, Mozilla OneCRL, the curated eMudhra fingerprints (Bugzilla 2083449), and a labelled synthetic demo list.
+
+   **Revocation (OCSP):** when the leaf lists a responder, the inspector sends an RFC 6960 GET request.
+   - The responder URL is attacker-controlled, so the request goes through the same request policy (8 s, 64 KB, one redirect).
+   - The response's signature and freshness are verified.
+   - Revoked for key/CA compromise is a trust incident; other revocation reasons count as configuration problems.
+   - Otherwise status is "unavailable", which is not a risk signal. CRLs are not fetched.
 6. **DNS and age** (`checks/dns_checks.py`): NS/MX/SPF/DMARC records, and the RDAP registration date via the IANA bootstrap (`unavailable` where a TLD has no RDAP).
 7. **Website security posture** (`checks/web_checks.py`): HSTS, CSP, XCTO, framing, Referrer-Policy, cookie flags, HTTP→HTTPS, mixed content, SRI, version disclosure, directory listing. These are reported with impact and remediation but **excluded from the threat classification**.
 8. **Correlation** (`pipeline.correlate`): deterministic shared indicators (domain, URL, IP, leaf key, brand) and, for messages, payment and contact identifiers (stored as keyed HMACs) plus word-shingle similarity. Only campaign-specific links can raise risk: shared certificate keys, payment or contact identifiers, or near-identical text. Re-checks of the same target, CDN IPs and brand names never do.

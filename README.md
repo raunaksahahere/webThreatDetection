@@ -92,8 +92,9 @@ Weak signals (urgent wording, keywords, AI observations, missing security header
 - One page is fetched without running scripts, so cloaked phishing kits can look harmless. There is no screenshot or visual comparison.
 - The brand list is small and curated, and some banks' new `.bank.in` domains are not yet listed.
 - Revocation status:
-  - OCSP and CRL checking is not enabled in this build;
-  - it is reported as unknown, never as "not revoked".
+  - OCSP is checked when the certificate lists a responder, and only signed, fresh responses count;
+  - CRLs are not checked;
+  - otherwise status is reported as unknown, never as "not revoked".
 - The free AI model is rate-limited (HTTP 429 seen in testing). The local model is slower (about 15–45 s), and without either the report says "AI unavailable".
 - The chain is a local anvil instance. Integrity holds under the contract's rules, but anvil's developer RPCs can rewrite local state. It proves a report has not changed, not that it is true.
 - No browser extension is included (a deliberate scope decision).
