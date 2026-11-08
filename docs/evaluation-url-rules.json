@@ -1,0 +1,1137 @@
+{
+  "what": "URL rules only (no fetch, TLS, DNS/RDAP or feeds). Measures one layer, not the system.",
+  "tranco_list": "https://tranco-list.eu/list/94P72",
+  "benign_top": {
+    "source": "Tranco 94P72 ranks 1-1000; popular-domain exception DISABLED (measures the rules themselves)",
+    "n": 1000,
+    "by_classification": {
+      "Low Risk": 993,
+      "High Risk": 4,
+      "Suspicious": 3
+    },
+    "flagged": 7,
+    "flagged_rate": 0.007,
+    "flagged_by_rule": {
+      "url.typosquat": 7
+    },
+    "flagged_examples": [
+      {
+        "domain": "mail.ru",
+        "classification": "High Risk",
+        "findings": [
+          "url.typosquat (high/strong)"
+        ]
+      },
+      {
+        "domain": "alicdn.com",
+        "classification": "High Risk",
+        "findings": [
+          "url.typosquat (high/strong)"
+        ]
+      },
+      {
+        "domain": "behance.net",
+        "classification": "Suspicious",
+        "findings": [
+          "url.typosquat (high/moderate)"
+        ]
+      },
+      {
+        "domain": "telegraph.co.uk",
+        "classification": "Suspicious",
+        "findings": [
+          "url.typosquat (high/moderate)"
+        ]
+      },
+      {
+        "domain": "hicloud.com",
+        "classification": "High Risk",
+        "findings": [
+          "url.typosquat (high/strong)"
+        ]
+      },
+      {
+        "domain": "teads.tv",
+        "classification": "Suspicious",
+        "findings": [
+          "url.typosquat (high/moderate)"
+        ]
+      },
+      {
+        "domain": "youku.com",
+        "classification": "High Risk",
+        "findings": [
+          "url.typosquat (high/strong)"
+        ]
+      }
+    ]
+  },
+  "benign_holdout": {
+    "source": "Tranco 94P72 ranks 20001-21000; shipped configuration; none of these are in the top-10k exception list",
+    "n": 1000,
+    "by_classification": {
+      "Low Risk": 996,
+      "Suspicious": 2,
+      "High Risk": 2
+    },
+    "flagged": 4,
+    "flagged_rate": 0.004,
+    "flagged_by_rule": {
+      "url.typosquat": 2,
+      "url.brand_wrong_suffix": 1,
+      "url.brand_in_domain": 1
+    },
+    "flagged_examples": [
+      {
+        "domain": "vinted.lu",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_wrong_suffix (high/moderate)"
+        ]
+      },
+      {
+        "domain": "lmcdn.ru",
+        "classification": "High Risk",
+        "findings": [
+          "url.typosquat (high/strong)"
+        ]
+      },
+      {
+        "domain": "mail.bg",
+        "classification": "High Risk",
+        "findings": [
+          "url.typosquat (high/strong)"
+        ]
+      },
+      {
+        "domain": "olx-st.com",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_domain (high/moderate)"
+        ]
+      }
+    ]
+  },
+  "phish_dev": {
+    "source": "CERT Polska snapshot, random 1000 (seed 7); DEVELOPMENT sample: brand additions were informed by it; feed disabled",
+    "n": 1000,
+    "by_classification": {
+      "Suspicious": 91,
+      "Low Risk": 885,
+      "High Risk": 24
+    },
+    "flagged": 115,
+    "flagged_rate": 0.115,
+    "flagged_by_rule": {
+      "url.brand_in_subdomain": 102,
+      "url.risky_tld": 91,
+      "url.fake_tld_label": 34,
+      "url.obfuscated_shape": 3,
+      "url.brand_wrong_suffix": 1,
+      "url.idn": 1,
+      "url.typosquat": 1
+    },
+    "flagged_examples": [
+      {
+        "domain": "allegrolokainie.pl-53421.click",
+        "classification": "Suspicious",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.ifeu723182.pl",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.kup-teraz930257.pl",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.podukty93624129.lol",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.632656ea.top",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.31209h845.courses",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.kup-teraz-209763.pl",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)"
+        ]
+      },
+      {
+        "domain": "olx.prywanei782389129.xyz",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.328238smart843.xyz",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pl-63642.icu",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "vinted.ofert83481.shop",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.oferta2435114.sbs",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "dpdgroup.bond",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_wrong_suffix (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokainie.pl-idwx9.sbs",
+        "classification": "Suspicious",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pi-blety39517.lol",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.lokalna-382.shop",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "olx-6934824.fuckall.co",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.8756818551.click",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.354gvf.sbs",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "vinted.pl-nd5produkty890785655.lol",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.oferta3q384bs.forum",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pl-produkt39knrs687567896.lol",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "xn--albilet-b9a.pl-5801952421.lol",
+        "classification": "Suspicious",
+        "findings": [
+          "url.idn (low/weak)",
+          "url.fake_tld_label (high/moderate)",
+          "url.obfuscated_shape (low/weak)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "aiebilet.pl-ogloszenia-firmowe83842.click",
+        "classification": "Suspicious",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.zakup827382395.shop",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pl-64243.click",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "olx.dk293ghdf684.cfd",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "vinted.pl-oferta1239391293.shop",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pl-oferta738291.sbs",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "inpost.paycore-tech.cfd",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.id278907851.rest",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.7817685135.lol",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "olx-pl.uijnne.icu",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.pl18z74vx73.cyou",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.pl-oferta294728.icu",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.lokalna-ofeta8923.sbs",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pl-numerbiletu93921391940.sbs",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "alebilet.pl-64744f099200oferta843784347888.top",
+        "classification": "Suspicious",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.oy845845j.shop",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "olx.pk43cv12.cyou",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.oferta27794643.lat",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)"
+        ]
+      },
+      {
+        "domain": "allegro.pl03.lol",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.lokalna-029481.sbs",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "vinted.oferta88618129.click",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.okazje-na-lato-2026-3we4gnj.sbs",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.obfuscated_shape (low/weak)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "olx.id282h32b2idmdd73.sbs",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pl-448042.sbs",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "vinted.pl-nd8produkty985455233.lol",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pl92562.lol",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.se182h5.pl",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)"
+        ]
+      },
+      {
+        "domain": "olx.pl-oferta23121.cfd",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.oferta0018.shop",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pl-f5nzy.sbs",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "olx.lokalna-oferta94291.cfd",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.oferta-7415412.cfd",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pl-oferta912712672332.icu",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "alebilet.pl-d-offerta-ssid61054-pryw.casa",
+        "classification": "Suspicious",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.obfuscated_shape (low/weak)"
+        ]
+      },
+      {
+        "domain": "olx.oferta-smart.sbs",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.com-8632826364.shop",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.lokalna-431239.sbs",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      }
+    ]
+  },
+  "phish_holdout": {
+    "source": "CERT Polska snapshot, random 1000 disjoint from the development sample (seed 99); feed disabled",
+    "n": 1000,
+    "by_classification": {
+      "Low Risk": 890,
+      "High Risk": 28,
+      "Suspicious": 82
+    },
+    "flagged": 110,
+    "flagged_rate": 0.11,
+    "flagged_by_rule": {
+      "url.brand_in_subdomain": 91,
+      "url.risky_tld": 89,
+      "url.fake_tld_label": 41,
+      "url.obfuscated_shape": 4,
+      "url.idn": 3,
+      "url.typosquat": 2,
+      "url.brand_in_domain": 2,
+      "url.brand_wrong_suffix": 1
+    },
+    "flagged_examples": [
+      {
+        "domain": "allegro.pl-nd5produkty345646378.lol",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pi-oferta885815.lat",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)"
+        ]
+      },
+      {
+        "domain": "allegro-lokalnie.pl-ogloszenie-prywatne748362548.click",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pl-oferta9785455432423.sbs",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "olx.oferta-lokalna854282.shop",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.pl-86255449.click",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokainie.pl-ogloszenie-prywatne763637483.click",
+        "classification": "Suspicious",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.po34u72830904.shop",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "ezebra.outlcoa.com",
+        "classification": "Suspicious",
+        "findings": [
+          "url.typosquat (high/moderate)"
+        ]
+      },
+      {
+        "domain": "allebilet.pl-ogloszenia-firmowe-id833083.click",
+        "classification": "Suspicious",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pl-oferta529185219.shop",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pls3llfretam98xk.sbs",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.12300h945b4vnj.best",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)"
+        ]
+      },
+      {
+        "domain": "olx.rodzajkategoria544342143.sbs",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.prywantm4892928.cyou",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "alebilet.pl-nr3produkty286447684.lol",
+        "classification": "Suspicious",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "vinted-delivery.com",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_domain (high/moderate)"
+        ]
+      },
+      {
+        "domain": "allegro.pl-60459034.click",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.oferta-182322.icu",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pl-8562989523985.lat",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.752364.sbs",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pl-oferta84nfsdf56d.click",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "olx.oferta88618129.click",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "inpost-59334582.harukataro.com",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)"
+        ]
+      },
+      {
+        "domain": "vinted.id54472722.com",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)"
+        ]
+      },
+      {
+        "domain": "vinted.pl-aukcja234907123421897.cfd",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.dk83msjx726.cyou",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.id-283ns834s2.club",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)"
+        ]
+      },
+      {
+        "domain": "olx.oferta-lokalana8694586845.shop",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pl-gj4tj.sbs",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "olx.com-4338252.sbs",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "alebilet.pl-bilety57432.top",
+        "classification": "Suspicious",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "olx.pi-ogloiszenie439i349.shop",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.pl-oferta19820498102.sbs",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "xn--albilet-b9a.pl-589198541.lol",
+        "classification": "Suspicious",
+        "findings": [
+          "url.idn (low/weak)",
+          "url.fake_tld_label (high/moderate)",
+          "url.obfuscated_shape (low/weak)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.kategorie-polecane-43269.sbs",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokainie.pl-ogloszenia-firmowe-id833083.click",
+        "classification": "Suspicious",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.pl629374.cyou",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro-lokalnie.pl-19252.sbs",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "olx.pikup-teraz74328832187.sbs",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.pl-8953.shop",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "olx.ofera6172893462171.sbs",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "olx.7865546.lat",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)"
+        ]
+      },
+      {
+        "domain": "vinted.pl18z74vx73.cyou",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "olx.340239g348.shop",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "booking.zjdxky.com",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pl-618402.sbs",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "aiebilet.pl-ogloszenia-firmowe-id833083.click",
+        "classification": "Suspicious",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pl11zs429.cyou",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pl3982712311457.top",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.e-zakupy24h.sbs",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "xn--albilet-b9a.8549431021-g4.shop",
+        "classification": "Suspicious",
+        "findings": [
+          "url.idn (low/weak)",
+          "url.obfuscated_shape (low/weak)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "olx.lokalna-oferta888048036.sbs",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pl629374.cyou",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.3737282733828.lol",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro.ofeta-85321.cfd",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "vinted.58781285.lat",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)"
+        ]
+      },
+      {
+        "domain": "allegrolokalnie.pl-oferta71028169.shop",
+        "classification": "High Risk",
+        "findings": [
+          "url.fake_tld_label (high/moderate)",
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "allegro-lokalnie.ifeoir239812.top",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      },
+      {
+        "domain": "olx.pl94324.sbs",
+        "classification": "Suspicious",
+        "findings": [
+          "url.brand_in_subdomain (high/moderate)",
+          "url.risky_tld (low/weak)"
+        ]
+      }
+    ]
+  }
+}

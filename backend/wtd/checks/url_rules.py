@@ -88,10 +88,25 @@ def damerau(a: str, b: str, cap: int = 3) -> int:
 
 
 def official_brand_for(registrable: str) -> dict | None:
+    tld = registrable.rsplit(".", 1)[-1] if registrable else ""
     for b in brand_data()["brands"]:
-        if registrable in b["official"]:
+        if registrable in b["official"] or tld in b.get("owned_tlds", ()):  # brand-owned gTLDs such as .google or .microsoft
             return b
     return None
+
+
+@lru_cache(maxsize=1)
+def popular_domains() -> frozenset[str]:
+    """Tranco top-10k registrable domains (snapshot; see the file header). Used only to suppress look-alike rules."""
+    p = DATA / "popular_domains.txt"
+    if not p.exists():
+        return frozenset()
+    return frozenset(ln.strip().lower() for ln in p.read_text().splitlines() if ln.strip() and not ln.startswith("#"))
+
+
+# A label that starts with a TLD and a hyphen right after a subdomain makes the host read as another domain:
+# 'alebilet.pl-otsochodzi.shop' reads as 'alebilet.pl', 'paypal.com-secure.top' as 'paypal.com'.
+FAKE_TLD_LABEL = re.compile(r"^(com|net|org|info|gov|edu|co|in|pl|de|uk|us|ru|fr|it|es|eu|io|app|bank|online|secure)-", re.I)
 
 
 def _f(code: str, title: str, observed: str, sev: Severity, strength: Strength, impact: str, rec: str, lim: str, ev: dict, n: int = 0) -> Finding:
@@ -162,7 +177,21 @@ def analyse_url(p: ParsedUrl) -> tuple[list[Finding], dict]:
                           "Check the address carefully against the organisation's known domain.",
                           "No match against the protected brand list; other brands were not checked.", {"unicode_host": p.host_unicode, "scripts": scripts}))
 
-    if parts.registrable and not official:
+    popular = bool(parts.registrable) and not official and parts.registrable in popular_domains()
+    if popular:
+        out.append(_f("url.popular_domain", "Well-established domain (look-alike rules not applied)",
+                      f"'{parts.registrable}' is among the 10,000 most popular registrable domains (Tranco snapshot).", Severity.info, Strength.weak,
+                      "Look-alike rules (typosquat, brand-in-domain, wrong suffix) are skipped here because they misfire on large legitimate sites.",
+                      "Popularity is not proof of safety: other checks still apply.",
+                      "Snapshot-based; a malicious or compromised popular domain would not be caught by this rule set.", {"source": "Tranco 94P72"}))
+    if parts.subdomain and parts.domain and FAKE_TLD_LABEL.match(parts.domain) and not official:
+        fake = f"{parts.subdomain.split('.')[-1]}.{FAKE_TLD_LABEL.match(parts.domain).group(1).lower()}"
+        out.append(_f("url.fake_tld_label", f"Address is built to read like '{fake}'",
+                      f"'{host}' reads as '{fake}', but the domain actually registered is '{parts.registrable}'.", Severity.high, Strength.moderate,
+                      "Splitting a familiar name across the subdomain and a 'tld-' prefix is a deliberate deception; it has no ordinary use.",
+                      f"The site belongs to {parts.registrable}. Do not enter any details.",
+                      "Rare legitimate hostnames may start with a country code and a hyphen.", {"reads_as": fake, "registrable": parts.registrable}))
+    if parts.registrable and not official and not popular:
         label = parts.domain.lower()
         label_skel = _digit_fold(skeleton(label))
         n = 0
@@ -171,7 +200,7 @@ def analyse_url(p: ParsedUrl) -> tuple[list[Finding], dict]:
             for od in b["official"]:
                 od_label = split_domain(od).domain.lower()
                 if len(od_label) < 5 or label == od_label:
-                    if label == od_label and parts.registrable not in b["official"]:
+                    if label == od_label and len(od_label) >= 3 and parts.registrable not in b["official"]:  # 1-2 letter names (t.me, g.co) are too generic
                         out.append(_f("url.brand_wrong_suffix", f"Brand name on an unofficial domain ending: imitates {b['name']}",
                                       f"'{parts.registrable}' uses the name '{od_label}' with a different suffix than the official {od}.",
                                       Severity.high, Strength.moderate,

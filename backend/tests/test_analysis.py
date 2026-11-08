@@ -199,3 +199,16 @@ def test_authenticated_service_email_stays_low_risk():
 def test_plain_message_not_mistaken_for_email():
     from wtd.message.email_checks import looks_like_email
     assert not looks_like_email("From: your bank\nPlease update KYC today")
+
+
+def test_url_rules_false_positive_guards_and_new_patterns():
+    from wtd.checks import url_rules
+    from wtd.netguard import parse_url
+    codes = lambda d: {f.code for f in url_rules.analyse_url(parse_url(f"https://{d}/"))[0]}
+    assert "url.official_domain" in codes("cloud.microsoft")          # brand-owned gTLD
+    assert "url.official_domain" in codes("amazon.co.jp")             # country domain
+    assert "url.popular_domain" in codes("hicloud.com") and "url.typosquat" not in codes("hicloud.com")
+    assert "url.brand_wrong_suffix" not in codes("t.co")               # 1-letter official names are too generic
+    assert "url.fake_tld_label" in codes("alebilet.pl-otsochodzi.shop")
+    assert "url.brand_in_subdomain" in codes("allegrolokalnie.f958h745.xyz")
+    assert "url.typosquat" in codes("paypa1.com") and "url.brand_wrong_suffix" in codes("amazon.cm")
