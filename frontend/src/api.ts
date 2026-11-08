@@ -10,6 +10,7 @@ import type {
   Health,
   Incident,
   CampaignBrief,
+  ReviewRecord,
   RegistrationResult,
   Report,
   ThreatReportState,
@@ -232,6 +233,11 @@ export function registerThreatReport(id: string, submitter?: string): Promise<Re
 export function reviseThreatReport(id: string, reason: string): Promise<RegistrationResult> {
   if (MOCK_MODE) return mock.reviseThreatReport(id, reason);
   return json<RegistrationResult>(`/api/analyses/${enc(id)}/threat-report/revise`, { method: 'POST', body: { reason } });
+}
+
+export function reviewThreatReport(id: string, status: 'Validated' | 'Disputed' | 'Retracted', note: string): Promise<ReviewRecord> {
+  if (MOCK_MODE) return Promise.reject(new ApiError(0, 'Not available in mock mode', 'network'));
+  return json<ReviewRecord>(`/api/analyses/${enc(id)}/threat-report/review`, { method: 'POST', body: { status, note } });
 }
 
 /** Returns null when the report has not been registered (404). */

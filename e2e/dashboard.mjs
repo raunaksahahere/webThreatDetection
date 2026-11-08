@@ -123,6 +123,21 @@ try {
     return "revision 0 → exit 2, revision 1 → exit 0";
   });
 
+  await step("Reviewer records 'Disputed' with a note; on-chain status updates; independent verifier reads it", async () => {
+    await page.$eval(".review-box", (el) => el.scrollIntoView());
+    await page.click(".review-choice:nth-child(2)"); // Disputed
+    await page.type(".review-form textarea", "e2e: second analyst disputes the severity");
+    await page.click(".review-form button[type=submit]");
+    await waitForText(page, ".review-box h3", /Disputed/, 60000);
+    await (await page.$("#registry")).screenshot({ path: join(SHOTS, "05b-registry-reviewed.png") });
+    await page.click("::-p-text(Download report for independent verification)");
+    const env = join(DL, "reviewed.envelope");
+    renameSync(await waitForDownload(DL, 0), env);
+    const r = verifier(env);
+    if (r.status !== 0 || !/Disputed/.test(r.stdout)) throw new Error(`verifier exit ${r.status}: ${r.stdout}`);
+    return (r.stdout.match(/.*Disputed.*/) || [""])[0].trim();
+  });
+
   await step("History and Incidents pages render", async () => {
     await page.goto(`${BASE}/#/history`, { waitUntil: "networkidle0" });
     await page.waitForFunction((id) => document.body.innerText.length > 200, {}, reportId);

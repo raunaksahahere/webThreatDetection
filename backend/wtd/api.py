@@ -120,6 +120,19 @@ def revise(rid: str, body: ReviseRequest) -> dict:
     return service.revise(rid, body.reason)
 
 
+class ReviewRequest(BaseModel):
+    status: str = Field(pattern="^(Validated|Disputed|Retracted)$")
+    note: str = Field(default="", max_length=500)
+
+
+@app.post("/api/analyses/{rid}/threat-report/review", dependencies=[Depends(require_token)])
+def review(rid: str, body: ReviewRequest) -> dict:
+    """Independent reviewer decision, signed by the reviewer account (contract forbids reviewing your own report)."""
+    from .registry import service
+
+    return service.review(rid, body.status, body.note)
+
+
 @app.get("/api/analyses/{rid}/threat-report", dependencies=[Depends(require_token)])
 def get_threat_report(rid: str) -> dict:
     from .registry import service

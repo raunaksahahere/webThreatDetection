@@ -194,7 +194,17 @@ export interface ThreatReportState {
   envelope: { [k: string]: unknown };
   commitment: string;
   records: RegistryRecord[];
-  onchain?: { revisions?: unknown[]; status_history?: unknown[]; error?: string } | null;
+  onchain?: { revisions?: unknown[]; status_history?: unknown[]; current_status?: string | null; error?: string } | null;
+  reviews?: ReviewRecord[];
+}
+
+export interface ReviewRecord {
+  tx_hash: string;
+  status: 'Validated' | 'Disputed' | 'Retracted';
+  note: string;
+  note_hash: string;
+  reviewer: string;
+  created_at?: string;
 }
 
 export interface VerifyResult {

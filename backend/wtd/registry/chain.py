@@ -6,6 +6,7 @@ connected chain id is 31337. Any other chain requires WTD_REPORTER_KEY and refus
 from __future__ import annotations
 
 import json
+import os
 from functools import lru_cache
 
 from web3 import Web3
@@ -58,8 +59,10 @@ def _contract(w3: Web3):
 def _signer_key(w3: Web3, role: str = "reporter") -> str:
     if role == "reporter" and SETTINGS.reporter_key:
         return SETTINGS.reporter_key
+    if role == "reviewer" and os.environ.get("WTD_REVIEWER_KEY"):
+        return os.environ["WTD_REVIEWER_KEY"]
     if w3.eth.chain_id != 31337:
-        raise ChainUnavailable("WTD_REPORTER_KEY must be set for non-local chains")
+        raise ChainUnavailable(f"WTD_{role.upper()}_KEY must be set for non-local chains")
     return ANVIL_REPORTER_KEY if role == "reporter" else ANVIL_REVIEWER_KEY
 
 
@@ -95,6 +98,15 @@ def revise(report_id_b32: str, expected_revision: int, commitment: str, cls_code
     c, dep = _contract(w3)
     res = _send(w3, c.functions.revise(bytes.fromhex(report_id_b32[2:]), expected_revision, bytes.fromhex(commitment[2:]), cls_code), _signer_key(w3))
     return {**res, "chain_id": w3.eth.chain_id, "contract": c.address, "revision": expected_revision, "registered_at": iso()}
+
+
+def set_status(report_id_b32: str, status_name: str, note_hash: str) -> dict:
+    """Reviewer decision. Signed by the reviewer account (a different key from the reporter; the contract rejects self-review)."""
+    w3 = _w3()
+    c, dep = _contract(w3)
+    res = _send(w3, c.functions.setStatus(bytes.fromhex(report_id_b32[2:]), STATUS.index(status_name), bytes.fromhex(note_hash[2:])),
+                _signer_key(w3, "reviewer"))
+    return {**res, "chain_id": w3.eth.chain_id, "contract": c.address, "status": status_name, "reviewed_at": iso()}
 
 
 def read(report_id_b32: str) -> dict:

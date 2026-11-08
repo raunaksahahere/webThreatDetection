@@ -1,6 +1,8 @@
 """Threat-report registration and app-side verification (the independent check is verifier/verify.mjs)."""
 from __future__ import annotations
 
+import hashlib
+
 from fastapi import HTTPException
 
 from ..models import RegistryRecord, iso
@@ -104,7 +106,33 @@ def get(rid: str) -> dict:
         onchain = chain.read(report_id_bytes32(rid))
     except chain.ChainUnavailable as e:
         onchain = {"error": str(e)}
-    return {"envelope": trs[-1]["envelope"], "commitment": trs[-1]["commitment"], "records": [t["record"] for t in trs], "onchain": onchain}
+    return {"envelope": trs[-1]["envelope"], "commitment": trs[-1]["commitment"], "records": [t["record"] for t in trs], "onchain": onchain,
+            "reviews": STORE.reviews(rid)}
+
+
+REVIEW_STATUSES = ("Validated", "Disputed", "Retracted")
+
+
+def review(rid: str, status: str, note: str) -> dict:
+    """Record a reviewer decision on-chain (status + SHA-256 of the note); the note text stays off-chain."""
+    if status not in REVIEW_STATUSES:
+        raise HTTPException(422, f"status must be one of {', '.join(REVIEW_STATUSES)}")
+    note = note.strip()
+    if status != "Validated" and not note:
+        raise HTTPException(422, "a note explaining the dispute or retraction is required")
+    if not STORE.threat_reports(rid):
+        raise HTTPException(409, "not registered yet")
+    note_hash = "0x" + hashlib.sha256(note.encode("utf-8")).hexdigest()
+    try:
+        res = chain.set_status(report_id_bytes32(rid), status, note_hash)
+    except chain.ChainUnavailable as e:
+        raise HTTPException(503, f"blockchain unavailable: {e}")
+    except Exception as e:  # revert, e.g. self-review or missing reviewer role
+        raise HTTPException(409, f"review rejected by the contract: {str(e)[:160]}")
+    rec = {"tx_hash": res["tx_hash"], "status": status, "note": note, "note_hash": note_hash, "reviewer": res["from"],
+           "block_number": res["block_number"], "chain_id": res["chain_id"]}
+    STORE.save_review(rid, rec)
+    return rec
 
 
 def verify(rid: str) -> dict:

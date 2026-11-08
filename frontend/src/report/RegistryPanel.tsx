@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
-import { Blocks, CircleCheck, CircleX, Download, FileCheck, GitBranch, LoaderCircle, Terminal, TriangleAlert } from 'lucide-react';
-import type { RegistryRecord, Report, ThreatReportState, VerifyResult } from '../types';
-import { downloadEnvelope, errorMessage, getThreatReport, registerThreatReport, reviseThreatReport, saveBlob, verifyIntegrity } from '../api';
+import { Blocks, CircleCheck, CircleX, Download, FileCheck, GitBranch, Gavel, LoaderCircle, Terminal, TriangleAlert } from 'lucide-react';
+import type { RegistryRecord, Report, ReviewRecord, ThreatReportState, VerifyResult } from '../types';
+import { downloadEnvelope, errorMessage, getThreatReport, registerThreatReport, reviewThreatReport, reviseThreatReport, saveBlob, verifyIntegrity } from '../api';
 import { formatDate } from '../format';
 import { CopyButton } from '../components/CopyButton';
 import { ValueView } from '../components/ValueView';
@@ -9,7 +9,7 @@ import { Notice } from '../components/Section';
 
 export const CHAIN_CAVEAT = 'The chain proves this report has not changed since it was registered — not that its conclusions are true.';
 
-type Busy = 'register' | 'revise' | 'verify' | 'download' | null;
+type Busy = 'register' | 'revise' | 'verify' | 'download' | 'review' | null;
 
 function Hex({ value }: { value: string }) {
   return (
@@ -146,6 +146,57 @@ function StatusHistory({ items }: { items: unknown[] }) {
   );
 }
 
+function ReviewBox({ current, reviews, busy, onReview }: { current: string | null | undefined; reviews: ReviewRecord[]; busy: Busy; onReview: (s: ReviewRecord['status'], note: string) => Promise<void> }) {
+  const [status, setStatus] = useState<ReviewRecord['status']>('Validated');
+  const [note, setNote] = useState('');
+  const needNote = status !== 'Validated';
+  return (
+    <div className="review-box">
+      <h3 className="mini-label">
+        <Gavel size={14} aria-hidden /> Independent review{current ? <span className={`review-current review-${current.toLowerCase()}`}>{current}</span> : null}
+      </h3>
+      <p className="fine">
+        A reviewer account (separate from the reporter that registered this report; the contract rejects self-review) records Validated, Disputed or Retracted on chain. Only the SHA-256 of the note is written on chain; the note text stays here.
+      </p>
+      {reviews.length ? (
+        <ul className="review-list">
+          {reviews.map((r) => (
+            <li key={r.tx_hash}>
+              <strong className={`review-current review-${r.status.toLowerCase()}`}>{r.status}</strong> {r.note || <span className="muted">(no note)</span>}
+              <div className="fine mono">
+                by {r.reviewer.slice(0, 10)}… · note sha256 {r.note_hash.slice(0, 14)}… · tx {r.tx_hash.slice(0, 14)}…
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      <form
+        className="review-form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (needNote && !note.trim()) return;
+          void onReview(status, note).then(() => setNote(''));
+        }}
+      >
+        <div className="review-choices" role="radiogroup" aria-label="Review decision">
+          {(['Validated', 'Disputed', 'Retracted'] as const).map((s) => (
+            <label key={s} className={`review-choice ${status === s ? 'is-active' : ''}`}>
+              <input type="radio" name="review-status" value={s} checked={status === s} onChange={() => setStatus(s)} /> {s}
+            </label>
+          ))}
+        </div>
+        <label className="field">
+          <span className="field-label">Reviewer note {needNote ? '(required)' : '(optional)'}</span>
+          <textarea rows={2} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Confirmed independently: the domain was registered 3 days ago and asks for the OTP" />
+        </label>
+        <button type="submit" className="btn btn-secondary" disabled={busy !== null || (needNote && !note.trim())}>
+          {busy === 'review' ? <LoaderCircle size={15} className="spin" aria-hidden /> : <Gavel size={15} aria-hidden />} Record review on-chain
+        </button>
+      </form>
+    </div>
+  );
+}
+
 interface Props {
   report: Report;
   onChanged: () => void;
@@ -213,6 +264,13 @@ export function RegistryPanel({ report, onChanged }: Props) {
     });
 
   const doVerify = () => run('verify', async () => setVerify(await verifyIntegrity(report.id)));
+
+  const doReview = (status: ReviewRecord['status'], note: string) =>
+    run('review', async () => {
+      await reviewThreatReport(report.id, status, note);
+      setVerify(null);
+      await load();
+    });
 
   const doDownload = () =>
     run('download', async () => {
@@ -311,6 +369,8 @@ export function RegistryPanel({ report, onChanged }: Props) {
               ) : null}
 
               {verify ? <VerifyView v={verify} /> : null}
+
+              <ReviewBox current={state?.onchain?.current_status} reviews={state?.reviews ?? []} busy={busy} onReview={doReview} />
 
               <div className="cli">
                 <div className="cli-head">

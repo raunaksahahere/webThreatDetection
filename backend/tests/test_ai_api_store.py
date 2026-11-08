@@ -191,3 +191,11 @@ def test_campaign_brief_rejects_attribution_and_unsupported_confirmed():
     assert campaign._validate(_cluster(), _EVID, _brief(summary="This is attributed to APT 41."))["status"] == "rejected"
     assert campaign._validate(_cluster(), _EVID, _brief(summary="All reports are Confirmed Malicious."))["status"] == "rejected"
     assert campaign._validate(_cluster(), _EVID, "nope")["status"] == "failed"
+
+
+def test_review_validation(client):
+    h = {"X-WTD-Token": "test-token"}
+    assert client.post("/api/analyses/x/threat-report/review", json={"status": "Pending"}, headers=h).status_code == 422
+    assert client.post("/api/analyses/x/threat-report/review", json={"status": "Disputed", "note": ""}, headers=h).status_code == 422
+    assert client.post("/api/analyses/nope/threat-report/review", json={"status": "Validated"}, headers=h).status_code == 409
+    assert client.post("/api/analyses/x/threat-report/review", json={"status": "Validated"}).status_code == 401

@@ -24,6 +24,10 @@ CREATE TABLE IF NOT EXISTS threat_reports (
   report_id TEXT NOT NULL, revision INTEGER NOT NULL, envelope_json TEXT NOT NULL, commitment TEXT NOT NULL,
   record_json TEXT, created_at TEXT NOT NULL, PRIMARY KEY (report_id, revision)
 );
+CREATE TABLE IF NOT EXISTS reviews (
+  report_id TEXT NOT NULL, tx_hash TEXT NOT NULL, status TEXT NOT NULL, note TEXT NOT NULL, note_hash TEXT NOT NULL,
+  reviewer TEXT NOT NULL, created_at TEXT NOT NULL, PRIMARY KEY (report_id, tx_hash)
+);
 CREATE TABLE IF NOT EXISTS campaign_briefs (cluster_id TEXT PRIMARY KEY, brief_json TEXT NOT NULL, created_at TEXT NOT NULL);
 """
 
@@ -116,3 +120,13 @@ class Store:
     def get_brief(self, cluster_id: str) -> dict | None:
         row = self.conn.execute("SELECT brief_json FROM campaign_briefs WHERE cluster_id=?", (cluster_id,)).fetchone()
         return json.loads(row[0]) if row else None
+
+    # --- reviewer decisions: the note text stays off-chain; only its SHA-256 is on-chain
+    def save_review(self, rid: str, rec: dict) -> None:
+        with self.lock:
+            self.conn.execute("INSERT OR REPLACE INTO reviews(report_id, tx_hash, status, note, note_hash, reviewer, created_at) VALUES (?,?,?,?,?,?,?)",
+                              (rid, rec["tx_hash"], rec["status"], rec["note"], rec["note_hash"], rec["reviewer"], iso()))
+
+    def reviews(self, rid: str) -> list[dict]:
+        rows = self.conn.execute("SELECT tx_hash, status, note, note_hash, reviewer, created_at FROM reviews WHERE report_id=? ORDER BY created_at", (rid,)).fetchall()
+        return [dict(zip(("tx_hash", "status", "note", "note_hash", "reviewer", "created_at"), r)) for r in rows]
