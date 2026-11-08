@@ -3,10 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "description": "Independent verifier for wtd.commitment.v1 threat-report envelopes anchored in ThreatReportRegistry",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "type": "module",
-  "engines": { "node": ">=24" },
-  "bin": { "wtd-verify": "./verify.mjs" },
+  "engines": {
+    "node": ">=24"
+  },
+  "bin": {
+    "wtd-verify": "./verify.mjs"
+  },
   "scripts": {
     "test": "node test-vectors.mjs",
     "verify": "node verify.mjs"

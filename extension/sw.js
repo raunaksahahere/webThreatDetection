@@ -6,7 +6,7 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({ id: "wtd-check-link", title: "Check this link with WTD (without opening it)", contexts: ["link"] });
 });
 
-chrome.contextMenus.onClicked.addListener(async (info) => {
+export async function handleMenuClick(info) {
   if (info.menuItemId !== "wtd-check-link") return;
   const url = checkableUrl(info.linkUrl || "");
   if (!url) return;
@@ -18,4 +18,6 @@ chrome.contextMenus.onClicked.addListener(async (info) => {
     chrome.action.setBadgeText({ text: "!" });
     chrome.action.setTitle({ title: `WTD: ${String(e.message || e).slice(0, 200)}` });
   }
-});
+}
+chrome.contextMenus.onClicked.addListener(handleMenuClick);
+globalThis.wtdHandleMenuClick = handleMenuClick; // lets the automated browser test drive the real handler

@@ -111,4 +111,5 @@ def read(report_id_b32: str) -> dict:
         for i in range(c.functions.statusCount(rid).call()):
             s = c.functions.getStatusChange(rid, i).call()
             history.append({"index": i, "status": STATUS[s[0]], "timestamp": s[1], "by": s[2], "note_hash": "0x" + bytes(s[3]).hex()})
-    return {"chain_id": w3.eth.chain_id, "contract": c.address, "revisions": revisions, "status_history": history}
+    current = STATUS[c.functions.currentStatus(rid).call()] if n else None  # Pending until a reviewer acts
+    return {"chain_id": w3.eth.chain_id, "contract": c.address, "revisions": revisions, "status_history": history, "current_status": current}

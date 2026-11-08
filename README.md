@@ -59,7 +59,12 @@ Tests:
 (cd contracts && forge test)                          # 22 contract tests incl. unauthorised writes and revision ordering
 node verifier/test-vectors.mjs                        # cross-language canonicalization vectors
 backend/.venv/bin/python scripts/run_cases.py         # documented cases through the live API
+(cd e2e && npm install && npm test)                   # real-browser click-through (Brave/Chrome, headless): dashboard register → verify → revise, extension
 ```
+
+The browser checks use an installed Brave or Chrome (`WTD_BROWSER=/path` to override) and save screenshots to `docs/screenshots/`.
+
+![Report page](docs/screenshots/02-report-verdict.png)
 
 ## How it decides
 
@@ -105,4 +110,4 @@ Weak signals (urgent wording, keywords, AI observations, missing security header
 - At runtime the product uses AI models (OpenRouter free model; optional local Qwen3 4B) for explanations only.
 - Development was assisted by AI coding tools.
 
-Licence: MIT for original code in this repository (see `LICENSE`); third-party components keep their own licences.
+Licence: Apache License 2.0 for original code in this repository (see `LICENSE` and `NOTICE`); third-party components keep their own licences.

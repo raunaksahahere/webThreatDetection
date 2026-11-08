@@ -1,0 +1,19 @@
+{
+  "name": "e2e",
+  "version": "1.0.0",
+  "description": "Browser end-to-end checks (dashboard and extension) using an installed Brave/Chrome",
+  "main": "index.js",
+  "scripts": {
+    "test": "node dashboard.mjs && node extension.mjs",
+    "dashboard": "node dashboard.mjs",
+    "extension": "node extension.mjs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "Apache-2.0",
+  "type": "module",
+  "devDependencies": {
+    "puppeteer-core": "^24.43.1"
+  },
+  "private": "true"
+}

@@ -119,5 +119,5 @@ def verify(rid: str) -> dict:
     latest = revs[-1]["index"] if revs else None
     return {"match": matched is not None and matched == latest, "matched_revision": matched, "latest_revision": latest,
             "recomputed": recomputed, "onchain_latest": revs[-1]["commitment"] if revs else None,
-            "status": oc["status_history"][-1]["status"] if oc["status_history"] else None, "checked_at": iso(),
+            "status": oc.get("current_status") or (oc["status_history"][-1]["status"] if oc["status_history"] else None), "checked_at": iso(),
             "note": "App-side check. For an independent check run: node verifier/verify.mjs --envelope <downloaded file>"}
