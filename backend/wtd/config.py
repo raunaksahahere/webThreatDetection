@@ -48,6 +48,8 @@ class Settings:
 
 
 def load() -> Settings:
+    if os.environ.get("WTD_NETWORK"):  # e.g. WTD_NETWORK=sepolia loads .env.sepolia (keys, RPC, deployment) first
+        _load_dotenv(ROOT / f".env.{os.environ['WTD_NETWORK']}")
     _load_dotenv(ROOT / ".env")
     token = os.environ.get("WTD_API_TOKEN") or _secret_file("api_token", 24)
     return Settings(
