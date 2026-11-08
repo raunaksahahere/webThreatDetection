@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS threat_reports (
   report_id TEXT NOT NULL, revision INTEGER NOT NULL, envelope_json TEXT NOT NULL, commitment TEXT NOT NULL,
   record_json TEXT, created_at TEXT NOT NULL, PRIMARY KEY (report_id, revision)
 );
+CREATE TABLE IF NOT EXISTS campaign_briefs (cluster_id TEXT PRIMARY KEY, brief_json TEXT NOT NULL, created_at TEXT NOT NULL);
 """
 
 
@@ -105,3 +106,13 @@ class Store:
     def threat_reports(self, rid: str) -> list[dict]:
         rows = self.conn.execute("SELECT revision, envelope_json, commitment, record_json FROM threat_reports WHERE report_id=? ORDER BY revision", (rid,)).fetchall()
         return [{"revision": r[0], "envelope": json.loads(r[1]), "commitment": r[2], "record": json.loads(r[3]) if r[3] else None} for r in rows]
+
+    # --- AI campaign briefs (cluster id is a hash of the member report ids, so a changed cluster gets a new id)
+    def save_brief(self, cluster_id: str, brief: dict) -> None:
+        with self.lock:
+            self.conn.execute("INSERT OR REPLACE INTO campaign_briefs(cluster_id, brief_json, created_at) VALUES (?,?,?)",
+                              (cluster_id, json.dumps(brief, ensure_ascii=False), iso()))
+
+    def get_brief(self, cluster_id: str) -> dict | None:
+        row = self.conn.execute("SELECT brief_json FROM campaign_briefs WHERE cluster_id=?", (cluster_id,)).fetchone()
+        return json.loads(row[0]) if row else None

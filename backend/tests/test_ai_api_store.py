@@ -141,3 +141,53 @@ def test_negated_classification_mention_is_not_a_contradiction():
     r = _report()
     res = explain._validate(r, good(summary="The redirect alone does not classify as Low Risk evidence; it is High Risk because of the OTP request."), "")
     assert res.status == "ok"
+
+
+# ------------------------------------------------------------------ AI campaign brief validation
+def _cluster(kind="campaign"):
+    return {"cluster_id": "c1", "kind": kind, "report_ids": ["r1", "r2"], "distinct_targets": 2,
+            "shared": ["upi: wt•••@ybl", "email: h•••@wtd-demo.invalid"], "classifications": ["High Risk"], "links": [], "reports": []}
+
+
+_EVID = {"reports": [{"report_id": "r1", "findings": [{"id": "msg.unusual_payment"}]}, {"report_id": "r2", "findings": [{"id": "msg.job_offer"}]}]}
+
+
+def test_campaign_tactic_report_must_carry_finding():
+    from wtd.ai import campaign
+    res = campaign._validate(_cluster(), _EVID, _brief(common_tactics=[{"technique": "advance fee", "report_ids": ["r1", "r2"], "finding_ids": ["msg.unusual_payment"]}]))
+    assert res["common_tactics"][0]["report_ids"] == ["r1"]
+
+
+def _brief(**over):
+    d = {"summary": "Both messages ask for fees to the same UPI ID.", "assessment": "likely_same_campaign",
+         "link_explanations": [{"indicator": "upi: wt•••@ybl", "report_ids": ["r1", "r2", "rX"], "explanation": "Same payee."}],
+         "common_tactics": [{"technique": "advance fee", "report_ids": ["r1"], "finding_ids": ["msg.unusual_payment", "msg.made_up"]}],
+         "next_steps": ["Report the UPI ID to the bank."], "uncertainty": "Masked values only.", "injection_attempt_observed": False}
+    d.update(over)
+    return json.dumps(d)
+
+
+def test_campaign_brief_grounding_enforced():
+    from wtd.ai import campaign
+    res = campaign._validate(_cluster(), _EVID, _brief(link_explanations=[
+        {"indicator": "upi: wt•••@ybl", "report_ids": ["r1", "r2", "rX"], "explanation": "Same payee."},
+        {"indicator": "ip: 1.2.3.4", "report_ids": ["r1"], "explanation": "invented"}]))
+    assert res["status"] == "ok"
+    assert [l["indicator"] for l in res["link_explanations"]] == ["upi: wt•••@ybl"]
+    assert res["link_explanations"][0]["report_ids"] == ["r1", "r2"]
+    assert res["common_tactics"][0]["finding_ids"] == ["msg.unusual_payment"]
+    assert any("not in this cluster" in n for n in res["validation_notes"])
+
+
+def test_campaign_brief_cannot_exceed_link_type():
+    from wtd.ai import campaign
+    assert campaign._validate(_cluster("shared_infrastructure"), _EVID, _brief())["status"] == "rejected"
+    assert campaign._validate(_cluster("repeat_checks"), _EVID, _brief(assessment="possibly_related"))["status"] == "rejected"
+    assert campaign._validate(_cluster("repeat_checks"), _EVID, _brief(assessment="repeat_checks_only"))["status"] == "ok"
+
+
+def test_campaign_brief_rejects_attribution_and_unsupported_confirmed():
+    from wtd.ai import campaign
+    assert campaign._validate(_cluster(), _EVID, _brief(summary="This is attributed to APT 41."))["status"] == "rejected"
+    assert campaign._validate(_cluster(), _EVID, _brief(summary="All reports are Confirmed Malicious."))["status"] == "rejected"
+    assert campaign._validate(_cluster(), _EVID, "nope")["status"] == "failed"

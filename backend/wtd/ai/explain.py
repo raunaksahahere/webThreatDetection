@@ -79,14 +79,14 @@ def _messages(evidence: dict, untrusted: str) -> list[dict]:
     return [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}]
 
 
-def _openrouter(msgs: list[dict]) -> tuple[str, str]:
+def _openrouter(msgs: list[dict], schema: dict | None = None, name: str = "explanation", max_tokens: int = 1200) -> tuple[str, str]:
     key = os.environ.get("OPENROUTER_API_KEY")
     if not key:
         raise RuntimeError("unavailable: OPENROUTER_API_KEY not set")
     if not SETTINGS.ai_model.endswith(":free"):
         raise RuntimeError("disabled: only free models are permitted in this deployment")
-    body = {"model": SETTINGS.ai_model, "max_tokens": 1200, "messages": msgs,
-            "response_format": {"type": "json_schema", "json_schema": {"name": "explanation", "strict": True, "schema": SCHEMA}},
+    body = {"model": SETTINGS.ai_model, "max_tokens": max_tokens, "messages": msgs,
+            "response_format": {"type": "json_schema", "json_schema": {"name": name, "strict": True, "schema": schema or SCHEMA}},
             "provider": {"data_collection": "deny", "require_parameters": True}}
     last = None
     for attempt in range(2):
@@ -119,10 +119,10 @@ def _openrouter(msgs: list[dict]) -> tuple[str, str]:
     raise RuntimeError(f"unavailable: {last}")
 
 
-def _ollama(msgs: list[dict]) -> tuple[str, str]:
+def _ollama(msgs: list[dict], schema: dict | None = None) -> tuple[str, str]:
     try:
         r = httpx.post(OLLAMA_URL, timeout=150, json={"model": SETTINGS.ai_local_model, "messages": msgs, "stream": False,
-                                                     "format": SCHEMA, "think": False, "options": {"temperature": 0, "num_ctx": 8192}})
+                                                     "format": schema or SCHEMA, "think": False, "options": {"temperature": 0, "num_ctx": 8192}})
     except httpx.HTTPError as e:
         raise RuntimeError(f"unavailable: local model not reachable ({type(e).__name__})")
     if r.status_code != 200:

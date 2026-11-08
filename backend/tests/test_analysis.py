@@ -152,3 +152,20 @@ def test_floats_rejected_and_salt_changes_commitment():
         canonical_bytes({"a": 1.5})
     tr = {"schema": "wtd.threat-report.v1", "report_id": "x"}
     assert commitment(make_envelope(tr)) != commitment(make_envelope(tr))  # random salt prevents guessing
+
+
+def test_task_scam_variants_detected_as_advance_fee():
+    from wtd.message.analyse import analyse_text
+    for text in [
+        "Hello! We are hiring for a part-time online job. Earn Rs 2500 daily by rating hotels from home. Registration fee Rs 499 "
+        "(refundable) — pay to UPI wtd.demo.campaign@ybl",
+        "Your profile is selected for the video like task. Daily income Rs 3000. To activate pay Rs 999 today to wtd.demo.campaign@ybl.",
+    ]:
+        codes = {f.code: f.strength for f in analyse_text(text)[0]}
+        assert codes.get("msg.job_offer") and codes.get("msg.unusual_payment") == "strong", codes
+
+
+def test_job_wording_alone_stays_weak():
+    from wtd.message.analyse import analyse_text
+    fs = analyse_text("We have a part-time online job opening for students. Apply on our careers page.")[0]
+    assert all(f.strength == "weak" for f in fs)

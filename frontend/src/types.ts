@@ -208,11 +208,54 @@ export interface VerifyResult {
   note?: string;
 }
 
+export type IncidentKind = 'campaign' | 'shared_infrastructure' | 'repeat_checks';
+
+export interface IncidentReportRef {
+  id: string;
+  kind: 'url' | 'message';
+  target: string;
+  created_at: string;
+  classification: string | null;
+  rule: string | null;
+}
+
+export interface IncidentLink {
+  a: string;
+  b: string;
+  shared: string[];
+  different_targets: boolean;
+}
+
 export interface Incident {
   cluster_id: string;
+  kind?: IncidentKind;
   report_ids: string[];
+  distinct_targets?: number;
   shared: string[];
+  links?: IncidentLink[];
+  reports?: IncidentReportRef[];
   classifications?: string[];
   first_seen: string;
   last_seen: string;
+  has_brief?: boolean;
+}
+
+export interface CampaignBrief {
+  cluster_id: string;
+  link_type: IncidentKind;
+  report_ids: string[];
+  generated_at: string;
+  status: 'ok' | 'rejected' | 'failed' | 'unavailable' | 'disabled';
+  error?: string;
+  summary?: string;
+  assessment?: 'likely_same_campaign' | 'possibly_related' | 'not_enough_evidence' | 'repeat_checks_only';
+  link_explanations?: { indicator: string; report_ids: string[]; explanation: string }[];
+  common_tactics?: { technique: string; report_ids: string[]; finding_ids: string[] }[];
+  next_steps?: string[];
+  uncertainty?: string;
+  injection_attempt_observed?: boolean;
+  validation_notes?: string[];
+  provider?: string;
+  model?: string;
+  latency_ms?: number;
 }

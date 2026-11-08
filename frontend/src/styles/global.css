@@ -1392,6 +1392,105 @@ textarea {
 .report-pill:hover {
   background: var(--accent-soft);
 }
+.incident-campaign {
+  grid-column: 1 / -1;
+  border-left: 4px solid var(--high);
+}
+.incident-shared_infrastructure {
+  border-left: 4px solid var(--susp);
+}
+.incident-repeat_checks {
+  opacity: 0.85;
+}
+.incident-kind {
+  font-family: var(--font-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 0.82rem;
+}
+.incident-kind-text {
+  margin: -0.35rem 0 0;
+}
+.incident-targets {
+  list-style: none;
+  padding: 0.6rem 0 0;
+  margin: 0;
+  border-top: 1px dashed var(--rule-strong);
+  display: grid;
+  gap: 0.4rem;
+}
+.incident-targets li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.incident-target-text {
+  font-size: 0.85rem;
+  color: var(--ink-2);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+.repeats-toggle {
+  margin: 0.5rem 0 1rem;
+}
+.brief {
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.brief-rejected {
+  border-color: var(--bad);
+  background: var(--surface-2);
+}
+.brief-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.brief-assess {
+  margin-left: auto;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: var(--surface);
+  border: 1px solid var(--accent);
+}
+.brief-flag {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--bad);
+}
+.brief-summary {
+  margin: 0;
+}
+.brief-list {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.9rem;
+}
+.brief-list .chip {
+  font-size: 0.75rem;
+  padding: 0.05rem 0.35rem;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  margin-right: 0.25rem;
+}
+.brief-notes {
+  font-size: 0.82rem;
+}
 
 /* ---------- responsive ---------- */
 @media (max-width: 900px) {

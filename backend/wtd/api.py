@@ -143,38 +143,36 @@ def verify(rid: str) -> dict:
 
 
 @app.get("/api/incidents", dependencies=[Depends(require_token)])
-def incidents() -> list[dict]:
-    edges = pipeline.STORE.indicator_edges()
-    parent: dict[str, str] = {}
+def incidents_list() -> list[dict]:
+    from . import incidents
 
-    def find(x: str) -> str:
-        parent.setdefault(x, x)
-        while parent[x] != x:
-            parent[x] = parent[parent[x]]
-            x = parent[x]
-        return x
+    out = incidents.clusters()
+    for c in out:
+        c["has_brief"] = pipeline.STORE.get_brief(c["cluster_id"]) is not None
+    return out
 
-    shared: dict[tuple[str, str], set] = {}
-    for a, b, t, d in edges:
-        parent[find(a)] = find(b)
-        shared.setdefault((a, b), set()).add(f"{t}: {d}")
-    clusters: dict[str, dict] = {}
-    for (a, b), s in shared.items():
-        root = find(a)
-        c = clusters.setdefault(root, {"report_ids": set(), "shared": set()})
-        c["report_ids"] |= {a, b}
-        c["shared"] |= s
-    out = []
-    for root, c in clusters.items():
-        reps = [pipeline.STORE.get(i) for i in c["report_ids"]]
-        reps = [r for r in reps if r]
-        if len(reps) < 2:
-            continue
-        dates = sorted(r.created_at for r in reps)
-        out.append({"cluster_id": root[:8], "report_ids": [r.id for r in reps], "shared": sorted(c["shared"])[:20],
-                    "classifications": sorted({(r.assessment.classification if r.assessment else r.status) for r in reps}),
-                    "first_seen": dates[0], "last_seen": dates[-1]})
-    return sorted(out, key=lambda c: c["last_seen"], reverse=True)
+
+@app.get("/api/incidents/{cid}/brief", dependencies=[Depends(require_token)])
+def incident_brief(cid: str) -> dict:
+    b = pipeline.STORE.get_brief(cid)
+    if not b:
+        raise HTTPException(404, "no brief for this cluster yet")
+    return b
+
+
+@app.post("/api/incidents/{cid}/brief", dependencies=[Depends(require_token), Depends(rate_limit)])
+def incident_brief_create(cid: str) -> dict:
+    """Generate (or regenerate) the AI campaign brief for a cluster. Synchronous: free/local models take 10-60 s."""
+    from . import incidents
+    from .ai import campaign
+
+    c = incidents.get(cid)
+    if not c:
+        raise HTTPException(404, "unknown cluster (clusters change as reports are added)")
+    b = campaign.brief(c)
+    if b["status"] in ("ok", "rejected"):
+        pipeline.STORE.save_brief(cid, b)
+    return b
 
 
 DIST = ROOT / "frontend" / "dist"

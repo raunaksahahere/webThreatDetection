@@ -47,7 +47,7 @@ RULES = [
      r"\b(congratulations|you('ve| have)? won|winner|lottery|prize|cash ?back|refund|reward|gift|bonus|free (iphone|gift|recharge)|lucky draw|claim (now|your))\b",
      "Unexpected rewards are bait to collect details or fees.", "Legitimate prizes never require you to pay or share secrets."),
     ("msg.job_offer", "Unsolicited job or easy-earning offer", Severity.medium, Strength.weak,
-     r"\b(work from home|part[- ]time (job|work)|earn (rs\.?|₹|inr)?\s?\d[\d,]* (per|a) (day|hour|week)|daily (income|earning)|like (videos|posts)|telegram (task|group)|task[- ]based|data entry job|hiring urgently)\b",
+     r"\b(work from home|part[- ]time (online |home )?(job|work)|online (part[- ]time )?job|earn (rs\.?|₹|inr)?\s?\d[\d,]*\s?(/-)?\s?((per|a) (day|hour|week)|daily|weekly|per task)|daily (income|earning)s?|like (videos|posts)|(video|youtube|instagram) like task|(rating|review|rate) (hotels|products|apps|movies)|prepaid task|task (bonus|commission)|telegram (task|group)|task[- ]based|data entry job|hiring urgently)\b",
      "Task and job scams lure victims with easy money and later demand deposits.", "Do not pay any fee to get a job; verify the company independently."),
     ("msg.investment", "High-return investment pitch", Severity.medium, Strength.weak,
      r"\b(guaranteed (returns?|profit)|double your (money|investment)|\d{2,3}% (returns?|profit)|risk[- ]free (profit|investment)|crypto (trading|investment|signals)|forex signals)\b",

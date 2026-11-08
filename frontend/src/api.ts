@@ -9,6 +9,7 @@ import type {
   AnalysisSummary,
   Health,
   Incident,
+  CampaignBrief,
   RegistrationResult,
   Report,
   ThreatReportState,
@@ -267,6 +268,22 @@ export async function downloadEnvelope(id: string): Promise<{ blob: Blob; filena
 export function listIncidents(): Promise<Incident[]> {
   if (MOCK_MODE) return mock.listIncidents();
   return json<Incident[]>('/api/incidents');
+}
+
+/** Returns null when no brief has been generated for this cluster (404). */
+export async function getCampaignBrief(clusterId: string): Promise<CampaignBrief | null> {
+  if (MOCK_MODE) return null;
+  try {
+    return await json<CampaignBrief>(`/api/incidents/${enc(clusterId)}/brief`);
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 404) return null;
+    throw e;
+  }
+}
+
+export function createCampaignBrief(clusterId: string): Promise<CampaignBrief> {
+  if (MOCK_MODE) return Promise.reject(new ApiError(0, 'Not available in mock mode', 'network'));
+  return json<CampaignBrief>(`/api/incidents/${enc(clusterId)}/brief`, { method: 'POST', body: {} });
 }
 
 /** Save a Blob we generated ourselves as a file. */
