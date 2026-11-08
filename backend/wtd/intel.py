@@ -18,7 +18,7 @@ from pathlib import Path
 
 import httpx
 
-from .checks.url_rules import split_domain
+from .checks.url_rules import official_brand_for, split_domain
 from .models import CheckResult, CheckStatus, Finding, Module, Provenance, Severity, Strength, iso
 
 PROJECT_DATA = Path(__file__).resolve().parents[2] / "data"
@@ -214,22 +214,32 @@ def lookup(url: str | None, hosts: list[str], shared_hosting: set[str] | None = 
             urls = d.get("urls") or []
             online = sum(1 for u in urls if u.get("url_status") == "online")
             reg = split_domain(h).registrable
-            shared = h in shared_hosting or reg in shared_hosting
-            recent = any(_recent(u.get("date_added")) for u in urls)
-            out.matches.append({"source": "URLhaus", "host": h, "url_count": d.get("url_count"), "online": online})
+            count = int(d.get("url_count") or 0)
+            bl = d.get("blacklists") or {}
+            # Domain-level verdicts from Spamhaus DBL / SURBL (as reported by URLhaus). "abused_legit_*" means a legitimate domain was abused.
+            dbl_bad = [f"{k}: {v}" for k, v in bl.items() if v and v != "not listed" and not str(v).startswith("abused_legit")]
+            platform = h in shared_hosting or reg in shared_hosting or count >= 1000 or official_brand_for(reg) is not None \
+                or any(str(v).startswith("abused_legit") for v in bl.values())
+            if dbl_bad:
+                sev, strength, why = Severity.critical, Strength.authoritative, f"the domain itself is listed ({'; '.join(dbl_bad)})"
+            elif platform:
+                sev, strength, why = Severity.info, Strength.weak, "a widely used platform where users upload content; listings concern specific uploaded files, not this domain"
+            elif online:
+                sev, strength, why = Severity.high, Strength.strong, f"{online} listed malware URL(s) on this host are currently online"
+            else:
+                sev, strength, why = Severity.low, Strength.weak, "historical listing only; no listed URL on this host is currently online"
+            out.matches.append({"source": "URLhaus", "host": h, "url_count": count, "online": online, "blacklists": bl})
             out.findings.append(Finding(
                 id=f"intel.urlhaus_host:{h}", code="intel.urlhaus_host_listed", module=Module.intel,
-                title="Host has served malware according to URLhaus",
-                observed=f"URLhaus lists {d.get('url_count')} malware URL(s) on '{h}' ({online} online, first seen {d.get('firstseen')}).",
-                evidence={"host": h, "url_count": d.get("url_count"), "online": online, "firstseen": d.get("firstseen"),
-                          "blacklists": d.get("blacklists") or {}, "reference": d.get("urlhaus_reference")},
-                source="URLhaus (abuse.ch)", provenance=Provenance.live, observed_at=iso(),
-                severity=Severity.high if shared else Severity.critical,
-                strength=Strength.moderate if shared else (Strength.authoritative if (online or recent) else Strength.strong),
-                impact="The site has been used to distribute malware.",
-                recommendation="Avoid downloading files from this host.",
-                limitation=("This is a shared hosting platform; other users' content may be the listed malware. " if shared else "")
-                + "URLhaus tracks malware-download URLs only, not phishing."))
+                title="URLhaus has malware URLs on this host" if not platform else "Platform hosts some user-uploaded malware (URLhaus context)",
+                observed=f"URLhaus lists {count} malware URL(s) on '{h}' ({online} online, first seen {d.get('firstseen')}); assessed as {why}.",
+                evidence={"host": h, "url_count": count, "online": online, "firstseen": d.get("firstseen"), "blacklists": bl,
+                          "reference": d.get("urlhaus_reference"), "platform": platform},
+                source="URLhaus (abuse.ch)", provenance=Provenance.live, observed_at=iso(), severity=sev, strength=strength,
+                impact="Files downloaded from this host may be malicious." if not platform else "Only specific uploaded files are implicated, not the whole site.",
+                recommendation="Avoid downloading files from this host." if not platform else "Be careful with downloads from links on this platform.",
+                limitation="A host-level listing does not show that the submitted page is malicious unless the exact URL is listed. "
+                           "URLhaus tracks malware-download URLs only, not phishing."))
         if not any_hit:
             out.findings.append(Finding(
                 id="intel.urlhaus_nohit", code="intel.no_listing", module=Module.intel, title="Not listed by URLhaus (unknown, not clean)",

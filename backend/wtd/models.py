@@ -92,7 +92,7 @@ class Classification(str, Enum):
     inconclusive = "Inconclusive"
 
 
-EvidenceValue = str | int | bool | None | list[str] | list[int] | dict[str, Any]
+EvidenceValue = str | int | bool | None | list[str] | list[int] | list[dict[str, Any]] | dict[str, Any]
 
 
 class Finding(StrictModel):

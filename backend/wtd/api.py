@@ -1,0 +1,189 @@
+"""HTTP API (see docs/INTERFACES.md §2). Serves the built dashboard from frontend/dist."""
+from __future__ import annotations
+
+import hmac
+import logging
+import time
+from collections import defaultdict, deque
+from pathlib import Path
+from typing import Literal
+
+from fastapi import Depends, FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel, Field
+
+from . import intel, pipeline
+from .config import ROOT, SETTINGS
+from .netguard import UrlRejected
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+log = logging.getLogger("wtd.api")
+app = FastAPI(title="WTD — Web Threat Detection & Digital Trust Intelligence", version="0.1.0", docs_url="/api/docs", redoc_url=None)
+_hits: dict[str, deque] = defaultdict(deque)
+
+
+@app.on_event("startup")
+def _startup() -> None:
+    n = pipeline.STORE.recover_interrupted()
+    if n:
+        log.info("marked %d unfinished analyses as interrupted", n)
+    intel.CERTPL.load_local()
+    log.info("API token file: data/api_token (or WTD_API_TOKEN). Dashboard: http://127.0.0.1:8000/")
+
+
+def require_token(request: Request) -> None:
+    tok = request.headers.get("x-wtd-token", "")
+    if not hmac.compare_digest(tok.encode(), SETTINGS.api_token.encode()):
+        raise HTTPException(401, "missing or invalid X-WTD-Token")
+
+
+def rate_limit(request: Request) -> None:
+    key = request.client.host if request.client else "unknown"
+    q = _hits[key]
+    now = time.monotonic()
+    while q and now - q[0] > 60:
+        q.popleft()
+    if len(q) >= SETTINGS.max_analyses_per_minute:
+        raise HTTPException(429, "rate limit: too many analyses per minute")
+    q.append(now)
+
+
+class UrlSubmission(BaseModel):
+    kind: Literal["url"]
+    url: str = Field(min_length=1, max_length=2048)
+
+
+class MessageSubmission(BaseModel):
+    kind: Literal["message"]
+    text: str = Field(min_length=1, max_length=20000)
+    investigate_links: bool = True
+
+
+class ThreatReportRequest(BaseModel):
+    submitter: str = Field(default="wtd-operator", max_length=60)
+
+
+class ReviseRequest(BaseModel):
+    reason: str = Field(min_length=1, max_length=300)
+
+
+@app.get("/api/health")
+def health() -> dict:
+    from .registry import chain
+
+    return {"ok": True, "version": app.version, "chain": chain.status(),
+            "ai": {"provider": "openrouter (free model)" if SETTINGS.ai_enabled else "disabled", "model": SETTINGS.ai_model,
+                   "status": "configured" if SETTINGS.ai_enabled else "disabled"},
+            "intel": {"urlhaus": "configured" if intel.urlhaus_key() else "not configured",
+                      "certpl": f"{len(intel.CERTPL.domains)} domains" if intel.CERTPL.domains else "not loaded"}}
+
+
+@app.post("/api/analyses", status_code=202, dependencies=[Depends(require_token), Depends(rate_limit)])
+def submit(body: UrlSubmission | MessageSubmission) -> dict:
+    try:
+        if body.kind == "url":
+            r = pipeline.submit_url(body.url)
+        else:
+            from .message import analyse as msg
+
+            r = msg.submit_message(body.text, body.investigate_links)
+    except UrlRejected as e:
+        raise HTTPException(422, str(e))
+    return {"id": r.id, "status": r.status}
+
+
+@app.get("/api/analyses", dependencies=[Depends(require_token)])
+def list_analyses(limit: int = 50) -> list[dict]:
+    return pipeline.STORE.list(min(max(limit, 1), 200))
+
+
+@app.get("/api/analyses/{rid}", dependencies=[Depends(require_token)])
+def get_analysis(rid: str) -> JSONResponse:
+    r = pipeline.STORE.get(rid)
+    if not r:
+        raise HTTPException(404, "analysis not found")
+    return JSONResponse(r.model_dump(mode="json"))
+
+
+@app.post("/api/analyses/{rid}/threat-report", dependencies=[Depends(require_token)])
+def register(rid: str, body: ThreatReportRequest) -> dict:
+    from .registry import service
+
+    return service.register(rid, body.submitter)
+
+
+@app.post("/api/analyses/{rid}/threat-report/revise", dependencies=[Depends(require_token)])
+def revise(rid: str, body: ReviseRequest) -> dict:
+    from .registry import service
+
+    return service.revise(rid, body.reason)
+
+
+@app.get("/api/analyses/{rid}/threat-report", dependencies=[Depends(require_token)])
+def get_threat_report(rid: str) -> dict:
+    from .registry import service
+
+    return service.get(rid)
+
+
+@app.get("/api/analyses/{rid}/threat-report/download", dependencies=[Depends(require_token)])
+def download(rid: str) -> JSONResponse:
+    from .registry import service
+
+    env = service.latest_envelope(rid)
+    return JSONResponse(env, headers={"Content-Disposition": f'attachment; filename="wtd-threat-report-{rid[:8]}.json"'})
+
+
+@app.get("/api/analyses/{rid}/verify", dependencies=[Depends(require_token)])
+def verify(rid: str) -> dict:
+    from .registry import service
+
+    return service.verify(rid)
+
+
+@app.get("/api/incidents", dependencies=[Depends(require_token)])
+def incidents() -> list[dict]:
+    edges = pipeline.STORE.indicator_edges()
+    parent: dict[str, str] = {}
+
+    def find(x: str) -> str:
+        parent.setdefault(x, x)
+        while parent[x] != x:
+            parent[x] = parent[parent[x]]
+            x = parent[x]
+        return x
+
+    shared: dict[tuple[str, str], set] = {}
+    for a, b, t, d in edges:
+        parent[find(a)] = find(b)
+        shared.setdefault((a, b), set()).add(f"{t}: {d}")
+    clusters: dict[str, dict] = {}
+    for (a, b), s in shared.items():
+        root = find(a)
+        c = clusters.setdefault(root, {"report_ids": set(), "shared": set()})
+        c["report_ids"] |= {a, b}
+        c["shared"] |= s
+    out = []
+    for root, c in clusters.items():
+        reps = [pipeline.STORE.get(i) for i in c["report_ids"]]
+        reps = [r for r in reps if r]
+        if len(reps) < 2:
+            continue
+        dates = sorted(r.created_at for r in reps)
+        out.append({"cluster_id": root[:8], "report_ids": [r.id for r in reps], "shared": sorted(c["shared"])[:20],
+                    "classifications": sorted({(r.assessment.classification if r.assessment else r.status) for r in reps}),
+                    "first_seen": dates[0], "last_seen": dates[-1]})
+    return sorted(out, key=lambda c: c["last_seen"], reverse=True)
+
+
+DIST = ROOT / "frontend" / "dist"
+if DIST.exists():
+    app.mount("/assets", StaticFiles(directory=DIST / "assets"), name="assets")
+
+    @app.get("/{path:path}", include_in_schema=False)
+    def spa(path: str) -> FileResponse:
+        f = (DIST / path).resolve()
+        if path and f.is_file() and DIST.resolve() in f.parents:
+            return FileResponse(f)
+        return FileResponse(DIST / "index.html")

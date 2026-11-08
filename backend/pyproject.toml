@@ -15,6 +15,7 @@ dependencies = [
     "rfc8785>=0.1.4",
     "tldextract>=5.4.0",
     "uvicorn[standard]>=0.54.0",
+    "web3>=8.0.0",
 ]
 
 [build-system]
