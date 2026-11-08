@@ -1,0 +1,1023 @@
+{
+ "$defs": {
+  "AIObservation": {
+   "additionalProperties": false,
+   "properties": {
+    "technique": {
+     "title": "Technique",
+     "type": "string"
+    },
+    "quote": {
+     "title": "Quote",
+     "type": "string"
+    },
+    "rationale": {
+     "title": "Rationale",
+     "type": "string"
+    },
+    "quote_verified": {
+     "title": "Quote Verified",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "technique",
+    "quote",
+    "rationale",
+    "quote_verified"
+   ],
+   "title": "AIObservation",
+   "type": "object"
+  },
+  "AIPoint": {
+   "additionalProperties": false,
+   "properties": {
+    "finding_ids": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Finding Ids",
+     "type": "array"
+    },
+    "explanation": {
+     "title": "Explanation",
+     "type": "string"
+    }
+   },
+   "required": [
+    "finding_ids",
+    "explanation"
+   ],
+   "title": "AIPoint",
+   "type": "object"
+  },
+  "AIResult": {
+   "additionalProperties": false,
+   "properties": {
+    "status": {
+     "enum": [
+      "ok",
+      "unavailable",
+      "failed",
+      "disabled",
+      "rejected"
+     ],
+     "title": "Status",
+     "type": "string"
+    },
+    "provider": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Provider"
+    },
+    "model": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Model"
+    },
+    "latency_ms": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Latency Ms"
+    },
+    "summary": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Summary"
+    },
+    "points": {
+     "items": {
+      "$ref": "#/$defs/AIPoint"
+     },
+     "title": "Points",
+     "type": "array"
+    },
+    "observations": {
+     "items": {
+      "$ref": "#/$defs/AIObservation"
+     },
+     "title": "Observations",
+     "type": "array"
+    },
+    "recommended_actions": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Recommended Actions",
+     "type": "array"
+    },
+    "uncertainty": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Uncertainty"
+    },
+    "injection_attempt_observed": {
+     "anyOf": [
+      {
+       "type": "boolean"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Injection Attempt Observed"
+    },
+    "validation_notes": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Validation Notes",
+     "type": "array"
+    },
+    "error": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Error"
+    }
+   },
+   "required": [
+    "status"
+   ],
+   "title": "AIResult",
+   "type": "object"
+  },
+  "Assessment": {
+   "additionalProperties": false,
+   "properties": {
+    "classification": {
+     "$ref": "#/$defs/Classification"
+    },
+    "rule_id": {
+     "title": "Rule Id",
+     "type": "string"
+    },
+    "rule_text": {
+     "title": "Rule Text",
+     "type": "string"
+    },
+    "basis_finding_ids": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Basis Finding Ids",
+     "type": "array"
+    },
+    "rationale": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Rationale",
+     "type": "array"
+    },
+    "contradictions": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Contradictions",
+     "type": "array"
+    },
+    "coverage": {
+     "$ref": "#/$defs/Coverage"
+    }
+   },
+   "required": [
+    "classification",
+    "rule_id",
+    "rule_text",
+    "basis_finding_ids",
+    "rationale",
+    "contradictions",
+    "coverage"
+   ],
+   "title": "Assessment",
+   "type": "object"
+  },
+  "CheckResult": {
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "description": "e.g. 'intel.urlhaus', 'tls.handshake'",
+     "title": "Name",
+     "type": "string"
+    },
+    "module": {
+     "$ref": "#/$defs/Module"
+    },
+    "status": {
+     "$ref": "#/$defs/CheckStatus"
+    },
+    "essential": {
+     "description": "Essential checks gate Low Risk; missing ones force Inconclusive",
+     "title": "Essential",
+     "type": "boolean"
+    },
+    "detail": {
+     "default": "",
+     "title": "Detail",
+     "type": "string"
+    },
+    "duration_ms": {
+     "default": 0,
+     "title": "Duration Ms",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "name",
+    "module",
+    "status",
+    "essential"
+   ],
+   "title": "CheckResult",
+   "type": "object"
+  },
+  "CheckStatus": {
+   "enum": [
+    "succeeded",
+    "failed",
+    "unavailable",
+    "skipped",
+    "not_implemented"
+   ],
+   "title": "CheckStatus",
+   "type": "string"
+  },
+  "Classification": {
+   "enum": [
+    "Low Risk",
+    "Suspicious",
+    "High Risk",
+    "Confirmed Malicious",
+    "Inconclusive"
+   ],
+   "title": "Classification",
+   "type": "string"
+  },
+  "CorrelationLink": {
+   "additionalProperties": false,
+   "properties": {
+    "other_report_id": {
+     "title": "Other Report Id",
+     "type": "string"
+    },
+    "other_created_at": {
+     "title": "Other Created At",
+     "type": "string"
+    },
+    "other_classification": {
+     "title": "Other Classification",
+     "type": "string"
+    },
+    "shared": {
+     "description": "Shared indicator types and display values",
+     "items": {
+      "type": "string"
+     },
+     "title": "Shared",
+     "type": "array"
+    },
+    "method": {
+     "enum": [
+      "exact_indicator",
+      "message_similarity",
+      "brand_pattern",
+      "infrastructure"
+     ],
+     "title": "Method",
+     "type": "string"
+    },
+    "score": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "description": "Similarity in percent (0-100) for message_similarity only",
+     "title": "Score"
+    }
+   },
+   "required": [
+    "other_report_id",
+    "other_created_at",
+    "other_classification",
+    "shared",
+    "method"
+   ],
+   "title": "CorrelationLink",
+   "type": "object"
+  },
+  "Coverage": {
+   "additionalProperties": false,
+   "properties": {
+    "applicable": {
+     "title": "Applicable",
+     "type": "integer"
+    },
+    "succeeded": {
+     "title": "Succeeded",
+     "type": "integer"
+    },
+    "failed": {
+     "title": "Failed",
+     "type": "integer"
+    },
+    "unavailable": {
+     "title": "Unavailable",
+     "type": "integer"
+    },
+    "skipped": {
+     "title": "Skipped",
+     "type": "integer"
+    },
+    "essential_missing": {
+     "items": {
+      "type": "string"
+     },
+     "title": "Essential Missing",
+     "type": "array"
+    }
+   },
+   "required": [
+    "applicable",
+    "succeeded",
+    "failed",
+    "unavailable",
+    "skipped",
+    "essential_missing"
+   ],
+   "title": "Coverage",
+   "type": "object"
+  },
+  "Finding": {
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "description": "Unique within the report, e.g. 'url.homograph' or 'tls.expired#2'",
+     "title": "Id",
+     "type": "string"
+    },
+    "code": {
+     "description": "Stable rule code, e.g. 'url.homograph'",
+     "title": "Code",
+     "type": "string"
+    },
+    "module": {
+     "$ref": "#/$defs/Module"
+    },
+    "title": {
+     "title": "Title",
+     "type": "string"
+    },
+    "observed": {
+     "description": "The observed fact in plain language",
+     "title": "Observed",
+     "type": "string"
+    },
+    "evidence": {
+     "additionalProperties": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "integer"
+       },
+       {
+        "type": "boolean"
+       },
+       {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "items": {
+         "type": "integer"
+        },
+        "type": "array"
+       },
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "title": "Evidence",
+     "type": "object"
+    },
+    "source": {
+     "description": "Check or provider that produced the finding",
+     "title": "Source",
+     "type": "string"
+    },
+    "provenance": {
+     "$ref": "#/$defs/Provenance",
+     "default": "live"
+    },
+    "observed_at": {
+     "title": "Observed At",
+     "type": "string"
+    },
+    "severity": {
+     "$ref": "#/$defs/Severity"
+    },
+    "strength": {
+     "$ref": "#/$defs/Strength"
+    },
+    "impact": {
+     "title": "Impact",
+     "type": "string"
+    },
+    "recommendation": {
+     "title": "Recommendation",
+     "type": "string"
+    },
+    "limitation": {
+     "title": "Limitation",
+     "type": "string"
+    }
+   },
+   "required": [
+    "id",
+    "code",
+    "module",
+    "title",
+    "observed",
+    "source",
+    "observed_at",
+    "severity",
+    "strength",
+    "impact",
+    "recommendation",
+    "limitation"
+   ],
+   "title": "Finding",
+   "type": "object"
+  },
+  "Hop": {
+   "additionalProperties": false,
+   "properties": {
+    "index": {
+     "title": "Index",
+     "type": "integer"
+    },
+    "url": {
+     "title": "Url",
+     "type": "string"
+    },
+    "host": {
+     "title": "Host",
+     "type": "string"
+    },
+    "ip": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Ip"
+    },
+    "status": {
+     "anyOf": [
+      {
+       "type": "integer"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Status"
+    },
+    "location": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Location"
+    },
+    "blocked_reason": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Blocked Reason"
+    },
+    "tls_version": {
+     "anyOf": [
+      {
+       "type": "string"
+      },
+      {
+       "type": "null"
+      }
+     ],
+     "default": null,
+     "title": "Tls Version"
+    },
+    "duration_ms": {
+     "default": 0,
+     "title": "Duration Ms",
+     "type": "integer"
+    }
+   },
+   "required": [
+    "index",
+    "url",
+    "host"
+   ],
+   "title": "Hop",
+   "type": "object"
+  },
+  "Indicator": {
+   "additionalProperties": false,
+   "properties": {
+    "type": {
+     "enum": [
+      "url",
+      "domain",
+      "ip",
+      "email",
+      "phone",
+      "upi",
+      "crypto_wallet",
+      "brand",
+      "cert_spki"
+     ],
+     "title": "Type",
+     "type": "string"
+    },
+    "display": {
+     "description": "Safe display value (defanged URL, masked phone/email)",
+     "title": "Display",
+     "type": "string"
+    },
+    "match_key": {
+     "description": "Normalized value, or keyed HMAC for personal identifiers",
+     "title": "Match Key",
+     "type": "string"
+    },
+    "hashed": {
+     "default": false,
+     "title": "Hashed",
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "type",
+    "display",
+    "match_key"
+   ],
+   "title": "Indicator",
+   "type": "object"
+  },
+  "Module": {
+   "enum": [
+    "url",
+    "dns",
+    "intel",
+    "tls",
+    "web",
+    "content",
+    "message",
+    "correlation",
+    "ai"
+   ],
+   "title": "Module",
+   "type": "string"
+  },
+  "Provenance": {
+   "enum": [
+    "live",
+    "cached",
+    "dataset",
+    "synthetic",
+    "ai"
+   ],
+   "title": "Provenance",
+   "type": "string"
+  },
+  "RegistryRecord": {
+   "additionalProperties": false,
+   "properties": {
+    "chain_id": {
+     "title": "Chain Id",
+     "type": "integer"
+    },
+    "contract": {
+     "title": "Contract",
+     "type": "string"
+    },
+    "report_id_hex": {
+     "title": "Report Id Hex",
+     "type": "string"
+    },
+    "commitment": {
+     "title": "Commitment",
+     "type": "string"
+    },
+    "revision": {
+     "title": "Revision",
+     "type": "integer"
+    },
+    "tx_hash": {
+     "title": "Tx Hash",
+     "type": "string"
+    },
+    "block_number": {
+     "title": "Block Number",
+     "type": "integer"
+    },
+    "registered_at": {
+     "title": "Registered At",
+     "type": "string"
+    },
+    "canonicalization": {
+     "title": "Canonicalization",
+     "type": "string"
+    }
+   },
+   "required": [
+    "chain_id",
+    "contract",
+    "report_id_hex",
+    "commitment",
+    "revision",
+    "tx_hash",
+    "block_number",
+    "registered_at",
+    "canonicalization"
+   ],
+   "title": "RegistryRecord",
+   "type": "object"
+  },
+  "Severity": {
+   "enum": [
+    "info",
+    "low",
+    "medium",
+    "high",
+    "critical"
+   ],
+   "title": "Severity",
+   "type": "string"
+  },
+  "Strength": {
+   "description": "How much a finding can carry the classification on its own.\n\nweak: language or heuristic signal (urgency, keyword, missing header).\nmoderate: structural signal with a plausible benign explanation (new domain, lookalike).\nstrong: specific, hard-to-explain signal (homograph of a protected brand, credential form\n        posting to a third party, chain to a distrusted CA).\nauthoritative: listing in an authoritative intelligence source with an exact match.",
+   "enum": [
+    "weak",
+    "moderate",
+    "strong",
+    "authoritative"
+   ],
+   "title": "Strength",
+   "type": "string"
+  }
+ },
+ "additionalProperties": false,
+ "properties": {
+  "schema_version": {
+   "const": "wtd.report.v1",
+   "default": "wtd.report.v1",
+   "title": "Schema Version",
+   "type": "string"
+  },
+  "id": {
+   "title": "Id",
+   "type": "string"
+  },
+  "kind": {
+   "enum": [
+    "url",
+    "message"
+   ],
+   "title": "Kind",
+   "type": "string"
+  },
+  "status": {
+   "enum": [
+    "queued",
+    "running",
+    "complete",
+    "failed",
+    "interrupted"
+   ],
+   "title": "Status",
+   "type": "string"
+  },
+  "created_at": {
+   "title": "Created At",
+   "type": "string"
+  },
+  "completed_at": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Completed At"
+  },
+  "input_display": {
+   "description": "Defanged URL, or a redacted excerpt for messages",
+   "title": "Input Display",
+   "type": "string"
+  },
+  "input_sha256": {
+   "title": "Input Sha256",
+   "type": "string"
+  },
+  "subject": {
+   "additionalProperties": {
+    "anyOf": [
+     {
+      "type": "string"
+     },
+     {
+      "type": "integer"
+     },
+     {
+      "type": "boolean"
+     },
+     {
+      "items": {
+       "type": "string"
+      },
+      "type": "array"
+     },
+     {
+      "items": {
+       "type": "integer"
+      },
+      "type": "array"
+     },
+     {
+      "additionalProperties": true,
+      "type": "object"
+     },
+     {
+      "type": "null"
+     }
+    ]
+   },
+   "title": "Subject",
+   "type": "object"
+  },
+  "redirects": {
+   "items": {
+    "$ref": "#/$defs/Hop"
+   },
+   "title": "Redirects",
+   "type": "array"
+  },
+  "tls": {
+   "anyOf": [
+    {
+     "additionalProperties": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "integer"
+       },
+       {
+        "type": "boolean"
+       },
+       {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "items": {
+         "type": "integer"
+        },
+        "type": "array"
+       },
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "type": "object"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Tls"
+  },
+  "web": {
+   "anyOf": [
+    {
+     "additionalProperties": {
+      "anyOf": [
+       {
+        "type": "string"
+       },
+       {
+        "type": "integer"
+       },
+       {
+        "type": "boolean"
+       },
+       {
+        "items": {
+         "type": "string"
+        },
+        "type": "array"
+       },
+       {
+        "items": {
+         "type": "integer"
+        },
+        "type": "array"
+       },
+       {
+        "additionalProperties": true,
+        "type": "object"
+       },
+       {
+        "type": "null"
+       }
+      ]
+     },
+     "type": "object"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Web"
+  },
+  "indicators": {
+   "items": {
+    "$ref": "#/$defs/Indicator"
+   },
+   "title": "Indicators",
+   "type": "array"
+  },
+  "findings": {
+   "items": {
+    "$ref": "#/$defs/Finding"
+   },
+   "title": "Findings",
+   "type": "array"
+  },
+  "checks": {
+   "items": {
+    "$ref": "#/$defs/CheckResult"
+   },
+   "title": "Checks",
+   "type": "array"
+  },
+  "assessment": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/Assessment"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  },
+  "ai": {
+   "anyOf": [
+    {
+     "$ref": "#/$defs/AIResult"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null
+  },
+  "correlations": {
+   "items": {
+    "$ref": "#/$defs/CorrelationLink"
+   },
+   "title": "Correlations",
+   "type": "array"
+  },
+  "recommended_actions": {
+   "items": {
+    "type": "string"
+   },
+   "title": "Recommended Actions",
+   "type": "array"
+  },
+  "limitations": {
+   "items": {
+    "type": "string"
+   },
+   "title": "Limitations",
+   "type": "array"
+  },
+  "registry": {
+   "items": {
+    "$ref": "#/$defs/RegistryRecord"
+   },
+   "title": "Registry",
+   "type": "array"
+  },
+  "error": {
+   "anyOf": [
+    {
+     "type": "string"
+    },
+    {
+     "type": "null"
+    }
+   ],
+   "default": null,
+   "title": "Error"
+  }
+ },
+ "required": [
+  "id",
+  "kind",
+  "status",
+  "created_at",
+  "input_display",
+  "input_sha256"
+ ],
+ "title": "Report",
+ "type": "object"
+}

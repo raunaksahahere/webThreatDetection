@@ -1,0 +1,121 @@
+{
+ "description": "wtd.commitment.v1 test vectors: commitment = sha256(RFC8785(envelope)); reportId = sha256('wtd.report-id.v1:' + report_id)",
+ "report_id": "6f1c2a3e-1111-4c4c-9a9a-0123456789ab",
+ "report_id_bytes32": "0xefacb7938499ae4b0a14eb00d995022aae753863306a67b24c60d3d131ba59df",
+ "vectors": [
+  {
+   "envelope": {
+    "schema": "wtd.commitment.v1",
+    "salt": "0000000000000000000000000000000000000000000000000000000000000000",
+    "threat_report": {
+     "schema": "wtd.threat-report.v1",
+     "report_id": "6f1c2a3e-1111-4c4c-9a9a-0123456789ab",
+     "created_at": "2026-11-08T12:00:00Z",
+     "kind": "url",
+     "classification": "High Risk",
+     "rule_id": "R-HIGH-1",
+     "indicators": [
+      {
+       "type": "domain",
+       "value": "sbi-kyc-update[.]top"
+      },
+      {
+       "type": "url",
+       "value": "hxxps://sbi-kyc-update[.]top/login?a=1&b=é"
+      }
+     ],
+     "findings": [
+      {
+       "id": "url.brand_in_domain",
+       "code": "url.brand_in_domain",
+       "severity": "high",
+       "strength": "moderate",
+       "title": "Domain combines the State Bank of India name with other words"
+      }
+     ],
+     "evidence_digest": "sha256:abababababababababababababababababababababababababababababababab",
+     "summary": "Unicode check: ₹500 refund — “quotes” 🙂 and newline\nend",
+     "submitter": "demo"
+    }
+   },
+   "jcs_utf8": "{\"salt\":\"0000000000000000000000000000000000000000000000000000000000000000\",\"schema\":\"wtd.commitment.v1\",\"threat_report\":{\"classification\":\"High Risk\",\"created_at\":\"2026-11-08T12:00:00Z\",\"evidence_digest\":\"sha256:abababababababababababababababababababababababababababababababab\",\"findings\":[{\"code\":\"url.brand_in_domain\",\"id\":\"url.brand_in_domain\",\"severity\":\"high\",\"strength\":\"moderate\",\"title\":\"Domain combines the State Bank of India name with other words\"}],\"indicators\":[{\"type\":\"domain\",\"value\":\"sbi-kyc-update[.]top\"},{\"type\":\"url\",\"value\":\"hxxps://sbi-kyc-update[.]top/login?a=1&b=é\"}],\"kind\":\"url\",\"report_id\":\"6f1c2a3e-1111-4c4c-9a9a-0123456789ab\",\"rule_id\":\"R-HIGH-1\",\"schema\":\"wtd.threat-report.v1\",\"submitter\":\"demo\",\"summary\":\"Unicode check: ₹500 refund — “quotes” 🙂 and newline\\nend\"}}",
+   "commitment": "0x354eb41ec43a25cef41b6a5c0cbad3caaeccce534a0a72c5639965df6eab2e7d"
+  },
+  {
+   "envelope": {
+    "schema": "wtd.commitment.v1",
+    "salt": "a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5",
+    "threat_report": {
+     "schema": "wtd.threat-report.v1",
+     "report_id": "6f1c2a3e-1111-4c4c-9a9a-0123456789ab",
+     "created_at": "2026-11-08T12:00:00Z",
+     "kind": "url",
+     "classification": "High Risk",
+     "rule_id": "R-HIGH-1",
+     "indicators": [
+      {
+       "type": "domain",
+       "value": "sbi-kyc-update[.]top"
+      },
+      {
+       "type": "url",
+       "value": "hxxps://sbi-kyc-update[.]top/login?a=1&b=é"
+      }
+     ],
+     "findings": [
+      {
+       "id": "url.brand_in_domain",
+       "code": "url.brand_in_domain",
+       "severity": "high",
+       "strength": "moderate",
+       "title": "Domain combines the State Bank of India name with other words"
+      }
+     ],
+     "evidence_digest": "sha256:abababababababababababababababababababababababababababababababab",
+     "summary": "Unicode check: ₹500 refund — “quotes” 🙂 and newline\nend",
+     "submitter": "demo"
+    }
+   },
+   "jcs_utf8": "{\"salt\":\"a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5\",\"schema\":\"wtd.commitment.v1\",\"threat_report\":{\"classification\":\"High Risk\",\"created_at\":\"2026-11-08T12:00:00Z\",\"evidence_digest\":\"sha256:abababababababababababababababababababababababababababababababab\",\"findings\":[{\"code\":\"url.brand_in_domain\",\"id\":\"url.brand_in_domain\",\"severity\":\"high\",\"strength\":\"moderate\",\"title\":\"Domain combines the State Bank of India name with other words\"}],\"indicators\":[{\"type\":\"domain\",\"value\":\"sbi-kyc-update[.]top\"},{\"type\":\"url\",\"value\":\"hxxps://sbi-kyc-update[.]top/login?a=1&b=é\"}],\"kind\":\"url\",\"report_id\":\"6f1c2a3e-1111-4c4c-9a9a-0123456789ab\",\"rule_id\":\"R-HIGH-1\",\"schema\":\"wtd.threat-report.v1\",\"submitter\":\"demo\",\"summary\":\"Unicode check: ₹500 refund — “quotes” 🙂 and newline\\nend\"}}",
+   "commitment": "0xbd344a60dacde8bfa66a10e333cfa829c12230b352fa45940eccf6f9bb6dfe78"
+  }
+ ],
+ "tampered": {
+  "envelope": {
+   "schema": "wtd.commitment.v1",
+   "salt": "0000000000000000000000000000000000000000000000000000000000000000",
+   "threat_report": {
+    "schema": "wtd.threat-report.v1",
+    "report_id": "6f1c2a3e-1111-4c4c-9a9a-0123456789ab",
+    "created_at": "2026-11-08T12:00:00Z",
+    "kind": "url",
+    "classification": "Low Risk",
+    "rule_id": "R-HIGH-1",
+    "indicators": [
+     {
+      "type": "domain",
+      "value": "sbi-kyc-update[.]top"
+     },
+     {
+      "type": "url",
+      "value": "hxxps://sbi-kyc-update[.]top/login?a=1&b=é"
+     }
+    ],
+    "findings": [
+     {
+      "id": "url.brand_in_domain",
+      "code": "url.brand_in_domain",
+      "severity": "high",
+      "strength": "moderate",
+      "title": "Domain combines the State Bank of India name with other words"
+     }
+    ],
+    "evidence_digest": "sha256:abababababababababababababababababababababababababababababababab",
+    "summary": "Unicode check: ₹500 refund — “quotes” 🙂 and newline\nend",
+    "submitter": "demo"
+   }
+  },
+  "commitment": "0x77b297cc71830a1f496d934ba5002b72d1ba7a7c3356ea7a7651fc7e03c0b83f",
+  "note": "classification changed; must NOT equal vectors[0].commitment"
+ }
+}

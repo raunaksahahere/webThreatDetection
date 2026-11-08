@@ -1,0 +1,22 @@
+{
+ "about": "Curated CA trust incidents. Fingerprints are SHA-256 of the DER certificate, copied from the primary record named in 'reference'. Matching is by fingerprint only, never by CA name.",
+ "checked": "2026-11-08",
+ "incidents": [
+  {
+   "id": "emudhra-2026-10",
+   "source": "Mozilla Bugzilla 2083449 (eMudhra intermediate key compromise), cross-checked against the Chromium blocklist",
+   "reference": "https://bugzilla.mozilla.org/show_bug.cgi?id=2083449",
+   "summary": "intermediate CA private keys were publicly recoverable (P-384 keys generated with tiny private values); revoked 2026-10-18 (caCompromise) and blocked by Chrome and Firefox",
+   "certificates": [
+    {"name": "EM EV TLS CA - G3B (eMudhra BV)", "sha256": "e7568fe6e12331f4fd7de61da4c7559d0f8eb192a218d4741a3ba75184333838", "purpose": "TLS"},
+    {"name": "EM OV TLS CA - G3B (eMudhra BV)", "sha256": "98b896625c0c230adeec3eb2cf6aad5001ecf9156a68644e82374ce5833bc25b", "purpose": "TLS"},
+    {"name": "EM DV TLS CA - G3B (eMudhra BV)", "sha256": "42c4accd12c4f59597925e1a08a7a90102608543809308d50ec427e118ba1493", "purpose": "TLS"},
+    {"name": "EM EV TLS CA - G3C (eMudhra Inc)", "sha256": "432ec25f0d28de9006d97bf752f17bbb2cd41f669933fcb072d9a1148d0261f3", "purpose": "TLS"},
+    {"name": "EM OV TLS CA - G3C (eMudhra Inc)", "sha256": "cb6e15165ac802e9b3f993f16c25d41f4e81c21ebde71ae1b012ac00bf9c7c3f", "purpose": "TLS"},
+    {"name": "EM DV TLS CA - G3C (eMudhra Inc)", "sha256": "0164d7ceae5bb909c272af151ff44b1177ae9b47d9424b94f1d9558c30934d19", "purpose": "TLS"},
+    {"name": "EM OV CS CA - G3B (eMudhra BV)", "sha256": "9e39de2881273acc225a149c72ba3e0f51424963669ab633ee1dc7df5db067b4", "purpose": "code signing"},
+    {"name": "EM OV CS CA - G3C (eMudhra Inc)", "sha256": "4b2460a466f95fd40113bcdcca2ceb29b3b093921de45474da7df48874c630b1", "purpose": "code signing"}
+   ]
+  }
+ ]
+}
