@@ -1,0 +1,529 @@
+{
+ "_about": "Curated protected-brand list (original work for this project). official = registrable domains operated by the brand, as listed on the brand's own site. tokens = strings that indicate the brand in hostnames or text. This list is small by design; absence from it means 'not checked', not 'safe'.",
+ "_checked": "2026-11-08",
+ "brands": [
+  {
+   "name": "State Bank of India",
+   "tokens": [
+    "sbi",
+    "onlinesbi",
+    "statebank",
+    "yonosbi",
+    "yono"
+   ],
+   "text": [
+    "state bank of india",
+    "sbi ",
+    "yono"
+   ],
+   "official": [
+    "sbi.co.in",
+    "onlinesbi.sbi",
+    "sbicard.com"
+   ]
+  },
+  {
+   "name": "HDFC Bank",
+   "tokens": [
+    "hdfc",
+    "hdfcbank"
+   ],
+   "text": [
+    "hdfc bank",
+    "hdfc"
+   ],
+   "official": [
+    "hdfcbank.com"
+   ]
+  },
+  {
+   "name": "ICICI Bank",
+   "tokens": [
+    "icici",
+    "icicibank"
+   ],
+   "text": [
+    "icici bank",
+    "icici"
+   ],
+   "official": [
+    "icicibank.com"
+   ]
+  },
+  {
+   "name": "Axis Bank",
+   "tokens": [
+    "axisbank"
+   ],
+   "text": [
+    "axis bank"
+   ],
+   "official": [
+    "axisbank.com"
+   ]
+  },
+  {
+   "name": "Kotak Mahindra Bank",
+   "tokens": [
+    "kotak"
+   ],
+   "text": [
+    "kotak"
+   ],
+   "official": [
+    "kotak.com"
+   ]
+  },
+  {
+   "name": "Punjab National Bank",
+   "tokens": [
+    "pnbindia",
+    "pnb"
+   ],
+   "text": [
+    "punjab national bank"
+   ],
+   "official": [
+    "pnbindia.in"
+   ]
+  },
+  {
+   "name": "Bank of Baroda",
+   "tokens": [
+    "bankofbaroda",
+    "bob"
+   ],
+   "text": [
+    "bank of baroda"
+   ],
+   "official": [
+    "bankofbaroda.in"
+   ]
+  },
+  {
+   "name": "Paytm",
+   "tokens": [
+    "paytm"
+   ],
+   "text": [
+    "paytm"
+   ],
+   "official": [
+    "paytm.com",
+    "paytm.in"
+   ]
+  },
+  {
+   "name": "PhonePe",
+   "tokens": [
+    "phonepe"
+   ],
+   "text": [
+    "phonepe"
+   ],
+   "official": [
+    "phonepe.com"
+   ]
+  },
+  {
+   "name": "NPCI / UPI / BHIM",
+   "tokens": [
+    "npci",
+    "bhim",
+    "upi"
+   ],
+   "text": [
+    "npci",
+    "bhim upi"
+   ],
+   "official": [
+    "npci.org.in",
+    "bhimupi.org.in"
+   ]
+  },
+  {
+   "name": "IRCTC",
+   "tokens": [
+    "irctc"
+   ],
+   "text": [
+    "irctc"
+   ],
+   "official": [
+    "irctc.co.in"
+   ]
+  },
+  {
+   "name": "Income Tax Department (India)",
+   "tokens": [
+    "incometax",
+    "incometaxindia",
+    "itrefund",
+    "efiling"
+   ],
+   "text": [
+    "income tax department",
+    "income tax refund"
+   ],
+   "official": [
+    "incometax.gov.in",
+    "incometaxindia.gov.in"
+   ]
+  },
+  {
+   "name": "UIDAI / Aadhaar",
+   "tokens": [
+    "uidai",
+    "aadhaar",
+    "aadhar"
+   ],
+   "text": [
+    "aadhaar",
+    "uidai"
+   ],
+   "official": [
+    "uidai.gov.in"
+   ]
+  },
+  {
+   "name": "EPFO",
+   "tokens": [
+    "epfo",
+    "epfindia"
+   ],
+   "text": [
+    "epfo",
+    "provident fund"
+   ],
+   "official": [
+    "epfindia.gov.in"
+   ]
+  },
+  {
+   "name": "India Post",
+   "tokens": [
+    "indiapost"
+   ],
+   "text": [
+    "india post"
+   ],
+   "official": [
+    "indiapost.gov.in"
+   ]
+  },
+  {
+   "name": "National Testing Agency",
+   "tokens": [
+    "nta",
+    "ntaexam",
+    "neet",
+    "jeemain"
+   ],
+   "text": [
+    "national testing agency"
+   ],
+   "official": [
+    "nta.ac.in"
+   ]
+  },
+  {
+   "name": "UGC",
+   "tokens": [
+    "ugc"
+   ],
+   "text": [
+    "university grants commission"
+   ],
+   "official": [
+    "ugc.gov.in"
+   ]
+  },
+  {
+   "name": "Amazon",
+   "tokens": [
+    "amazon",
+    "amzn"
+   ],
+   "text": [
+    "amazon"
+   ],
+   "official": [
+    "amazon.in",
+    "amazon.com",
+    "amazon.co.uk",
+    "amzn.to",
+    "amazonaws.com"
+   ]
+  },
+  {
+   "name": "Flipkart",
+   "tokens": [
+    "flipkart"
+   ],
+   "text": [
+    "flipkart"
+   ],
+   "official": [
+    "flipkart.com"
+   ]
+  },
+  {
+   "name": "Google",
+   "tokens": [
+    "google",
+    "gmail"
+   ],
+   "text": [
+    "google account",
+    "gmail"
+   ],
+   "official": [
+    "google.com",
+    "google.co.in",
+    "gmail.com",
+    "goo.gl",
+    "googleusercontent.com",
+    "gstatic.com",
+    "youtube.com"
+   ]
+  },
+  {
+   "name": "Microsoft",
+   "tokens": [
+    "microsoft",
+    "office365",
+    "outlook",
+    "msft"
+   ],
+   "text": [
+    "microsoft",
+    "office 365",
+    "outlook"
+   ],
+   "official": [
+    "microsoft.com",
+    "live.com",
+    "office.com",
+    "outlook.com",
+    "microsoftonline.com",
+    "sharepoint.com"
+   ]
+  },
+  {
+   "name": "Apple",
+   "tokens": [
+    "apple",
+    "icloud",
+    "appleid"
+   ],
+   "text": [
+    "apple id",
+    "icloud"
+   ],
+   "official": [
+    "apple.com",
+    "icloud.com"
+   ]
+  },
+  {
+   "name": "PayPal",
+   "tokens": [
+    "paypal"
+   ],
+   "text": [
+    "paypal"
+   ],
+   "official": [
+    "paypal.com",
+    "paypal.me"
+   ]
+  },
+  {
+   "name": "Meta (Facebook/Instagram/WhatsApp)",
+   "tokens": [
+    "facebook",
+    "instagram",
+    "whatsapp",
+    "meta"
+   ],
+   "text": [
+    "facebook",
+    "instagram",
+    "whatsapp"
+   ],
+   "official": [
+    "facebook.com",
+    "fb.com",
+    "instagram.com",
+    "whatsapp.com",
+    "meta.com"
+   ]
+  },
+  {
+   "name": "Netflix",
+   "tokens": [
+    "netflix"
+   ],
+   "text": [
+    "netflix"
+   ],
+   "official": [
+    "netflix.com"
+   ]
+  },
+  {
+   "name": "LinkedIn",
+   "tokens": [
+    "linkedin"
+   ],
+   "text": [
+    "linkedin"
+   ],
+   "official": [
+    "linkedin.com",
+    "lnkd.in"
+   ]
+  },
+  {
+   "name": "GitHub",
+   "tokens": [
+    "github"
+   ],
+   "text": [
+    "github"
+   ],
+   "official": [
+    "github.com",
+    "github.io",
+    "githubusercontent.com"
+   ]
+  },
+  {
+   "name": "DHL",
+   "tokens": [
+    "dhl"
+   ],
+   "text": [
+    "dhl"
+   ],
+   "official": [
+    "dhl.com",
+    "dhl.co.in"
+   ]
+  },
+  {
+   "name": "FedEx",
+   "tokens": [
+    "fedex"
+   ],
+   "text": [
+    "fedex"
+   ],
+   "official": [
+    "fedex.com"
+   ]
+  },
+  {
+   "name": "Blue Dart",
+   "tokens": [
+    "bluedart"
+   ],
+   "text": [
+    "blue dart",
+    "bluedart"
+   ],
+   "official": [
+    "bluedart.com"
+   ]
+  },
+  {
+   "name": "Binance",
+   "tokens": [
+    "binance"
+   ],
+   "text": [
+    "binance"
+   ],
+   "official": [
+    "binance.com"
+   ]
+  },
+  {
+   "name": "Coinbase",
+   "tokens": [
+    "coinbase"
+   ],
+   "text": [
+    "coinbase"
+   ],
+   "official": [
+    "coinbase.com"
+   ]
+  },
+  {
+   "name": "MetaMask",
+   "tokens": [
+    "metamask"
+   ],
+   "text": [
+    "metamask"
+   ],
+   "official": [
+    "metamask.io"
+   ]
+  }
+ ],
+ "shorteners": [
+  "bit.ly",
+  "tinyurl.com",
+  "t.co",
+  "goo.gl",
+  "ow.ly",
+  "is.gd",
+  "buff.ly",
+  "rebrand.ly",
+  "cutt.ly",
+  "shorturl.at",
+  "rb.gy",
+  "t.ly",
+  "tiny.cc",
+  "s.id",
+  "v.gd",
+  "bitly.com",
+  "lnkd.in",
+  "amzn.to",
+  "wa.me"
+ ],
+ "shared_hosting": [
+  "github.io",
+  "githubusercontent.com",
+  "googleusercontent.com",
+  "storage.googleapis.com",
+  "firebaseapp.com",
+  "web.app",
+  "netlify.app",
+  "vercel.app",
+  "pages.dev",
+  "workers.dev",
+  "herokuapp.com",
+  "azurewebsites.net",
+  "blob.core.windows.net",
+  "s3.amazonaws.com",
+  "cloudfront.net",
+  "000webhostapp.com",
+  "weebly.com",
+  "wixsite.com",
+  "blogspot.com",
+  "sites.google.com",
+  "docs.google.com",
+  "drive.google.com",
+  "forms.gle",
+  "dropbox.com",
+  "ipfs.io",
+  "glitch.me",
+  "replit.app",
+  "framer.app",
+  "webflow.io"
+ ],
+ "_unverified_note": "Banks' RBI-mandated '.bank.in' domains are not listed until verified on each bank's own site; until then such hosts get no 'official' credit and no brand-mismatch penalty is applied to hosts under bank.in."
+}

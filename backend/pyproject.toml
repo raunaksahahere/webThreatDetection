@@ -1,0 +1,25 @@
+[project]
+name = "wtd"
+version = "0.1.0"
+description = "AI-Powered Web Threat Detection & Digital Trust Intelligence (hackathon prototype)"
+requires-python = ">=3.13"
+dependencies = [
+    "ada-url>=4.0.0",
+    "cryptography>=50.0.2",
+    "dnspython>=2.9.2",
+    "fastapi>=0.162.2",
+    "h11>=0.16.0",
+    "httpx>=0.28.1",
+    "idna>=3.20",
+    "pydantic>=2.14.3",
+    "rfc8785>=0.1.4",
+    "tldextract>=5.4.0",
+    "uvicorn[standard]>=0.54.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["wtd"]
