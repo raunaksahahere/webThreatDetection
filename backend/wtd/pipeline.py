@@ -113,6 +113,7 @@ def correlation_findings(links: list[CorrelationLink]) -> list[Finding]:
     or near-identical message text. Same domain/URL (a re-check of the same target), shared IPs (CDNs) and
     brand names are shown as context links but never raise the classification."""
     bad = [l for l in links if l.other_classification in ("High Risk", "Confirmed Malicious")
+           and not any(s.startswith(("domain:", "url:")) for s in l.shared)  # same target re-checked: not campaign evidence
            and (l.method == "message_similarity" or any(s.startswith(ESCALATING_TYPES) for s in l.shared))]
     if not bad:
         return []
