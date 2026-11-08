@@ -75,7 +75,9 @@ function loadTarget(args) {
     fail(`cannot read deployment file ${file}: ${err.message}`);
   }
   if (!isAddress(String(deployment?.address), { strict: false })) fail(`deployment file ${file} has no valid "address"`);
-  return { address: getAddress(deployment.address), chainId: deployment.chainId, source: file };
+  // A public deployment file may name a public RPC endpoint; --rpc still overrides it.
+  const rpc = typeof deployment.rpc === 'string' && /^https?:\/\//.test(deployment.rpc) ? deployment.rpc : undefined;
+  return { address: getAddress(deployment.address), chainId: deployment.chainId, rpc, source: file };
 }
 
 async function main() {
@@ -106,7 +108,7 @@ async function main() {
 
   // 2. Read the registry directly from the chain, pinned to one block for a consistent view.
   const target = loadTarget(args);
-  const rpc = args.rpc ?? DEFAULT_RPC;
+  const rpc = args.rpc ?? target.rpc ?? DEFAULT_RPC;
   const client = createPublicClient({ transport: http(rpc, { timeout: 10_000, retryCount: 0 }) });
   let chainId, blockNumber, revisions, statuses, current;
   try {

@@ -147,6 +147,21 @@ try {
     await page.screenshot({ path: join(SHOTS, "07-incidents.png") });
   });
 
+  await step("QR tab decodes a payment QR locally and flags a 'scan to receive refund' UPI code", async () => {
+    await page.goto(`${BASE}/#/`, { waitUntil: "networkidle0" });
+    await page.click("#tab-qr");
+    const input = await page.waitForSelector('#panel-qr input[type=file]');
+    await input.uploadFile(join(ROOT, "e2e/fixtures/upi-refund-qr.png")); // synthetic fixture
+    await waitForText(page, ".qr-decoded", /UPI payment request/, 10000);
+    await page.click("button[type=submit]");
+    await page.waitForFunction(() => location.hash.startsWith("#/r/"), { timeout: 20000 });
+    const cls = await waitForText(page, "#verdict-h", /High Risk|Suspicious|Low Risk|Inconclusive|Confirmed Malicious/, 150000);
+    await page.waitForSelector("::-p-text(UPI payment request)", { timeout: 10000 });
+    await page.screenshot({ path: join(SHOTS, "11-qr-upi-report.png") });
+    if (cls !== "High Risk") throw new Error(`expected High Risk, got ${cls}`);
+    return cls;
+  });
+
   await step("No uncaught page errors", async () => {
     const real = consoleErrors.filter((e) => !/Failed to load resource/.test(e)); // HTTP failures are checked below with their URL
     if (real.length || badResponses.length) throw new Error([...real, ...badResponses].join("\n"));

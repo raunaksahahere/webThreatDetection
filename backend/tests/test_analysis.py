@@ -212,3 +212,20 @@ def test_url_rules_false_positive_guards_and_new_patterns():
     assert "url.fake_tld_label" in codes("alebilet.pl-otsochodzi.shop")
     assert "url.brand_in_subdomain" in codes("allegrolokalnie.f958h745.xyz")
     assert "url.typosquat" in codes("paypa1.com") and "url.brand_wrong_suffix" in codes("amazon.cm")
+
+
+def test_upi_payment_qr_disguised_as_refund_is_high_risk():
+    from wtd.message.analyse import analyse_text
+    fs, ind, facts, _ = analyse_text("upi://pay?pa=refund.desk@okaxis&pn=Refund%20Desk&am=4999&tn=Scan%20to%20receive%20your%20refund&cu=INR")
+    f = {x.code: x for x in fs}
+    assert f["msg.upi_pay_request"].severity == "high" and f["msg.upi_pay_request"].strength == "strong"
+    assert classify(fs, [CheckResult(name="message.rules", module="message", status="succeeded", essential=True)]).classification == "High Risk"
+    assert any(t == "upi" for t, _, _ in ind) and facts["upi_ids"]
+
+
+def test_plain_merchant_payment_qr_stays_low_risk():
+    from wtd.message.analyse import analyse_text
+    fs, *_ = analyse_text("upi://pay?pa=chaiwala@ybl&pn=Sharma%20Tea%20Stall&cu=INR")
+    f = {x.code: x for x in fs}
+    assert f["msg.upi_pay_request"].strength == "weak"
+    assert classify(fs, [CheckResult(name="message.rules", module="message", status="succeeded", essential=True)]).classification == "Low Risk"

@@ -1492,6 +1492,19 @@ textarea {
   font-size: 0.82rem;
 }
 
+.qr-decoded {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.6rem 0.75rem;
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+}
+.qr-decoded code {
+  overflow-wrap: anywhere;
+  font-size: 0.85rem;
+}
 .eml-load {
   display: inline-flex;
   align-items: center;

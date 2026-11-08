@@ -93,6 +93,8 @@ The optional AI brief explains a cluster, and its grounding is enforced in code:
 - the assessment may not exceed what the link type supports (e.g. no "likely same campaign" for shared infrastructure);
 - attribution to a named actor, or a "Confirmed Malicious" claim no report carries, → `rejected`.
 
+**QR codes.** The dashboard decodes the image locally (jsQR); the image never leaves the browser and the server never parses images. A decoded `http(s)` address is submitted as a URL analysis with `via: "qr"`, which adds an info finding: context only. Anything else goes to message analysis. A `upi://pay` URI yields `msg.upi_pay_request`, which is high/strong when the surrounding text promises a refund, prize or "receive money", and low/weak otherwise, so a shop's payment QR stays Low Risk.
+
 **Quick check** (`POST /api/quick-check`) backs the extension's opt-in warning mode. It applies the URL rules and the local CERT Polska snapshot, with no page fetch, no DNS and no third-party lookup, so browsing history never leaves the machine. Results are cached for 10 minutes and never stored.
 
 ## 3. Classification policy (auditable, first match wins)

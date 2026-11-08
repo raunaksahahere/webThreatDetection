@@ -1,6 +1,6 @@
 # WTD: Web Threat Detection & Digital Trust Intelligence
 
-Paste a suspicious **link**, **message** or **raw e-mail** and get an evidence-based risk assessment. Every finding carries its source and its limitations. An AI explanation is grounded in those findings, and the report's integrity is anchored on-chain so anyone can check it independently.
+Paste a suspicious **link**, **message**, **raw e-mail** or **QR code** and get an evidence-based risk assessment. Every finding carries its source and its limitations. An AI explanation is grounded in those findings, and the report's integrity is anchored on-chain so anyone can check it independently.
 
 Hackathon prototype (AI · Cybersecurity · Web3).
 
@@ -16,6 +16,7 @@ Hackathon prototype (AI · Cybersecurity · Web3).
 | AI evidence-grounded explanations | `ai/explain.py`: free OpenRouter model → local Ollama fallback; strict JSON schema; cited IDs, quotes and classification validated in code |
 | Scam-message analysis | `message/analyse.py`: indicator extraction (URLs, emails, phones, UPI, wallets) and social-engineering rules; urgency alone is never fraud |
 | E-mail security analysis | `message/email_checks.py`: paste or load raw `.eml`; receiving-server SPF/DKIM/DMARC, display-name and look-alike senders, Reply-To divergence, disguised links, risky attachments (never opened) |
+| QR-code scam detection | Dashboard **QR code** tab: decoded locally (jsQR); web addresses get the full investigation; `upi://pay` codes flagged when presented as "scan to receive money" |
 | Structured, explainable risk | `classify.py`: five classes, auditable rules, coverage counts, contradictions listed |
 | AI correlation | `incidents.py` + `ai/campaign.py`: deterministic clusters typed as campaign / shared infrastructure / repeat checks; validated AI campaign brief (cited indicators, reports and findings checked; verdict capped by link type) |
 | Threat intelligence | CERT Polska Warning List (phishing domains) and URLhaus (malware URLs) with stated scope |
@@ -57,11 +58,11 @@ Demonstrations:
 Tests:
 
 ```bash
-(cd backend && .venv/bin/python -m pytest -q)        # 118 tests: request boundary, TLS, classifier, messages, e-mail, AI validation (explanations and campaign briefs), API, persistence
+(cd backend && .venv/bin/python -m pytest -q)        # 124 tests: request boundary, TLS, classifier, messages, e-mail, AI validation (explanations and campaign briefs), API, persistence
 (cd contracts && forge test)                          # 22 contract tests incl. unauthorised writes and revision ordering
 node verifier/test-vectors.mjs                        # cross-language canonicalization vectors
 backend/.venv/bin/python scripts/run_cases.py         # documented cases through the live API
-(cd e2e && npm install && npm test)                   # real-browser click-through (Brave/Chrome, headless): dashboard 12 steps, extension 13 steps
+(cd e2e && npm install && npm test)                   # real-browser click-through (Brave/Chrome, headless): dashboard 13 steps, extension 13 steps
 backend/.venv/bin/python scripts/eval_url_rules.py --tranco top-1m.csv --tranco-id 94P72   # false-positive / detection evaluation (docs/EVALUATION.md)
 ```
 

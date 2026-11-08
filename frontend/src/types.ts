@@ -166,8 +166,8 @@ export interface Health {
 }
 
 export type AnalysisRequest =
-  | { kind: 'url'; url: string }
-  | { kind: 'message'; text: string; investigate_links: boolean };
+  | { kind: 'url'; url: string; via?: 'qr' }
+  | { kind: 'message'; text: string; investigate_links: boolean; via?: 'qr' };
 
 export interface AnalysisCreated {
   id: string;

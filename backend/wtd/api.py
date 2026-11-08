@@ -53,10 +53,12 @@ def rate_limit(request: Request) -> None:
 class UrlSubmission(BaseModel):
     kind: Literal["url"]
     url: str = Field(min_length=1, max_length=2048)
+    via: Literal["qr"] | None = None  # decoded from a QR code in the investigator's browser
 
 
 class MessageSubmission(BaseModel):
     kind: Literal["message"]
+    via: Literal["qr"] | None = None
     text: str = Field(min_length=1, max_length=150_000)  # raw e-mail source can be large; only redacted excerpts are stored
     investigate_links: bool = True
 
@@ -88,11 +90,11 @@ def health() -> dict:
 def submit(body: UrlSubmission | MessageSubmission) -> dict:
     try:
         if body.kind == "url":
-            r = pipeline.submit_url(body.url)
+            r = pipeline.submit_url(body.url, body.via)
         else:
             from .message import analyse as msg
 
-            r = msg.submit_message(body.text, body.investigate_links)
+            r = msg.submit_message(body.text, body.investigate_links, body.via)
     except UrlRejected as e:
         raise HTTPException(422, str(e))
     return {"id": r.id, "status": r.status}

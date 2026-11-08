@@ -28,6 +28,9 @@ Versions as installed on 2026-11-08. Licences are each project's own; this file 
 | TypeScript | 7.0.2 | Apache-2.0 | Dashboard type checking |
 | lucide-react | 1.60.0 | ISC | Icons |
 | Fontsource: Archivo, JetBrains Mono, Atkinson Hyperlegible Next | 5.3.0 | SIL Open Font License 1.1 (fonts); MIT (packages) | Dashboard typography |
+| jsQR | 1.4.0 | Apache-2.0 | Decodes QR images locally in the dashboard (images are never uploaded) |
+| puppeteer-core (e2e only) | 24.43.1 | Apache-2.0 | Drives an installed Brave/Chrome for the browser checks |
+| qrcode (npm, e2e only) | 1.5.4 | MIT | Generated the synthetic QR test fixture |
 
 ## Data and intelligence sources
 
@@ -38,7 +41,6 @@ Versions as installed on 2026-11-08. Licences are each project's own; this file 
 | **Mozilla OneCRL** | Downloaded at setup into `data/` (gitignored); not redistributed | Mozilla Remote Settings public data. Attributed as "Mozilla OneCRL"; licence for redistribution not verified |
 | **CERT Polska Warning List** | Downloaded at runtime into `data/` (gitignored) | "May be used by any user for any purpose, including commercial purposes." Attribution not required; no endorsement by NASK-PIB / CERT Polska is implied |
 | **Tranco top-sites list** (list 94P72, ranks 1-10,000) | Snapshot of domain names in `backend/wtd/data/popular_domains.txt`; used only to skip look-alike rules on established domains, and for the offline evaluation in `docs/EVALUATION.md` | Research ranking published at tranco-list.eu; cite Le Pochat et al., "Tranco: A Research-Oriented Top Sites Ranking Hardened Against Manipulation", NDSS 2019. No endorsement implied |
-| puppeteer-core (e2e only) | Dev dependency in `e2e/` | Apache-2.0; drives an installed Brave/Chrome for the browser checks |
 | **URLhaus** (abuse.ch) | Live API lookups with the operator's own Auth-Key; results cached ≤ 30 min in memory; never stored in the repository | abuse.ch terms of use: not-for-profit use; no copying or derivative datasets; data must not be used to train or validate AI models. Source shown as "URLhaus (abuse.ch)" with a link to each entry |
 | **IANA RDAP bootstrap** and registry RDAP servers | Domain registration dates | Public registry data |
 | **Unicode** | Confusable mapping is a small hand-written subset inspired by UTS #39 | No Unicode data files are redistributed |

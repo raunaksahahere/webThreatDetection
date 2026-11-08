@@ -67,9 +67,9 @@ case "${1:-}" in
     mkdir -p "$(dirname "$OUT")"
     jq -n --argjson chainId "$CHAIN_ID" --arg address "$ADDRESS" --arg deployTx "$TX" --argjson deployBlock "$BLOCK" \
       --arg owner "$REPORTER" --arg reporter "$REPORTER" --arg reviewer "$REVIEWER" \
-      --arg deployedAt "$(date -u -d "@$TS" +%Y-%m-%dT%H:%M:%SZ)" --arg explorer "https://sepolia.etherscan.io/address/$ADDRESS" \
+      --arg deployedAt "$(date -u -d "@$TS" +%Y-%m-%dT%H:%M:%SZ)" --arg explorer "https://sepolia.etherscan.io/address/$ADDRESS" --arg rpc "$RPC" \
       '{chainId: $chainId, network: "sepolia", address: $address, deployTx: $deployTx, deployBlock: $deployBlock,
-        owner: $owner, reporter: $reporter, reviewer: $reviewer, deployedAt: $deployedAt, explorer: $explorer}' >"$OUT"
+        owner: $owner, reporter: $reporter, reviewer: $reviewer, deployedAt: $deployedAt, explorer: $explorer, rpc: $rpc}' >"$OUT"
     echo "deployed: $ADDRESS  ($(jq -r .explorer "$OUT"))"
     ;;
   *) sed -n 2,12p "$0"; exit 1;;

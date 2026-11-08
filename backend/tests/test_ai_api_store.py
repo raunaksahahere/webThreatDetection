@@ -212,3 +212,16 @@ def test_quick_check_is_local_and_fast(client, monkeypatch):
     assert calls == []  # no third-party lookup for browsing
     assert client.post("/api/quick-check", json={"url": "javascript:alert(1)"}, headers=h).status_code == 422
     assert client.post("/api/quick-check", json={"url": "https://example.com"}).status_code == 401
+
+
+@pytest.mark.parametrize("summary", [
+    "It may mean the URL was recently registered, so do not assume it is safe.",            # observed S1 output
+    "The certificate is valid but does not prove the site is legitimate or safe.",          # observed S4 output
+    "The page looks legitimate but its domain imitates the bank.",
+])
+def test_negated_or_descriptive_safe_wording_is_not_a_safe_claim(summary):
+    assert explain._validate(_report(), good(summary=summary), "").status == "ok"
+
+
+def test_plain_safe_claim_still_rejected():
+    assert explain._validate(_report(), good(summary="Overall the site is legitimate."), "").status == "rejected"

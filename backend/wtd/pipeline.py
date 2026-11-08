@@ -128,7 +128,13 @@ def correlation_findings(links: list[CorrelationLink]) -> list[Finding]:
                     limitation="Shared hosting and CDNs can create coincidental matches; matches are against reports stored in this instance only.")]
 
 
-def analyse_url(rid: str, url: str) -> None:
+QR_FINDING = dict(code="url.qr_delivery", title="Address was delivered in a QR code",
+                  impact="QR codes hide the destination until scanned; 'quishing' uses them to bypass link filters.",
+                  rec="Check the decoded address below before opening it, exactly as you would a link in a message.",
+                  lim="Context only; it does not change the classification.")
+
+
+def analyse_url(rid: str, url: str, via: str | None = None) -> None:
     r = STORE.get(rid)
     r.status = "running"
     STORE.save(r)
@@ -139,6 +145,12 @@ def analyse_url(rid: str, url: str) -> None:
         p = parse_url(url)
         f, facts = url_rules.analyse_url(p)
         findings += f
+        if via == "qr":
+            facts["delivered_via"] = "QR code"
+            findings.append(Finding(id="url.qr_delivery", code=QR_FINDING["code"], module=Module.url, title=QR_FINDING["title"],
+                                    observed="Submitted from a QR code decoded in the investigator's browser.", source="WTD intake",
+                                    provenance=Provenance.live, observed_at=iso(), severity=Severity.info, strength=Strength.weak,
+                                    impact=QR_FINDING["impact"], recommendation=QR_FINDING["rec"], limitation=QR_FINDING["lim"]))
         r.subject = facts
         checks.append(_check("url.static", Module.url, CheckStatus.succeeded, True, f"{len(f)} indicator(s)", int((time.monotonic() - t0) * 1000)))
         reason = fetch_block_reason(p)
@@ -304,8 +316,8 @@ def _finish(r: Report, findings: list[Finding], checks: list[CheckResult], limit
         log.warning("AI explanation failed: %s", type(e).__name__)
 
 
-def submit_url(url: str) -> Report:
+def submit_url(url: str, via: str | None = None) -> Report:
     p = parse_url(url)  # raises UrlRejected → 422
     r = new_report("url", defang(p.href), p.href)
-    EXECUTOR.submit(analyse_url, r.id, p.href)
+    EXECUTOR.submit(analyse_url, r.id, p.href, via)
     return r

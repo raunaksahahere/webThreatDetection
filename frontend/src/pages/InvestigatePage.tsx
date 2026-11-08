@@ -1,13 +1,36 @@
 import { useState, type FormEvent } from 'react';
-import { ArrowRight, Globe, Info, LoaderCircle, Mail, ShieldAlert } from 'lucide-react';
+import { ArrowRight, Globe, Info, LoaderCircle, Mail, QrCode, ShieldAlert } from 'lucide-react';
+import jsQR from 'jsqr';
 import { MOCK_MODE, createAnalysis, errorMessage } from '../api';
 import { navigate, reportPath, href } from '../router';
 import { FlowSteps } from '../components/FlowSteps';
 import { Notice } from '../components/Section';
 
-type Tab = 'url' | 'message';
+type Tab = 'url' | 'message' | 'qr';
 const MAX_MESSAGE = 150000;
 const MESSAGE_NOTICE = 'Paste the message text only. Remove passwords, OTPs, card numbers and personal details you do not want analysed.';
+
+/** Decode a QR code locally in the browser (the image never leaves this page; the server only sees the decoded text). */
+async function decodeQr(file: File): Promise<string | null> {
+  const bmp = await createImageBitmap(file);
+  const scale = Math.min(1, 1600 / Math.max(bmp.width, bmp.height));
+  const w = Math.max(1, Math.round(bmp.width * scale));
+  const h = Math.max(1, Math.round(bmp.height * scale));
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+  ctx.drawImage(bmp, 0, 0, w, h);
+  const img = ctx.getImageData(0, 0, w, h);
+  return jsQR(img.data, w, h, { inversionAttempts: 'attemptBoth' })?.data ?? null;
+}
+
+function qrKind(payload: string): 'url' | 'upi' | 'text' {
+  if (/^https?:\/\//i.test(payload.trim())) return 'url';
+  if (/^upi:\/\/pay\?/i.test(payload.trim())) return 'upi';
+  return 'text';
+}
 
 export function InvestigatePage() {
   const [tab, setTab] = useState<Tab>('url');
@@ -16,8 +39,10 @@ export function InvestigatePage() {
   const [investigateLinks, setInvestigateLinks] = useState(true);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [qr, setQr] = useState<string | null>(null);
+  const [qrBusy, setQrBusy] = useState(false);
 
-  const canSubmit = !busy && (tab === 'url' ? url.trim().length > 0 : text.trim().length > 0);
+  const canSubmit = !busy && (tab === 'url' ? url.trim().length > 0 : tab === 'qr' ? !!qr : text.trim().length > 0);
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -28,7 +53,11 @@ export function InvestigatePage() {
       const res =
         tab === 'url'
           ? await createAnalysis({ kind: 'url', url: url.trim() })
-          : await createAnalysis({ kind: 'message', text, investigate_links: investigateLinks });
+          : tab === 'qr' && qr
+            ? qrKind(qr) === 'url'
+              ? await createAnalysis({ kind: 'url', url: qr.trim(), via: 'qr' })
+              : await createAnalysis({ kind: 'message', text: qr, investigate_links: true, via: 'qr' })
+            : await createAnalysis({ kind: 'message', text, investigate_links: investigateLinks });
       navigate(reportPath(res.id));
     } catch (err) {
       setError(errorMessage(err));
@@ -57,9 +86,56 @@ export function InvestigatePage() {
           <button type="button" role="tab" id="tab-msg" aria-selected={tab === 'message'} aria-controls="panel-msg" className={`tab ${tab === 'message' ? 'is-active' : ''}`} onClick={() => setTab('message')}>
             <Mail size={16} aria-hidden /> Message / Email
           </button>
+          <button type="button" role="tab" id="tab-qr" aria-selected={tab === 'qr'} aria-controls="panel-qr" className={`tab ${tab === 'qr' ? 'is-active' : ''}`} onClick={() => setTab('qr')}>
+            <QrCode size={16} aria-hidden /> QR code
+          </button>
         </div>
 
-        {tab === 'url' ? (
+        {tab === 'qr' ? (
+          <div className="intake-panel" role="tabpanel" id="panel-qr" aria-labelledby="tab-qr">
+            <label className="field">
+              <span className="field-label">Photo or screenshot of a QR code</span>
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/webp,image/gif"
+                onChange={async (e) => {
+                  const f = e.target.files?.[0];
+                  setQr(null);
+                  setError(null);
+                  if (!f) return;
+                  if (f.size > 10_000_000) {
+                    setError('Image is larger than 10 MB.');
+                    return;
+                  }
+                  setQrBusy(true);
+                  try {
+                    const data = await decodeQr(f);
+                    if (!data) setError('No QR code found in that image. Try a sharper, straight-on photo.');
+                    else setQr(data.slice(0, 4000));
+                  } catch {
+                    setError('Could not read that image.');
+                  } finally {
+                    setQrBusy(false);
+                  }
+                }}
+              />
+            </label>
+            <p className="field-help">
+              <Info size={14} aria-hidden /> The image is decoded here in your browser and is never uploaded. Only the decoded text is investigated: a web address gets the full website investigation; a UPI payment code is checked for "scan to receive money" tricks.
+            </p>
+            {qrBusy ? (
+              <p className="muted">
+                <LoaderCircle size={14} className="spin" aria-hidden /> Decoding…
+              </p>
+            ) : null}
+            {qr ? (
+              <div className="qr-decoded">
+                <span className="mini-label">Decoded ({qrKind(qr) === 'url' ? 'web address' : qrKind(qr) === 'upi' ? 'UPI payment request' : 'text'})</span>
+                <code className="mono">{qr}</code>
+              </div>
+            ) : null}
+          </div>
+        ) : tab === 'url' ? (
           <div className="intake-panel" role="tabpanel" id="panel-url" aria-labelledby="tab-url">
             <label className="field">
               <span className="field-label">Website address</span>

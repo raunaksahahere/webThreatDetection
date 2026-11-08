@@ -170,12 +170,27 @@ def _validate(r: Report, raw: str, untrusted: str) -> AIResult:
         return False
 
     others = [l for l in LABELS if l != actual and asserted(l)]
-    safe_claim = actual != "Low Risk" and re.search(r"\b(is|looks|appears)\s+(completely\s+|totally\s+)?(safe|legitimate|genuine|trustworthy)\b", text)
+    def safe_claimed() -> bool:
+        """An unnegated claim that the target is safe/legitimate ('do not assume it is safe' and
+        'does not prove it is legitimate' are negated; 'looks legitimate but…' describes the deception)."""
+        if actual == "Low Risk":
+            return False
+        for m in re.finditer(r"\b(is|looks|appears)\s+(completely\s+|totally\s+)?(safe|legitimate|genuine|trustworthy)\b", text):
+            before = text[max(0, m.start() - 60): m.start()]
+            before = re.split(r"[.!?;]", before)[-1]
+            if re.search(r"\b(not|no|never|n't|cannot|without|nothing|neither|nor|unless|whether|if)\b", before):
+                continue
+            if re.match(r"\s*(,\s*)?(but|yet|although|though|until)\b", text[m.end(): m.end() + 15]):
+                continue
+            return True
+        return False
+
+    safe_claim = safe_claimed()
     status = "ok"
     if others:
         status = "rejected"
         notes.append(f"explanation asserted a different classification ({others[0]}); deterministic result kept")
-    if safe_claim and not re.search(r"not\s+(be\s+)?(safe|legitimate)", text[max(0, safe_claim.start() - 12): safe_claim.end()]):
+    if safe_claim:
         status = "rejected"
         notes.append("explanation called the target safe or legitimate although it is not Low Risk")
     if not points and status == "ok":

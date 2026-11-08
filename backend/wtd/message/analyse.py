@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import re
 import zlib
+from urllib.parse import parse_qs, urlsplit
 
 from .. import intel
 from ..checks import url_rules
@@ -60,6 +61,8 @@ RULES = [
 CRED_RX = re.compile(r"\b(share|send|provide|tell|give|enter|confirm|reply with|forward|update|verify)\b[^.\n]{0,40}\b(otp|one[- ]time (password|code)|pin|mpin|upi pin|password|cvv|card (number|details)|aadhaar|aadhar|pan (number|card)|bank details|login (details|credentials)|verification code|seed phrase|private key)\b", re.I)
 NEGATION_RX = re.compile(r"\b(never|do not|don't|dont|not)\b[^.\n]{0,25}\b(share|send|provide|tell|give|disclose)\b", re.I)
 PAY_RX = re.compile(r"\b(pay|payment|transfer|deposit|send money|processing fee|registration fee|activation fee|security deposit|refundable deposit|charges? of|scan (the )?qr)\b", re.I)
+UPI_URI_RX = re.compile(r"upi://pay\?[^\s\"'<>]{3,1000}", re.I)
+RECEIVE_LURE_RX = re.compile(r"\b(receive|refund|cash ?back|prize|reward|won|winner|lottery|credited|claim|bonus|get paid|payment received)\b", re.I)
 GIFT_CARD_RX = re.compile(r"\b(gift ?cards?|google play (card|code)|amazon (gift )?(card|voucher)|itunes card|steam card)\b", re.I)
 
 
@@ -120,13 +123,30 @@ def analyse_text(text: str) -> tuple[list[Finding], list[tuple[str, str, str]], 
                            "Never share these codes. If you already did, contact your bank immediately and change the password.",
                            "Pattern-based; a message that merely mentions these words without asking is excluded where a negation is detected.",
                            {"requested": sorted({m.group(2).lower() for m in cred})[:5]}))
-    pay = list(PAY_RX.finditer(red))
+    pay = list(PAY_RX.finditer(UPI_URI_RX.sub(" ", red)))  # the word "pay" inside upi://pay is handled by the QR rule
     amounts = AMOUNT_RX.findall(text)
     upis = sorted({m.group(0).lower() for m in UPI_RX.finditer(text)})
     emails = sorted({e.lower() for e in EMAIL_RX.findall(text) if not UPI_RX.fullmatch(e)})
     phones = sorted({re.sub(r"[\s-]", "", p) for p in PHONE_RX.findall(text)})
     wallets = sorted(set(BTC_RX.findall(text)) | set(ETH_RX.findall(text)) | set(TRX_RX.findall(text)))
     gift = list(GIFT_CARD_RX.finditer(red))
+    upi_uris = [m.group(0) for m in UPI_URI_RX.finditer(text)]
+    for uri in upi_uris[:1]:
+        q = parse_qs(urlsplit(uri.replace("upi://pay", "upi://pay/", 1)).query)
+        pa = (q.get("pa") or [""])[0].lower()
+        pn, am, tn = (q.get("pn") or [""])[0][:60], (q.get("am") or [""])[0][:12], (q.get("tn") or [""])[0][:80]
+        if pa and pa not in upis:
+            upis.append(pa)
+        lure = RECEIVE_LURE_RX.search(f"{pn} {tn} {red}")
+        findings.append(_f("msg.upi_pay_request", "This is a UPI payment request: approving it SENDS money",
+                           f"upi://pay to {mask('upi', pa) if '@' in pa else 'unknown payee'}" + (f" ({pn})" if pn else "")
+                           + (f", amount Rs {am}" if am else ", amount left to the payer") + (f", note '{tn}'" if tn else "")
+                           + (f". The text around it talks about receiving money ('{lure.group(0)}')." if lure else "."),
+                           Severity.high if lure else Severity.low, Strength.strong if lure else Strength.weak,
+                           "In UPI you never scan a QR code or enter your PIN to receive money; 'scan to get your refund/prize' QR codes take money instead.",
+                           "Do not scan or approve it unless you intend to pay this exact payee. Check the payee name in your UPI app.",
+                           "Legitimate merchants also use payment QR codes; the risk is in being told it will pay you.",
+                           {"payee": mask("upi", pa) if "@" in pa else None, "payee_name": pn, "amount": am, "receive_lure": bool(lure)}))
     if pay and (amounts or upis or wallets):
         findings.append(_f("msg.payment_request", "Requests a payment or fee", f"\"{_quote(red, pay[0])}\"" + (f"; amount(s): {', '.join(amounts[:3])}" if amounts else ""),
                            Severity.medium, Strength.moderate, "Advance fees and 'processing charges' are the core of many scams.",
@@ -188,7 +208,7 @@ def analyse_text(text: str) -> tuple[list[Finding], list[tuple[str, str, str]], 
     return findings, indicators, facts, [p.href for p in parsed]
 
 
-def analyse_message(rid: str, text: str, investigate_links: bool) -> None:
+def analyse_message(rid: str, text: str, investigate_links: bool, via: str | None = None) -> None:
     r = STORE.get(rid)
     r.status = "running"
     STORE.save(r)
@@ -237,6 +257,8 @@ def analyse_message(rid: str, text: str, investigate_links: bool) -> None:
                 except UrlRejected:
                     pass
         facts["linked_reports"] = linked
+        if via == "qr":
+            facts["delivered_via"] = "QR code"
         r.subject = facts
         sh = shingles(facts["redacted_text"])
         r.indicators = [Indicator(type=t, display=d, match_key=k, hashed=k.startswith("hmac:")) for t, k, d in items]
@@ -251,7 +273,7 @@ def analyse_message(rid: str, text: str, investigate_links: bool) -> None:
         STORE.save(r)
 
 
-def submit_message(text: str, investigate_links: bool = True):
+def submit_message(text: str, investigate_links: bool = True, via: str | None = None):
     excerpt = redact(" ".join(text.split()))[:160]
     if looks_like_email(text):
         import email as _email
@@ -262,5 +284,5 @@ def submit_message(text: str, investigate_links: bool = True):
         dom = frm.rsplit("@", 1)[-1].strip("> ").lower() if "@" in frm else "unknown sender"
         excerpt = redact(f"E-mail from {dom}: " + " ".join(str(m.get("Subject", "(no subject)")).split()))[:160]
     r = new_report("message", excerpt + ("…" if len(text) > 160 else ""), text)
-    EXECUTOR.submit(analyse_message, r.id, text, investigate_links)
+    EXECUTOR.submit(analyse_message, r.id, text, investigate_links, via)
     return r
