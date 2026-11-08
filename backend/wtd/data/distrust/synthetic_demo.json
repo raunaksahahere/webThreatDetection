@@ -1,0 +1,9 @@
+{
+ "about": "SYNTHETIC demo distrust entries. NOT real intelligence. Used only to demonstrate distrusted-CA matching end to end without live infrastructure.",
+ "entries": [
+  {
+   "spki_sha256": "f8a455b3fbceb68b0f1b105a22eb2bbe6b1494028e2973b201b3d6c5bdf430f1",
+   "detail": "SYNTHETIC: demo intermediate CA whose P-384 private key is the tiny value 77 (models the eMudhra 2026 weakness; see Bugzilla 2083449)"
+  }
+ ]
+}

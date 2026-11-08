@@ -160,7 +160,8 @@ def analyse_text(text: str) -> tuple[list[Finding], list[tuple[str, str, str]], 
         indicators.append(("url", p.href, defang(p.href)))
         if reg:
             indicators.append(("domain", reg, reg.replace(".", "[.]")))
-    claimed = [b for b in url_rules.brand_data()["brands"] if any(t.strip() in low for t in b.get("text", []) if len(t.strip()) >= 4)]
+    claimed = [b for b in url_rules.brand_data()["brands"]
+               if any(re.search(rf"(?<![a-z0-9]){re.escape(t.strip())}(?![a-z0-9])", low) for t in b.get("text", []) if len(t.strip()) >= 3)]
     for b in claimed[:3]:
         indicators.append(("brand", b["name"].lower(), b["name"]))
         for p in parsed:

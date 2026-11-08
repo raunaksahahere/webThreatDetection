@@ -375,7 +375,7 @@ def analyse_chain(
     if tls_version in ("TLSv1", "TLSv1.1", "SSLv3"):
         F("tls.old_protocol", f"Server negotiated obsolete {tls_version}", f"Negotiated {tls_version}.", Severity.medium, Strength.weak,
           "Old TLS versions have known weaknesses.", "Operator should enable TLS 1.2+ only.", "", {"version": tls_version})
-    if full_ok and not hits:
+    if full_ok and not hits and not any(x.severity in ("medium", "high", "critical") for x in findings):
         F("tls.valid", "Certificate is valid for this site", f"Chain verified to a trusted root; issued by {leaf.issuer.rfc4514_string()[:120]}; expires {iso(leaf.not_valid_after_utc)}.",
           Severity.info, Strength.weak, "The connection is encrypted and the certificate matches the name.",
           "A valid certificate does not mean the site is legitimate: phishing sites routinely have valid certificates.",
