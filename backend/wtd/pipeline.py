@@ -20,7 +20,7 @@ from .netguard import UrlRejected, defang, fetch_block_reason, parse_url
 from .store import Store
 
 log = logging.getLogger("wtd.pipeline")
-STORE = Store(SETTINGS.db_path)
+STORE = Store(SETTINGS.db_path, SETTINGS.database_url)
 EXECUTOR = ThreadPoolExecutor(max_workers=3, thread_name_prefix="analysis")
 
 URL_LIMITATIONS = [

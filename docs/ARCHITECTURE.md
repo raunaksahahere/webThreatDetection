@@ -16,7 +16,7 @@
   ├─ message/ (analyse.py: messages; email_checks.py: raw e-mail headers, links, attachments)
   ├─ incidents.py ── ai/campaign.py (validated AI campaign brief per cluster)
   ├─ /api/quick-check (URL rules + local CERT Polska list only; for the extension's opt-in warnings)
-  ├─ store.py (SQLite, WAL)
+  ├─ store.py (Postgres/Neon via DATABASE_URL, else SQLite WAL)
   └─ registry/ (canonical.py, service.py, chain.py) ──► anvil (31337) or Sepolia ── ThreatReportRegistry.sol
                                      reporter key: register/revise · reviewer key: Validated/Disputed/Retracted
  verifier/verify.mjs (Node + viem) — independent: recomputes the commitment and reads contract storage

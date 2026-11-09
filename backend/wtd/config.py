@@ -53,6 +53,7 @@ class Settings:
     api_token: str
     hmac_key: bytes
     db_path: Path
+    database_url: str | None
     ai_enabled: bool
     ai_model: str
     ai_local_model: str
@@ -72,6 +73,7 @@ def load() -> Settings:
         api_token=token,
         hmac_key=_hmac_key(),
         db_path=Path(os.environ.get("WTD_DB", DATA / "wtd.sqlite3")),
+        database_url=os.environ.get("DATABASE_URL", "").strip() or None,  # Postgres (Neon); empty = local SQLite file
         ai_enabled=os.environ.get("WTD_AI_ENABLED", "1") != "0",
         ai_model=os.environ.get("WTD_AI_MODEL", "xingchen-agi/xing4.0-29b-a4b:free"),
         ai_local_model=os.environ.get("WTD_AI_LOCAL_MODEL", "qwen3:4b"),

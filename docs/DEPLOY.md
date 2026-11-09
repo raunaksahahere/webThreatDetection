@@ -1,6 +1,6 @@
 # Deploying: Render (API, Docker) + Vercel (dashboard)
 
-The API is a long-running service: it starts an isolated inspector process per analysis, keeps SQLite, and talks to a chain. That is why it runs on **Render as a Docker web service**, while the static dashboard can run on **Vercel**. The Render service also serves the dashboard on its own URL, so Vercel is optional.
+The API is a long-running service: it starts an isolated inspector process per analysis, keeps its history in Postgres (Neon) or SQLite, and talks to a chain. That is why it runs on **Render as a Docker web service**, while the static dashboard can run on **Vercel**. The Render service also serves the dashboard on its own URL, so Vercel is optional.
 
 ```
  Vercel (static dashboard, VITE_API_BASE=https://<api>.onrender.com)
@@ -23,7 +23,7 @@ The API is a long-running service: it starts an isolated inspector process per a
 
 Notes for the free plan:
 - The instance sleeps after about 15 minutes idle, and the first request takes roughly a minute to wake it.
-- The filesystem is **ephemeral**. Reports and the embedded chain reset on every restart or redeploy. For a demo, run the analyses shortly before presenting. The commented `disk:` block in `render.yaml` (paid plan) keeps `/app/data`.
+- The filesystem is **ephemeral**, so set `DATABASE_URL` to a [Neon](https://neon.tech) Postgres connection string: reports (History) then persist across restarts and redeploys. Without it the SQLite file resets with the container. The embedded chain still resets on restart, so on-chain registration of an older report can show as missing; use the Sepolia setup below if registry state must persist. For a demo, run the analyses shortly before presenting. The commented `disk:` block in `render.yaml` (paid plan) keeps `/app/data`.
 - The embedded chain is a private anvil instance inside the container, so registrations are not publicly visible. For publicly checkable registrations, deploy to Sepolia with `scripts/testnet.sh`, commit `deployments/sepolia.json`, and switch to the commented `WTD_CHAIN=external` block, giving `WTD_REPORTER_KEY` and `WTD_REVIEWER_KEY` as secrets.
 - 512 MB RAM is enough for the API, the per-analysis inspector process and anvil. Analyses run three at a time.
 

@@ -13,6 +13,8 @@ services:
     envVars:
       - key: WTD_API_TOKEN          # operator token the dashboard asks for; read it in the Render dashboard
         generateValue: true
+      - key: DATABASE_URL           # Neon Postgres connection string; history persists across restarts and redeploys
+        sync: false
       - key: WTD_HMAC_KEY           # keeps indicator hashes stable across restarts
         generateValue: true
       - key: WTD_CORS_ORIGINS       # your Vercel URL, e.g. https://wtd.vercel.app (comma-separate several)

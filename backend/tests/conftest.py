@@ -3,6 +3,8 @@ import os
 import tempfile
 
 _tmp = tempfile.mkdtemp(prefix="wtd-test-")
+# Tests use a throwaway SQLite file, never a developer's Neon database. WTD_TEST_DATABASE_URL opts in to running them on a disposable Postgres.
+os.environ["DATABASE_URL"] = os.environ.get("WTD_TEST_DATABASE_URL", "")
 os.environ["WTD_DB"] = os.path.join(_tmp, "test.sqlite3")
 os.environ["WTD_AI_ENABLED"] = "0"
 os.environ["WTD_API_TOKEN"] = "test-token"

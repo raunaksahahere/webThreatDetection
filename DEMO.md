@@ -42,7 +42,7 @@ If the Sepolia deployment exists (`deployments/sepolia.json`), you can show the 
 ## Fallbacks (say what is happening; never fake it)
 | Problem | Fallback |
 |---|---|
-| Internet down | Use pre-run reports from History (persisted in SQLite). The e-mail, the synthetic TLS demo, chain registration, review and the verifier all work offline. Say: "these were run earlier today". |
+| Internet down | Use pre-run reports from History (persisted in the Neon database). The e-mail, the synthetic TLS demo, chain registration, review and the verifier all work offline. Say: "these were run earlier today". |
 | Free AI model rate-limited (HTTP 429) | The local model takes over automatically (15–90 s); the badge shows `ollama (local)`. |
 | No AI at all | The report shows "AI unavailable" and the deterministic findings stand alone. Say so. |
 | Chain not running | `scripts/chain.sh start && scripts/deploy.sh`. The register button shows "blockchain unavailable" until then. |
