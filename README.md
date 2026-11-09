@@ -35,8 +35,7 @@ Prerequisites: [uv](https://docs.astral.sh/uv/), Node 20+, [Foundry](https://get
 ```bash
 scripts/setup.sh                 # Python 3.13 env, contract build, npm installs, dashboard build, intel snapshots
 # optional: edit .env → URLHAUS_AUTH_KEY=... (free key from your own abuse.ch account).
-#   Visitors can instead use their own key: click the "urlhaus" pill in the dashboard header. It stays in that
-#   browser tab (sessionStorage), travels as X-URLhaus-Key with each analysis, and is never stored by the server.
+#   Visitors never enter a key; every analysis uses this one (public-demo quotas bound how often).
 scripts/chain.sh start           # local chain (chain id 31337), state persisted in chain-state/
 scripts/deploy.sh                # deploys ThreatReportRegistry, writes deployments/local.json
 scripts/api.sh start             # API + dashboard on http://127.0.0.1:8000/

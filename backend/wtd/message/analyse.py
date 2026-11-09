@@ -208,7 +208,7 @@ def analyse_text(text: str) -> tuple[list[Finding], list[tuple[str, str, str]], 
     return findings, indicators, facts, [p.href for p in parsed]
 
 
-def analyse_message(rid: str, text: str, investigate_links: bool, via: str | None = None, urlhaus_key: str | None = None) -> None:
+def analyse_message(rid: str, text: str, investigate_links: bool, via: str | None = None) -> None:
     r = STORE.get(rid)
     r.status = "running"
     STORE.save(r)
@@ -243,7 +243,7 @@ def analyse_message(rid: str, text: str, investigate_links: bool, via: str | Non
                 findings.append(f)
         if urls:
             hosts = [parse_url(u).host for u in urls]
-            io = intel.lookup(urls[0], hosts, set(url_rules.brand_data()["shared_hosting"]), user_urlhaus_key=urlhaus_key)
+            io = intel.lookup(urls[0], hosts, set(url_rules.brand_data()["shared_hosting"]))
             findings += io.findings
             checks += io.checks
         else:
@@ -252,7 +252,7 @@ def analyse_message(rid: str, text: str, investigate_links: bool, via: str | Non
         if investigate_links and urls:
             for u in urls[:3]:
                 try:
-                    lr = submit_url(u, urlhaus_key=urlhaus_key)
+                    lr = submit_url(u)
                     linked.append({"url": defang(u), "report_id": lr.id})
                 except UrlRejected:
                     pass
@@ -273,7 +273,7 @@ def analyse_message(rid: str, text: str, investigate_links: bool, via: str | Non
         STORE.save(r)
 
 
-def submit_message(text: str, investigate_links: bool = True, via: str | None = None, urlhaus_key: str | None = None):
+def submit_message(text: str, investigate_links: bool = True, via: str | None = None):
     excerpt = redact(" ".join(text.split()))[:160]
     if looks_like_email(text):
         import email as _email
@@ -284,5 +284,5 @@ def submit_message(text: str, investigate_links: bool = True, via: str | None = 
         dom = frm.rsplit("@", 1)[-1].strip("> ").lower() if "@" in frm else "unknown sender"
         excerpt = redact(f"E-mail from {dom}: " + " ".join(str(m.get("Subject", "(no subject)")).split()))[:160]
     r = new_report("message", excerpt + ("…" if len(text) > 160 else ""), text)
-    EXECUTOR.submit(analyse_message, r.id, text, investigate_links, via, urlhaus_key)
+    EXECUTOR.submit(analyse_message, r.id, text, investigate_links, via)
     return r

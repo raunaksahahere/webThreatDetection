@@ -490,23 +490,6 @@ button {
 .pill-muted {
   color: #9aa0aa;
 }
-.pill-btn {
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-  border-radius: 999px;
-}
-.pill-btn:hover .pill {
-  background: rgba(255, 255, 255, 0.09);
-  border-color: rgba(255, 255, 255, 0.24);
-}
-.pill-btn:focus-visible {
-  outline: 2px solid var(--signal);
-  outline-offset: 2px;
-}
 
 /* ---------- layout ---------- */
 .main {
@@ -1347,24 +1330,6 @@ textarea {
 .dialog-ok {
   color: var(--good);
   font-weight: 700;
-}
-.link-btn {
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 2px;
-  cursor: pointer;
-}
-.link-btn:focus-visible {
-  outline: 2px solid var(--signal);
-  outline-offset: 2px;
-}
-.intake-intel {
-  margin: 0;
-  padding: 0 1.25rem 1.1rem;
 }
 .dialog-fine {
   font-size: 0.8rem;

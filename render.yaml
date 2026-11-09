@@ -25,7 +25,7 @@ services:
         value: gemini-3.5-flash-lite,gemini-3.1-flash-lite
       - key: OPENROUTER_API_KEY     # optional second provider: free OpenRouter models only (enforced in code)
         sync: false
-      - key: URLHAUS_AUTH_KEY       # optional abuse.ch key
+      - key: URLHAUS_AUTH_KEY       # your abuse.ch key; used for every analysis (visitors never supply one)
         sync: false
       - key: WTD_CHAIN              # embedded = private anvil chain inside the container (resets on restart)
         value: embedded

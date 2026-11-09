@@ -1,8 +1,7 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useState, type FormEvent } from 'react';
 import { ArrowRight, Globe, Info, LoaderCircle, Mail, QrCode, ShieldAlert } from 'lucide-react';
 import jsQR from 'jsqr';
-import { MOCK_MODE, createAnalysis, errorMessage, getHealth, setUrlhausDialogOpen } from '../api';
-import { useUrlhausKey } from '../components/UrlhausKeyDialog';
+import { MOCK_MODE, createAnalysis, errorMessage } from '../api';
 import { QuotaLine } from '../components/PublicDemo';
 import { navigate, reportPath, href } from '../router';
 import { FlowSteps } from '../components/FlowSteps';
@@ -11,40 +10,6 @@ import { Notice } from '../components/Section';
 type Tab = 'url' | 'message' | 'qr';
 const MAX_MESSAGE = 150000;
 const MESSAGE_NOTICE = 'Paste the message text only. Remove passwords, OTPs, card numbers and personal details you do not want analysed.';
-
-/** One line under the form saying which URLhaus key new analyses will use, with a way to add your own. */
-function UrlhausLine() {
-  const own = useUrlhausKey();
-  const [server, setServer] = useState<boolean | null>(null);
-  useEffect(() => {
-    let alive = true;
-    getHealth()
-      .then((h) => alive && setServer(/^configured$/i.test(String(h.intel?.urlhaus ?? ''))))
-      .catch(() => undefined);
-    return () => {
-      alive = false;
-    };
-  }, []);
-  if (MOCK_MODE || server === null) return null;
-  const open = (
-    <button type="button" className="link-btn" onClick={() => setUrlhausDialogOpen(true)}>
-      {own ? 'Change or remove' : server ? 'Use your own key' : 'Add your own free key'}
-    </button>
-  );
-  return (
-    <p className="field-help intake-intel">
-      <Info size={14} aria-hidden />
-      <span>
-        {own
-          ? 'URLhaus malware lookups use your own key (this tab only). '
-          : server
-            ? 'URLhaus malware lookups use the server key. '
-            : 'URLhaus malware lookups are off on this server. '}
-        {open}
-      </span>
-    </p>
-  );
-}
 
 /** Decode a QR code locally in the browser (the image never leaves this page; the server only sees the decoded text). */
 async function decodeQr(file: File): Promise<string | null> {
@@ -256,7 +221,6 @@ export function InvestigatePage() {
           ) : null}
         </div>
         <QuotaLine />
-        <UrlhausLine />
       </form>
 
       <section className="how" aria-labelledby="how-h">

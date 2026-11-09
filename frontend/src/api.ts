@@ -130,63 +130,6 @@ function obtainToken(reason: TokenReason): Promise<string> {
 }
 
 
-// ---------------- investigator's own URLhaus key ----------------
-// Optional abuse.ch Auth-Key a visitor (e.g. a judge) supplies when the server has none or they prefer their own.
-// Kept in sessionStorage for this tab only, sent as X-URLhaus-Key with each analysis, never stored by the server.
-
-const URLHAUS_KEY = 'wtd.urlhausKey';
-export const URLHAUS_KEY_RE = /^[A-Za-z0-9]{20,100}$/;
-let memoryUrlhaus: string | null = null;
-const urlhausListeners = new Set<() => void>();
-
-export function getUrlhausKey(): string | null {
-  try {
-    return window.sessionStorage.getItem(URLHAUS_KEY) ?? memoryUrlhaus;
-  } catch {
-    return memoryUrlhaus;
-  }
-}
-
-export function setUrlhausKey(key: string): void {
-  memoryUrlhaus = key;
-  try {
-    window.sessionStorage.setItem(URLHAUS_KEY, key);
-  } catch {
-    /* storage blocked: keep in memory for this page only */
-  }
-  urlhausListeners.forEach((l) => l());
-}
-
-export function clearUrlhausKey(): void {
-  memoryUrlhaus = null;
-  try {
-    window.sessionStorage.removeItem(URLHAUS_KEY);
-  } catch {
-    /* ignore */
-  }
-  urlhausListeners.forEach((l) => l());
-}
-
-export function onUrlhausKeyChange(l: () => void): () => void {
-  urlhausListeners.add(l);
-  return () => urlhausListeners.delete(l);
-}
-
-// Open/close state for <UrlhausKeyDialog/>, so the header pill and the Investigate page can both open it.
-let urlhausDialogOpen = false;
-const urlhausDialogListeners = new Set<() => void>();
-export function isUrlhausDialogOpen(): boolean {
-  return urlhausDialogOpen;
-}
-export function setUrlhausDialogOpen(open: boolean): void {
-  urlhausDialogOpen = open;
-  urlhausDialogListeners.forEach((l) => l());
-}
-export function subscribeUrlhausDialog(l: () => void): () => void {
-  urlhausDialogListeners.add(l);
-  return () => urlhausDialogListeners.delete(l);
-}
-
 // ---------------- public demo: access mode and browser session ----------------
 
 let accessPromise: Promise<AccessInfo> | null = null;
@@ -323,22 +266,13 @@ export function getHealth(): Promise<Health> {
 export function createAnalysis(body: AnalysisRequest): Promise<AnalysisCreated> {
   if (MOCK_MODE) return mock.createAnalysis(body);
   // Custom headers only where needed: the session id is what the public demo's per-session limit counts.
-  const own = getUrlhausKey();
-  const headers: Record<string, string> = { 'X-WTD-Session': getSessionId() };
-  if (own) headers['X-URLhaus-Key'] = own;
-  return json<AnalysisCreated>('/api/analyses', { method: 'POST', body, headers });
+  return json<AnalysisCreated>('/api/analyses', { method: 'POST', body, headers: { 'X-WTD-Session': getSessionId() } });
 }
 
 /** Analyses left for this browser session in the public demo. */
 export function getQuota(): Promise<QuotaInfo> {
   if (MOCK_MODE) return Promise.resolve({ public_demo: false });
   return json<QuotaInfo>('/api/quota', { auth: false, headers: { 'X-WTD-Session': getSessionId() } });
-}
-
-/** Asks the server to test a URLhaus key with one harmless lookup. The key is not saved anywhere by the server. */
-export function checkUrlhausKey(key: string): Promise<{ accepted: boolean; message: string }> {
-  if (MOCK_MODE) return Promise.reject(new ApiError(0, 'Not available in mock mode', 'network'));
-  return json<{ accepted: boolean; message: string }>('/api/intel/urlhaus/check', { method: 'POST', headers: { 'X-URLhaus-Key': key } });
 }
 
 export function listAnalyses(limit = 50): Promise<AnalysisSummary[]> {

@@ -31,7 +31,7 @@ if _cors:
     from fastapi.middleware.cors import CORSMiddleware
 
     app.add_middleware(CORSMiddleware, allow_origins=_cors, allow_methods=["GET", "POST"], allow_credentials=False,
-                       allow_headers=["Content-Type", "X-WTD-Token", "X-URLhaus-Key", "X-WTD-Session", "Accept"], expose_headers=["Content-Disposition"], max_age=600)
+                       allow_headers=["Content-Type", "X-WTD-Token", "X-WTD-Session", "Accept"], expose_headers=["Content-Disposition"], max_age=600)
 _hits: dict[str, deque] = defaultdict(deque)
 
 
@@ -67,16 +67,6 @@ def require_chain_writer(request: Request) -> None:
 
 def _client(request: Request) -> str:
     return request.client.host if request.client else "unknown"
-
-
-def user_urlhaus_key(request: Request) -> str | None:
-    """Optional investigator-supplied abuse.ch key (X-URLhaus-Key). Used for one analysis only; never stored or logged."""
-    k = request.headers.get("x-urlhaus-key", "").strip()
-    if not k:
-        return None
-    if not intel.valid_user_key(k):
-        raise HTTPException(422, "X-URLhaus-Key must be an abuse.ch Auth-Key (letters and digits only)")
-    return k
 
 
 def rate_limit(request: Request) -> None:
@@ -140,7 +130,7 @@ def quota(request: Request) -> dict:
 
 
 @app.post("/api/analyses", status_code=202, dependencies=[Depends(require_token), Depends(rate_limit)])
-def submit(body: UrlSubmission | MessageSubmission, request: Request, urlhaus_key: str | None = Depends(user_urlhaus_key)) -> dict:
+def submit(body: UrlSubmission | MessageSubmission, request: Request) -> dict:
     limited = access.public_demo() and not is_operator(request)
     ip = _client(request)
     sk = access.session_key(request.headers.get("x-wtd-session"), ip)
@@ -152,11 +142,11 @@ def submit(body: UrlSubmission | MessageSubmission, request: Request, urlhaus_ke
             raise HTTPException(429, str(e))
     try:
         if body.kind == "url":
-            r = pipeline.submit_url(body.url, body.via, urlhaus_key)
+            r = pipeline.submit_url(body.url, body.via)
         else:
             from .message import analyse as msg
 
-            r = msg.submit_message(body.text, body.investigate_links, body.via, urlhaus_key)
+            r = msg.submit_message(body.text, body.investigate_links, body.via)
     except UrlRejected as e:
         if limited:
             access.QUOTA.refund(sk, ip)  # a rejected address does not use up the visitor's quota
@@ -165,15 +155,6 @@ def submit(body: UrlSubmission | MessageSubmission, request: Request, urlhaus_ke
     if left is not None:
         out["quota"] = left
     return out
-
-
-@app.post("/api/intel/urlhaus/check", dependencies=[Depends(require_token), Depends(rate_limit)])
-def urlhaus_key_check(urlhaus_key: str | None = Depends(user_urlhaus_key)) -> dict:
-    """Lets an investigator test their own URLhaus key before using it. The key is not stored."""
-    if not urlhaus_key:
-        raise HTTPException(422, "send the key in the X-URLhaus-Key header")
-    ok, message = intel.check_urlhaus_key(urlhaus_key)
-    return {"accepted": ok, "message": message}
 
 
 _quick_hits: dict[str, list[float]] = {}

@@ -134,7 +134,7 @@ QR_FINDING = dict(code="url.qr_delivery", title="Address was delivered in a QR c
                   lim="Context only; it does not change the classification.")
 
 
-def analyse_url(rid: str, url: str, via: str | None = None, urlhaus_key: str | None = None) -> None:
+def analyse_url(rid: str, url: str, via: str | None = None) -> None:
     r = STORE.get(rid)
     r.status = "running"
     STORE.save(r)
@@ -158,7 +158,7 @@ def analyse_url(rid: str, url: str, via: str | None = None, urlhaus_key: str | N
         fetch, upgrade = None, None
         shared = set(url_rules.brand_data()["shared_hosting"])
         # Intelligence first: never fetch a destination an authoritative source already lists as malicious.
-        io = intel.lookup(p.href, [p.host], shared, user_urlhaus_key=urlhaus_key)
+        io = intel.lookup(p.href, [p.host], shared)
         findings += io.findings
         checks += io.checks
         if not reason and any(f.strength == "authoritative" for f in io.findings):
@@ -254,7 +254,7 @@ def analyse_url(rid: str, url: str, via: str | None = None, urlhaus_key: str | N
         # Intelligence for redirect destinations discovered during the fetch
         extra = [h.host for h in r.redirects if h.host and h.host != p.host]
         if extra:
-            io2 = intel.lookup(None, extra, shared, user_urlhaus_key=urlhaus_key)
+            io2 = intel.lookup(None, extra, shared)
             findings += [f for f in io2.findings if f.code != "intel.no_listing"]
             checks += [c.model_copy(update={"name": c.name + ".redirects", "essential": False}) for c in io2.checks]
         # Indicators and correlation
@@ -316,9 +316,8 @@ def _finish(r: Report, findings: list[Finding], checks: list[CheckResult], limit
         log.warning("AI explanation failed: %s", type(e).__name__)
 
 
-def submit_url(url: str, via: str | None = None, urlhaus_key: str | None = None) -> Report:
-    """urlhaus_key: optional investigator-supplied key, held in memory for this analysis only (never saved)."""
+def submit_url(url: str, via: str | None = None) -> Report:
     p = parse_url(url)  # raises UrlRejected → 422
     r = new_report("url", defang(p.href), p.href)
-    EXECUTOR.submit(analyse_url, r.id, p.href, via, urlhaus_key)
+    EXECUTOR.submit(analyse_url, r.id, p.href, via)
     return r

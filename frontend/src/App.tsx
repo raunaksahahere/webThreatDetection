@@ -1,7 +1,6 @@
 import { useRoute, href } from './router';
 import { Header, MockBanner } from './components/Header';
 import { TokenDialog } from './components/TokenDialog';
-import { UrlhausKeyDialog } from './components/UrlhausKeyDialog';
 import { PublicDemoBanner } from './components/PublicDemo';
 import { InvestigatePage } from './pages/InvestigatePage';
 import { ReportPage } from './pages/ReportPage';
@@ -48,7 +47,6 @@ export function App() {
         <span>No automated check can prove a site or message is safe.</span>
       </footer>
       <TokenDialog />
-      <UrlhausKeyDialog />
     </>
   );
 }
