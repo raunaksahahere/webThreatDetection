@@ -4,7 +4,7 @@
 export type Classification = 'Low Risk' | 'Suspicious' | 'High Risk' | 'Confirmed Malicious' | 'Inconclusive';
 export type Severity = 'info' | 'low' | 'medium' | 'high' | 'critical';
 export type Strength = 'weak' | 'moderate' | 'strong' | 'authoritative';
-export type CheckStatus = 'succeeded' | 'failed' | 'unavailable' | 'skipped' | 'not_implemented';
+export type CheckStatus = 'succeeded' | 'failed' | 'unavailable' | 'skipped' | 'inconclusive' | 'not_implemented';
 export type Provenance = 'live' | 'cached' | 'dataset' | 'synthetic' | 'ai';
 export type AIStatus = 'ok' | 'unavailable' | 'failed' | 'disabled' | 'rejected';
 export type Module = 'url' | 'dns' | 'intel' | 'tls' | 'web' | 'content' | 'message' | 'correlation' | 'ai';

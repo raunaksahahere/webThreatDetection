@@ -10,7 +10,7 @@ import uuid
 from concurrent.futures import ThreadPoolExecutor
 
 from . import intel
-from .checks import dns_checks, tls_checks, url_rules, web_checks
+from .checks import ct_checks, dns_checks, tls_checks, url_rules, web_checks
 from .classify import classify
 from .config import SETTINGS
 from .inspector import run_inspection
@@ -22,6 +22,7 @@ from .store import Store
 log = logging.getLogger("wtd.pipeline")
 STORE = Store(SETTINGS.db_path, SETTINGS.database_url)
 EXECUTOR = ThreadPoolExecutor(max_workers=3, thread_name_prefix="analysis")
+CT_EXECUTOR = ThreadPoolExecutor(max_workers=3, thread_name_prefix="ct")  # CT lookups overlap the DNS/RDAP steps instead of adding to them
 
 URL_LIMITATIONS = [
     "Automated checks cannot prove a site is safe; a Low Risk result means no significant indicator was found in the checks listed.",
@@ -29,6 +30,7 @@ URL_LIMITATIONS = [
     "Threat-intelligence sources have limited scope (URLhaus: malware downloads; CERT Polska: phishing targeting Poland). Not being listed is not evidence of safety.",
     "The brand list is small and curated; impersonation of brands outside it is detected only through generic indicators.",
     "Revocation status is reported separately and may be unavailable; a valid certificate does not mean the site is legitimate.",
+    "Certificate Transparency records come from a public monitoring service's index, not from verifying log proofs; the index can lag the logs.",
 ]
 
 
@@ -156,6 +158,7 @@ def analyse_url(rid: str, url: str, via: str | None = None) -> None:
         reason = fetch_block_reason(p)
         registrable = facts.get("registrable_domain") or ""
         fetch, upgrade = None, None
+        ct_future, ct_tsum = None, None
         shared = set(url_rules.brand_data()["shared_hosting"])
         # Intelligence first: never fetch a destination an authoritative source already lists as malicious.
         io = intel.lookup(p.href, [p.host], shared)
@@ -211,6 +214,8 @@ def analyse_url(rid: str, url: str, via: str | None = None) -> None:
                     checks.append(_check("tls.certificate", Module.tls, CheckStatus.succeeded, True, f"chain of {len(chain)} from {tls_hop['host']}: {tsum.get('verification')}"))
                     checks.append(_check("tls.distrust_lists", Module.tls, CheckStatus.succeeded, False,
                                          f"{tsum.get('distrust_hits', 0)} hit(s) across: {', '.join(tsum.get('distrust_sources', []))}"))
+                    ct_future = CT_EXECUTOR.submit(ct_checks.analyse, tls_hop["host"], ct_checks.leaf_from_chain(chain[0], tsum))
+                    ct_tsum = tsum
                     oc = insp.get("ocsp") or {}
                     if tsum.get("ocsp_urls") and oc.get("body_b64") and oc.get("host") == tls_hop["host"]:
                         rv = tls_checks.interpret_ocsp(chain, base64.b64decode(oc["body_b64"]))
@@ -251,6 +256,15 @@ def analyse_url(rid: str, url: str, via: str | None = None) -> None:
                 checks.append(achk)
                 if afacts:
                     r.subject = {**r.subject, "domain_age": afacts}
+        if ct_future is not None:  # started right after the TLS analysis; DNS/RDAP above ran meanwhile
+            try:
+                ctf, ctc, cts = ct_future.result(timeout=25)
+                findings += ctf
+                checks.append(ctc)
+                if cts and ct_tsum is not None:
+                    ct_tsum["ct_lookup"] = cts
+            except Exception as e:  # a CT problem is recorded, never allowed to fail the analysis
+                checks.append(_check("tls.ct_lookup", Module.tls, CheckStatus.failed, False, f"{type(e).__name__} while looking up CT records"))
         # Intelligence for redirect destinations discovered during the fetch
         extra = [h.host for h in r.redirects if h.host and h.host != p.host]
         if extra:

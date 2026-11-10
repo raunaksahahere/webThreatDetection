@@ -212,6 +212,10 @@
 .tally-cell.chk-unavailable {
   background: var(--warn);
 }
+.tally-cell.chk-inconclusive {
+  background: transparent;
+  border: 2px solid var(--warn);
+}
 .tally-cell.chk-skipped {
   background: transparent;
   border: 1px dashed var(--ink-3);

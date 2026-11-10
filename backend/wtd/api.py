@@ -15,6 +15,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from . import access, intel, pipeline
+from .checks import ct_checks
 from .ai.explain import status as explain_status
 from .config import ROOT, SETTINGS
 from .models import iso
@@ -112,7 +113,8 @@ def health() -> dict:
     return {"ok": True, "version": app.version, "chain": chain.status(),
             "ai": explain_status(),
             "intel": {"urlhaus": "configured" if intel.urlhaus_key() else "not configured",
-                      "certpl": f"{len(intel.CERTPL.domains)} domains" if intel.CERTPL.domains else "not loaded"},
+                      "certpl": f"{len(intel.CERTPL.domains)} domains" if intel.CERTPL.domains else "not loaded",
+                      "ct_lookup": "enabled" if ct_checks.enabled() else "disabled"},
             "access": ({"mode": "public_demo", "session_limit": access.session_limit(), "daily_limit": access.daily_limit(),
                         "chain_actions": "open" if access.local_chain() else "operator token"}
                        if access.public_demo() else {"mode": "operator_token"})}
