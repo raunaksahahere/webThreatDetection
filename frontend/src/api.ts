@@ -132,19 +132,22 @@ function obtainToken(reason: TokenReason): Promise<string> {
 
 // ---------------- public demo: access mode and browser session ----------------
 
-let accessPromise: Promise<AccessInfo> | null = null;
+let healthPromise: Promise<Health> | null = null;
+
+/** /api/health, fetched once per page load and shared by everything that needs the access mode or the chain state. */
+export function healthInfo(): Promise<Health> {
+  if (!healthPromise)
+    healthPromise = getHealth().catch((e: unknown) => {
+      healthPromise = null;
+      throw e;
+    });
+  return healthPromise;
+}
 
 /** Access mode from /api/health, fetched once per page load. */
 export function accessInfo(): Promise<AccessInfo> {
   if (MOCK_MODE) return Promise.resolve({ mode: 'operator_token' });
-  if (!accessPromise)
-    accessPromise = getHealth()
-      .then((h) => h.access ?? { mode: 'operator_token' as const })
-      .catch((e: unknown) => {
-        accessPromise = null;
-        throw e;
-      });
-  return accessPromise;
+  return healthInfo().then((h) => h.access ?? { mode: 'operator_token' as const });
 }
 
 async function isPublicDemo(): Promise<boolean> {

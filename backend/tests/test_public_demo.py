@@ -109,3 +109,30 @@ def test_local_chain_reads_deployment(tmp_path, monkeypatch):
     assert access.local_chain() is False
     f.write_text('{"chainId": 31337}')
     assert access.local_chain() is True
+
+
+# ---- chain status: a stable reason for the dashboard, and no RPC URL in the public health response
+def test_chain_status_says_why_the_registry_is_unavailable(tmp_path, monkeypatch):
+    from dataclasses import replace
+
+    from wtd import config
+    from wtd.registry import chain
+
+    monkeypatch.setattr(config, "SETTINGS", replace(config.SETTINGS, deployment_file=tmp_path / "none.json"))
+    monkeypatch.setattr(chain, "SETTINGS", config.SETTINGS)
+    monkeypatch.setattr(chain, "_w3", lambda: object())
+    s = chain.status()
+    assert s["connected"] is False and s["kind"] == "not_deployed" and "scripts/deploy.sh" in s["error"]
+
+
+def test_unreachable_rpc_is_reported_without_echoing_its_url(monkeypatch):
+    from dataclasses import replace
+
+    from wtd import config
+    from wtd.registry import chain
+
+    secret = "https://rpc.example.invalid/v2/SECRET-API-KEY"
+    monkeypatch.setattr(chain, "SETTINGS", replace(config.SETTINGS, rpc_url=secret))
+    s = chain.status()
+    assert s["connected"] is False and s["kind"] == "rpc_unreachable"
+    assert "SECRET-API-KEY" not in str(s) and "rpc.example.invalid" not in str(s)

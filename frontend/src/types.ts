@@ -160,7 +160,7 @@ export interface Report {
 export interface Health {
   ok: boolean;
   version?: string;
-  chain?: { connected?: boolean; chain_id?: number | null; contract?: string | null };
+  chain?: { connected?: boolean; chain_id?: number | null; contract?: string | null; kind?: string };
   ai?: { provider?: string | null; model?: string | null; status?: string | null };
   intel?: { [source: string]: unknown };
   access?: AccessInfo;
