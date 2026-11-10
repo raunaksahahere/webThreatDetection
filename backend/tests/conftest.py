@@ -15,5 +15,7 @@ os.environ["WTD_PUBLIC_DEMO"] = "0"
 os.environ["GEMINI_API_KEY"] = ""
 os.environ["WTD_AI_PROVIDERS"] = "gemini,openrouter,local"
 os.environ.pop("WTD_GEMINI_MODELS", None)
-# No test may reach a third-party service by accident: CT lookups are off unless a test enables them.
+# No test may reach a third-party service by accident: CT lookups and the extra intelligence sources are off unless a test enables them.
 os.environ["WTD_CT"] = "0"
+os.environ["GSB_API_KEY"] = ""
+os.environ["WTD_OPENPHISH"] = "0"

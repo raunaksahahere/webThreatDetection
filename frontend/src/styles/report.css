@@ -1564,3 +1564,12 @@
     padding: 0.75rem 0.85rem;
   }
 }
+
+.advisory-note {
+  margin: 0.4rem 0 0.2rem;
+  font-size: 0.82rem;
+  color: var(--ink-2);
+}
+.advisory-note a {
+  font-weight: 600;
+}

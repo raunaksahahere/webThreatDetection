@@ -6,6 +6,9 @@ import { ProvenanceBadge, SeverityBadge, StrengthBadge } from '../components/Bad
 import { DefinitionList } from '../components/ValueView';
 import { Empty } from '../components/Section';
 
+// Required by the Safe Browsing usage terms on every warning derived from Google data, and only on those.
+const GSB_ADVISORY_URL = 'https://developers.google.com/safe-browsing/v4/advisory';
+
 export interface FocusRequest {
   id: string;
   n: number;
@@ -41,6 +44,14 @@ function FindingRow({ f, open, highlighted, onToggle, rowRef, basis }: { f: Find
             <span className="mini-label">Observed</span>
             <p>{f.observed}</p>
           </div>
+          {f.code === 'intel.gsb_listed' ? (
+            <p className="advisory-note">
+              <a href={GSB_ADVISORY_URL} target="_blank" rel="noopener noreferrer">
+                Advisory provided by Google
+              </a>
+              . Safe Browsing protection is not perfect: it can miss unsafe sites and can list safe ones in error.
+            </p>
+          ) : null}
           <div className="finding-grid">
             <div>
               <span className="mini-label">Impact</span>
