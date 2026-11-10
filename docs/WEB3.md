@@ -80,6 +80,8 @@ third-party trust.
 
 ## Public Sepolia evidence
 
+How the dashboard presents this: it reads the chain state from `/api/health` (`chain.connected`, `chain.chain_id`, `chain.kind`). With no deployment configured it shows "Free demonstration mode", says public registration is pending Sepolia setup, and disables register, revise and review with that reason. On the local anvil chain it says so ("not public, reset on restart") and the actions work. It names the Sepolia network and contract only when the server reports a connected Sepolia deployment. Reading and verifying never need a wallet.
+
 Everything under "Observed results" below ran on a **local anvil chain**, which proves the contract's rules and the verifier's behaviour but not public availability. Anvil's developer RPCs can rewrite local state, and nobody outside this machine can check it.
 
 The public-testnet run is automated by `scripts/sepolia_evidence.py` after `scripts/testnet.sh deploy` (it needs a funded Sepolia reporter key; see `scripts/testnet.sh keys` and `balance`). It confirms the chain id, bytecode, deploy receipt and roles, registers the synthetic test-vector report, revises and reviews it, runs the independent verifier over a public RPC (match, tampered, superseded, current, validated), and writes `docs/SEPOLIA_EVIDENCE.md`, `docs/evidence/sepolia-demo.json` and `docs/evidence/sepolia-demo.txt` from the observed values only. **Status in this snapshot: not yet run on Sepolia** (the testnet reporter address held no test ETH), so those files do not exist yet and nothing here claims a public deployment. The script is rehearsed on a disposable local chain with a different chain id; a rehearsal never writes to the evidence folder.

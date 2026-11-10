@@ -60,27 +60,41 @@ Demonstrations:
   # exit 0 = matches latest revision · 2 = superseded revision · 1 = altered / not anchored · 3 = error
   ```
 
+## Free demonstration and blockchain status
+
+**No wallet and no test ETH are needed to use the demonstration.** The dashboard has no wallet-connection feature: investigating, reading reports and verifying a registered report never ask you to connect or fund anything. When a registry is available, the server signs registrations with its own keys.
+
+| | Without a wallet or test ETH | Status |
+|---|---|---|
+| Investigate a link, domain, message, raw e-mail or QR code; read the report, its evidence, limitations and history | Yes | Works. Optional sources report honestly when unavailable: AI needs a provider key, Safe Browsing needs `GSB_API_KEY`, OpenPhish is off by default (see Limitations) |
+| Register, revise and review a report on a **local** Anvil chain | Yes (the server holds anvil's public test keys, used only on chain id 31337) | Implemented and tested: 22 contract tests, cross-language vectors, a 13-step browser run. The dashboard labels it local: it is not public and resets when the server restarts |
+| Verify a registered report independently (`verifier/verify.mjs`) | Yes: a read-only RPC call, no signing | Works wherever a real registered report and a configured network exist |
+| Register, revise or review on **public Sepolia** | Not offered yet | **Pending.** Nothing is deployed on Sepolia, and the dashboard says so and disables those actions with the reason |
+
+Sepolia ETH is **test currency** from free faucets; no real cryptocurrency purchase is needed for the intended testnet demonstration. Test ETH is not the only missing piece: a contract must also be deployed, its reporter and reviewer roles granted, and the server pointed at it. Deferred setup, in order:
+
+1. **Get free Sepolia test ETH** for the reporter address printed by `scripts/testnet.sh balance` (about 0.02 ETH). The reviewer account is topped up from the reporter during deployment. If `.env.sepolia` does not exist yet, `scripts/testnet.sh keys` creates two testnet-only keys in it (mode 600, gitignored; it prints only public addresses).
+2. **Keep the testnet environment private.** `.env.sepolia` holds `WTD_RPC_URL`, `WTD_DEPLOYMENT`, `WTD_REPORTER_KEY` and `WTD_REVIEWER_KEY`. Never commit it or reuse these keys anywhere with value.
+3. **Deploy the existing registry:** `scripts/testnet.sh deploy`. It refuses any chain id but 11155111, grants the roles and writes `deployments/sepolia.json`.
+4. **Confirm contract, chain, permissions and configuration.** `scripts/testnet.sh balance` shows chain id 11155111; the next step also re-checks bytecode, the deploy receipt and the owner/reporter/reviewer roles on chain before it signs anything.
+5. **Run the public evidence script:** `backend/.venv/bin/python scripts/sepolia_evidence.py`. It registers a synthetic report, revises and reviews it, runs the independent verifier against a public RPC (match, tampered, superseded, current) and writes `docs/SEPOLIA_EVIDENCE.md` and `docs/evidence/`.
+6. **Update the status only after the run succeeds:** change the "Public" row of the table below to point at the generated evidence. Do not edit it before.
+
+To make a running server use Sepolia: locally, `WTD_NETWORK=sepolia scripts/api.sh restart`; on the hosted service, the commented `WTD_CHAIN=external` block in `render.yaml` (needs `deployments/sepolia.json` committed and `WTD_REPORTER_KEY` / `WTD_REVIEWER_KEY` set as secrets; see `docs/DEPLOY.md`). On a public chain, registering, revising and reviewing need the operator token, because the server pays the testnet gas; reading and verifying need nothing.
+
 ## Verification evidence
 
 | | Network | Status | Where |
 |---|---|---|---|
-| **Public** | Ethereum Sepolia (chain id 11155111) | **Not deployed yet.** The testnet reporter address held no test ETH when this snapshot was prepared. The tooling is ready and rehearsed on a disposable local chain; no public contract address or transaction is claimed anywhere in this repository. | After the steps below: `docs/SEPOLIA_EVIDENCE.md`, `docs/evidence/sepolia-demo.json` |
+| **Public** | Ethereum Sepolia (chain id 11155111) | **Not deployed yet.** The testnet reporter address held no test ETH when this snapshot was prepared. The tooling is ready and rehearsed on a disposable local chain; no public contract address or transaction is claimed anywhere in this repository. | After the steps above: `docs/SEPOLIA_EVIDENCE.md`, `docs/evidence/sepolia-demo.json` |
 | **Local** | anvil (chain id 31337) | Observed 2026-11-08: register, verify, tamper, revise, review, restart | `docs/WEB3.md` ("Observed results"), `verifier/e2e-demo.sh`. Anvil is a developer chain whose RPCs can rewrite state, so this shows the contract's rules, not public availability |
-
-To produce the public evidence (fund the reporter address printed by `scripts/testnet.sh balance` from a Sepolia faucet first):
-
-```bash
-scripts/testnet.sh deploy                                # deploys ThreatReportRegistry, grants roles, writes deployments/sepolia.json
-backend/.venv/bin/python scripts/sepolia_evidence.py     # registers a synthetic report, revises and reviews it, runs the independent verifier
-                                                         # against a public RPC (match, tampered, superseded, current), writes docs/SEPOLIA_EVIDENCE.md
-```
 
 Only a salted commitment hash, a classification code and a note hash go on-chain, and the demonstration report is a synthetic test vector. A match proves a report is unchanged since registration, not that it is true.
 
 Tests:
 
 ```bash
-(cd backend && .venv/bin/python -m pytest -q)        # 249 tests: request boundary, TLS, CT lookup, intelligence sources, classifier, messages, e-mail, AI validation (explanations and campaign briefs), message evaluation, API, persistence
+(cd backend && .venv/bin/python -m pytest -q)        # 251 tests: request boundary, TLS, CT lookup, intelligence sources, classifier, messages, e-mail, AI validation (explanations and campaign briefs), message evaluation, API, persistence
 (cd contracts && forge test)                          # 22 contract tests incl. unauthorised writes and revision ordering
 node verifier/test-vectors.mjs                        # cross-language canonicalization vectors
 backend/.venv/bin/python scripts/run_cases.py         # documented cases through the live API
