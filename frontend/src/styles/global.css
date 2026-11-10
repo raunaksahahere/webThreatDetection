@@ -920,6 +920,10 @@ textarea {
 .chk-unavailable {
   color: var(--warn);
 }
+.chk-inconclusive {
+  color: var(--warn);
+  font-style: italic;
+}
 .chk-skipped {
   color: var(--ink-3);
 }

@@ -7,7 +7,7 @@ Rules:
 - Every important finding carries: id, observed fact, source, timestamp, severity,
   evidence strength, impact, recommendation, limitation, provenance.
 - Check outcomes are tracked separately from findings: succeeded / failed /
-  unavailable / skipped / not_implemented. Missing evidence is never a clean result.
+  unavailable / skipped / inconclusive / not_implemented. Missing evidence is never a clean result.
 """
 from __future__ import annotations
 
@@ -80,7 +80,8 @@ class CheckStatus(str, Enum):
     succeeded = "succeeded"
     failed = "failed"  # attempted, errored (timeout, refused, parse error)
     unavailable = "unavailable"  # dependency not configured or provider down
-    skipped = "skipped"  # not applicable or blocked by policy (e.g. SSRF guard)
+    skipped = "skipped"  # not applicable, disabled by the operator, or blocked by policy (e.g. SSRF guard)
+    inconclusive = "inconclusive"  # ran, but the data was partial or contradictory, so no conclusion is drawn from it
     not_implemented = "not_implemented"
 
 

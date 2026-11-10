@@ -1,0 +1,2468 @@
+{
+ "config": {
+  "run_at": "2026-11-10T12:16:17Z",
+  "wtd_commit": "90a0220e018447395480ec2017218da04c0bb2e4",
+  "wtd_tree_dirty": false,
+  "python": "3.13.15",
+  "machine": "Linux x86_64",
+  "dev_share_threshold": 77,
+  "flagged_classes": [
+   "Confirmed Malicious",
+   "High Risk",
+   "Suspicious"
+  ],
+  "evaluated": "message rules + static URL rules + production classifier; offline"
+ },
+ "datasets": {
+  "scamshield_in": {
+   "name": "ScamShield-IN",
+   "url": "https://huggingface.co/datasets/haxrits/ScamShield-IN",
+   "revision": "3009fb07af780f607e4c923ba6bda6b00d4672e8",
+   "sha256": "cc714da9b73f11ee4433087b4b05fe43c502a0f7299898cb7956fa9c5f25cee9",
+   "licence": "OpenRAIL (use-based restrictions; see the dataset card)"
+  },
+  "uci_sms_spam": {
+   "name": "SMS Spam Collection v.1",
+   "url": "https://archive.ics.uci.edu/dataset/228/sms+spam+collection",
+   "doi": "10.24432/C5CC84",
+   "sha256": "7d039a24a6083ed9ef0f806ebad56bbb976e3aeb8de05669173bfdc4996c239d",
+   "licence": "CC BY 4.0",
+   "citation": "Almeida, Gómez Hidalgo and Yamakami, 'Contributions to the Study of SMS Spam Filtering: New Collection and Results', ACM DocEng 2011"
+  }
+ },
+ "scamshield_rows_total": 8066,
+ "build": {
+  "scamshield_labelled": 578,
+  "uci": 5574,
+  "uci_removed_overlap_with_scamshield": 0,
+  "conflicting_labels_removed": 0,
+  "exact_duplicates_removed": 418,
+  "final_rows": 5734
+ },
+ "strata_counts": {
+  "scam_specific": 62,
+  "legit_scamshield": 448,
+  "ambiguous_promo": 65,
+  "legit_uci_ham": 4517,
+  "uci_spam": 642
+ },
+ "split_counts": {
+  "holdout": 4036,
+  "dev": 1698
+ },
+ "summary": {
+  "holdout": {
+   "n": 4036,
+   "strata": {
+    "scam_specific": {
+     "n": 48,
+     "by_classification": {
+      "Low Risk": 19,
+      "Suspicious": 20,
+      "High Risk": 9,
+      "Confirmed Malicious": 0,
+      "Inconclusive": 0
+     },
+     "flagged": {
+      "k": 29,
+      "n": 48,
+      "pct": 60.4,
+      "ci95_pct": [
+       46.3,
+       73.0
+      ]
+     },
+     "high_or_confirmed": {
+      "k": 9,
+      "n": 48,
+      "pct": 18.8,
+      "ci95_pct": [
+       10.2,
+       31.9
+      ]
+     },
+     "inconclusive": {
+      "k": 0,
+      "n": 48,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       7.4
+      ]
+     }
+    },
+    "legit_scamshield": {
+     "n": 328,
+     "by_classification": {
+      "Low Risk": 318,
+      "Suspicious": 10,
+      "High Risk": 0,
+      "Confirmed Malicious": 0,
+      "Inconclusive": 0
+     },
+     "flagged": {
+      "k": 10,
+      "n": 328,
+      "pct": 3.0,
+      "ci95_pct": [
+       1.7,
+       5.5
+      ]
+     },
+     "high_or_confirmed": {
+      "k": 0,
+      "n": 328,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       1.2
+      ]
+     },
+     "inconclusive": {
+      "k": 0,
+      "n": 328,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       1.2
+      ]
+     }
+    },
+    "legit_uci_ham": {
+     "n": 3177,
+     "by_classification": {
+      "Low Risk": 3176,
+      "Suspicious": 1,
+      "High Risk": 0,
+      "Confirmed Malicious": 0,
+      "Inconclusive": 0
+     },
+     "flagged": {
+      "k": 1,
+      "n": 3177,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.2
+      ]
+     },
+     "high_or_confirmed": {
+      "k": 0,
+      "n": 3177,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.1
+      ]
+     },
+     "inconclusive": {
+      "k": 0,
+      "n": 3177,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.1
+      ]
+     }
+    },
+    "ambiguous_promo": {
+     "n": 43,
+     "by_classification": {
+      "Low Risk": 39,
+      "Suspicious": 3,
+      "High Risk": 1,
+      "Confirmed Malicious": 0,
+      "Inconclusive": 0
+     },
+     "flagged": {
+      "k": 4,
+      "n": 43,
+      "pct": 9.3,
+      "ci95_pct": [
+       3.7,
+       21.6
+      ]
+     },
+     "high_or_confirmed": {
+      "k": 1,
+      "n": 43,
+      "pct": 2.3,
+      "ci95_pct": [
+       0.4,
+       12.1
+      ]
+     },
+     "inconclusive": {
+      "k": 0,
+      "n": 43,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       8.2
+      ]
+     }
+    },
+    "uci_spam": {
+     "n": 440,
+     "by_classification": {
+      "Low Risk": 439,
+      "Suspicious": 1,
+      "High Risk": 0,
+      "Confirmed Malicious": 0,
+      "Inconclusive": 0
+     },
+     "flagged": {
+      "k": 1,
+      "n": 440,
+      "pct": 0.2,
+      "ci95_pct": [
+       0.0,
+       1.3
+      ]
+     },
+     "high_or_confirmed": {
+      "k": 0,
+      "n": 440,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.9
+      ]
+     },
+     "inconclusive": {
+      "k": 0,
+      "n": 440,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.9
+      ]
+     }
+    }
+   },
+   "confusion": {
+    "tp": 29,
+    "fn": 19,
+    "fp": 11,
+    "tn": 3494,
+    "recall": {
+     "k": 29,
+     "n": 48,
+     "pct": 60.4,
+     "ci95_pct": [
+      46.3,
+      73.0
+     ]
+    },
+    "false_positive_rate": {
+     "k": 11,
+     "n": 3505,
+     "pct": 0.3,
+     "ci95_pct": [
+      0.2,
+      0.6
+     ]
+    },
+    "precision_on_this_mixture": {
+     "k": 29,
+     "n": 40,
+     "pct": 72.5,
+     "ci95_pct": [
+      57.2,
+      83.9
+     ]
+    },
+    "abstentions": {
+     "k": 0,
+     "n": 3553,
+     "pct": 0.0,
+     "ci95_pct": [
+      0.0,
+      0.1
+     ]
+    }
+   },
+   "confusion_scamshield_only": {
+    "tp": 29,
+    "fn": 19,
+    "fp": 10,
+    "tn": 318,
+    "recall": {
+     "k": 29,
+     "n": 48,
+     "pct": 60.4,
+     "ci95_pct": [
+      46.3,
+      73.0
+     ]
+    },
+    "false_positive_rate": {
+     "k": 10,
+     "n": 328,
+     "pct": 3.0,
+     "ci95_pct": [
+      1.7,
+      5.5
+     ]
+    },
+    "precision_on_this_mixture": {
+     "k": 29,
+     "n": 39,
+     "pct": 74.4,
+     "ci95_pct": [
+      58.9,
+      85.4
+     ]
+    },
+    "abstentions": {
+     "k": 0,
+     "n": 376,
+     "pct": 0.0,
+     "ci95_pct": [
+      0.0,
+      1.0
+     ]
+    }
+   },
+   "recall_by_fraud_type": {
+    "Fake Police/Court Notice": {
+     "k": 3,
+     "n": 6,
+     "pct": 50.0,
+     "ci95_pct": [
+      18.8,
+      81.2
+     ]
+    },
+    "Insurance Scam": {
+     "k": 3,
+     "n": 5,
+     "pct": 60.0,
+     "ci95_pct": [
+      23.1,
+      88.2
+     ]
+    },
+    "Investment Scam": {
+     "k": 0,
+     "n": 5,
+     "pct": 0.0,
+     "ci95_pct": [
+      0.0,
+      43.4
+     ]
+    },
+    "Job Scam": {
+     "k": 2,
+     "n": 2,
+     "pct": 100.0,
+     "ci95_pct": [
+      34.2,
+      100.0
+     ]
+    },
+    "KYC Scam": {
+     "k": 8,
+     "n": 9,
+     "pct": 88.9,
+     "ci95_pct": [
+      56.5,
+      98.0
+     ]
+    },
+    "Loan Scam": {
+     "k": 2,
+     "n": 5,
+     "pct": 40.0,
+     "ci95_pct": [
+      11.8,
+      76.9
+     ]
+    },
+    "Lottery/Prize Scam": {
+     "k": 4,
+     "n": 6,
+     "pct": 66.7,
+     "ci95_pct": [
+      30.0,
+      90.3
+     ]
+    },
+    "OTP Phishing": {
+     "k": 2,
+     "n": 4,
+     "pct": 50.0,
+     "ci95_pct": [
+      15.0,
+      85.0
+     ]
+    },
+    "UPI Request Scam": {
+     "k": 5,
+     "n": 6,
+     "pct": 83.3,
+     "ci95_pct": [
+      43.6,
+      97.0
+     ]
+    }
+   }
+  },
+  "dev": {
+   "n": 1698,
+   "strata": {
+    "scam_specific": {
+     "n": 14,
+     "by_classification": {
+      "Low Risk": 8,
+      "Suspicious": 2,
+      "High Risk": 4,
+      "Confirmed Malicious": 0,
+      "Inconclusive": 0
+     },
+     "flagged": {
+      "k": 6,
+      "n": 14,
+      "pct": 42.9,
+      "ci95_pct": [
+       21.4,
+       67.4
+      ]
+     },
+     "high_or_confirmed": {
+      "k": 4,
+      "n": 14,
+      "pct": 28.6,
+      "ci95_pct": [
+       11.7,
+       54.6
+      ]
+     },
+     "inconclusive": {
+      "k": 0,
+      "n": 14,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       21.5
+      ]
+     }
+    },
+    "legit_scamshield": {
+     "n": 120,
+     "by_classification": {
+      "Low Risk": 120,
+      "Suspicious": 0,
+      "High Risk": 0,
+      "Confirmed Malicious": 0,
+      "Inconclusive": 0
+     },
+     "flagged": {
+      "k": 0,
+      "n": 120,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       3.1
+      ]
+     },
+     "high_or_confirmed": {
+      "k": 0,
+      "n": 120,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       3.1
+      ]
+     },
+     "inconclusive": {
+      "k": 0,
+      "n": 120,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       3.1
+      ]
+     }
+    },
+    "legit_uci_ham": {
+     "n": 1340,
+     "by_classification": {
+      "Low Risk": 1339,
+      "Suspicious": 1,
+      "High Risk": 0,
+      "Confirmed Malicious": 0,
+      "Inconclusive": 0
+     },
+     "flagged": {
+      "k": 1,
+      "n": 1340,
+      "pct": 0.1,
+      "ci95_pct": [
+       0.0,
+       0.4
+      ]
+     },
+     "high_or_confirmed": {
+      "k": 0,
+      "n": 1340,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.3
+      ]
+     },
+     "inconclusive": {
+      "k": 0,
+      "n": 1340,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.3
+      ]
+     }
+    },
+    "ambiguous_promo": {
+     "n": 22,
+     "by_classification": {
+      "Low Risk": 22,
+      "Suspicious": 0,
+      "High Risk": 0,
+      "Confirmed Malicious": 0,
+      "Inconclusive": 0
+     },
+     "flagged": {
+      "k": 0,
+      "n": 22,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       14.9
+      ]
+     },
+     "high_or_confirmed": {
+      "k": 0,
+      "n": 22,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       14.9
+      ]
+     },
+     "inconclusive": {
+      "k": 0,
+      "n": 22,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       14.9
+      ]
+     }
+    },
+    "uci_spam": {
+     "n": 202,
+     "by_classification": {
+      "Low Risk": 202,
+      "Suspicious": 0,
+      "High Risk": 0,
+      "Confirmed Malicious": 0,
+      "Inconclusive": 0
+     },
+     "flagged": {
+      "k": 0,
+      "n": 202,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       1.9
+      ]
+     },
+     "high_or_confirmed": {
+      "k": 0,
+      "n": 202,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       1.9
+      ]
+     },
+     "inconclusive": {
+      "k": 0,
+      "n": 202,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       1.9
+      ]
+     }
+    }
+   },
+   "confusion": {
+    "tp": 6,
+    "fn": 8,
+    "fp": 1,
+    "tn": 1459,
+    "recall": {
+     "k": 6,
+     "n": 14,
+     "pct": 42.9,
+     "ci95_pct": [
+      21.4,
+      67.4
+     ]
+    },
+    "false_positive_rate": {
+     "k": 1,
+     "n": 1460,
+     "pct": 0.1,
+     "ci95_pct": [
+      0.0,
+      0.4
+     ]
+    },
+    "precision_on_this_mixture": {
+     "k": 6,
+     "n": 7,
+     "pct": 85.7,
+     "ci95_pct": [
+      48.7,
+      97.4
+     ]
+    },
+    "abstentions": {
+     "k": 0,
+     "n": 1474,
+     "pct": 0.0,
+     "ci95_pct": [
+      0.0,
+      0.3
+     ]
+    }
+   },
+   "confusion_scamshield_only": {
+    "tp": 6,
+    "fn": 8,
+    "fp": 0,
+    "tn": 120,
+    "recall": {
+     "k": 6,
+     "n": 14,
+     "pct": 42.9,
+     "ci95_pct": [
+      21.4,
+      67.4
+     ]
+    },
+    "false_positive_rate": {
+     "k": 0,
+     "n": 120,
+     "pct": 0.0,
+     "ci95_pct": [
+      0.0,
+      3.1
+     ]
+    },
+    "precision_on_this_mixture": {
+     "k": 6,
+     "n": 6,
+     "pct": 100.0,
+     "ci95_pct": [
+      61.0,
+      100.0
+     ]
+    },
+    "abstentions": {
+     "k": 0,
+     "n": 134,
+     "pct": 0.0,
+     "ci95_pct": [
+      0.0,
+      2.8
+     ]
+    }
+   },
+   "recall_by_fraud_type": {
+    "Fake Police/Court Notice": {
+     "k": 0,
+     "n": 1,
+     "pct": 0.0,
+     "ci95_pct": [
+      0.0,
+      79.3
+     ]
+    },
+    "Investment Scam": {
+     "k": 0,
+     "n": 2,
+     "pct": 0.0,
+     "ci95_pct": [
+      0.0,
+      65.8
+     ]
+    },
+    "Job Scam": {
+     "k": 0,
+     "n": 2,
+     "pct": 0.0,
+     "ci95_pct": [
+      0.0,
+      65.8
+     ]
+    },
+    "KYC Scam": {
+     "k": 2,
+     "n": 2,
+     "pct": 100.0,
+     "ci95_pct": [
+      34.2,
+      100.0
+     ]
+    },
+    "Lottery/Prize Scam": {
+     "k": 1,
+     "n": 1,
+     "pct": 100.0,
+     "ci95_pct": [
+      20.7,
+      100.0
+     ]
+    },
+    "OTP Phishing": {
+     "k": 2,
+     "n": 4,
+     "pct": 50.0,
+     "ci95_pct": [
+      15.0,
+      85.0
+     ]
+    },
+    "UPI Request Scam": {
+     "k": 1,
+     "n": 2,
+     "pct": 50.0,
+     "ci95_pct": [
+      9.5,
+      90.5
+     ]
+    }
+   }
+  },
+  "all": {
+   "n": 5734,
+   "strata": {
+    "scam_specific": {
+     "n": 62,
+     "by_classification": {
+      "Low Risk": 27,
+      "Suspicious": 22,
+      "High Risk": 13,
+      "Confirmed Malicious": 0,
+      "Inconclusive": 0
+     },
+     "flagged": {
+      "k": 35,
+      "n": 62,
+      "pct": 56.5,
+      "ci95_pct": [
+       44.1,
+       68.1
+      ]
+     },
+     "high_or_confirmed": {
+      "k": 13,
+      "n": 62,
+      "pct": 21.0,
+      "ci95_pct": [
+       12.7,
+       32.6
+      ]
+     },
+     "inconclusive": {
+      "k": 0,
+      "n": 62,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       5.8
+      ]
+     }
+    },
+    "legit_scamshield": {
+     "n": 448,
+     "by_classification": {
+      "Low Risk": 438,
+      "Suspicious": 10,
+      "High Risk": 0,
+      "Confirmed Malicious": 0,
+      "Inconclusive": 0
+     },
+     "flagged": {
+      "k": 10,
+      "n": 448,
+      "pct": 2.2,
+      "ci95_pct": [
+       1.2,
+       4.1
+      ]
+     },
+     "high_or_confirmed": {
+      "k": 0,
+      "n": 448,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.9
+      ]
+     },
+     "inconclusive": {
+      "k": 0,
+      "n": 448,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.9
+      ]
+     }
+    },
+    "legit_uci_ham": {
+     "n": 4517,
+     "by_classification": {
+      "Low Risk": 4515,
+      "Suspicious": 2,
+      "High Risk": 0,
+      "Confirmed Malicious": 0,
+      "Inconclusive": 0
+     },
+     "flagged": {
+      "k": 2,
+      "n": 4517,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.2
+      ]
+     },
+     "high_or_confirmed": {
+      "k": 0,
+      "n": 4517,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.1
+      ]
+     },
+     "inconclusive": {
+      "k": 0,
+      "n": 4517,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.1
+      ]
+     }
+    },
+    "ambiguous_promo": {
+     "n": 65,
+     "by_classification": {
+      "Low Risk": 61,
+      "Suspicious": 3,
+      "High Risk": 1,
+      "Confirmed Malicious": 0,
+      "Inconclusive": 0
+     },
+     "flagged": {
+      "k": 4,
+      "n": 65,
+      "pct": 6.2,
+      "ci95_pct": [
+       2.4,
+       14.8
+      ]
+     },
+     "high_or_confirmed": {
+      "k": 1,
+      "n": 65,
+      "pct": 1.5,
+      "ci95_pct": [
+       0.3,
+       8.2
+      ]
+     },
+     "inconclusive": {
+      "k": 0,
+      "n": 65,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       5.6
+      ]
+     }
+    },
+    "uci_spam": {
+     "n": 642,
+     "by_classification": {
+      "Low Risk": 641,
+      "Suspicious": 1,
+      "High Risk": 0,
+      "Confirmed Malicious": 0,
+      "Inconclusive": 0
+     },
+     "flagged": {
+      "k": 1,
+      "n": 642,
+      "pct": 0.2,
+      "ci95_pct": [
+       0.0,
+       0.9
+      ]
+     },
+     "high_or_confirmed": {
+      "k": 0,
+      "n": 642,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.6
+      ]
+     },
+     "inconclusive": {
+      "k": 0,
+      "n": 642,
+      "pct": 0.0,
+      "ci95_pct": [
+       0.0,
+       0.6
+      ]
+     }
+    }
+   },
+   "confusion": {
+    "tp": 35,
+    "fn": 27,
+    "fp": 12,
+    "tn": 4953,
+    "recall": {
+     "k": 35,
+     "n": 62,
+     "pct": 56.5,
+     "ci95_pct": [
+      44.1,
+      68.1
+     ]
+    },
+    "false_positive_rate": {
+     "k": 12,
+     "n": 4965,
+     "pct": 0.2,
+     "ci95_pct": [
+      0.1,
+      0.4
+     ]
+    },
+    "precision_on_this_mixture": {
+     "k": 35,
+     "n": 47,
+     "pct": 74.5,
+     "ci95_pct": [
+      60.5,
+      84.7
+     ]
+    },
+    "abstentions": {
+     "k": 0,
+     "n": 5027,
+     "pct": 0.0,
+     "ci95_pct": [
+      0.0,
+      0.1
+     ]
+    }
+   },
+   "confusion_scamshield_only": {
+    "tp": 35,
+    "fn": 27,
+    "fp": 10,
+    "tn": 438,
+    "recall": {
+     "k": 35,
+     "n": 62,
+     "pct": 56.5,
+     "ci95_pct": [
+      44.1,
+      68.1
+     ]
+    },
+    "false_positive_rate": {
+     "k": 10,
+     "n": 448,
+     "pct": 2.2,
+     "ci95_pct": [
+      1.2,
+      4.1
+     ]
+    },
+    "precision_on_this_mixture": {
+     "k": 35,
+     "n": 45,
+     "pct": 77.8,
+     "ci95_pct": [
+      63.7,
+      87.5
+     ]
+    },
+    "abstentions": {
+     "k": 0,
+     "n": 510,
+     "pct": 0.0,
+     "ci95_pct": [
+      0.0,
+      0.7
+     ]
+    }
+   },
+   "recall_by_fraud_type": {
+    "Fake Police/Court Notice": {
+     "k": 3,
+     "n": 7,
+     "pct": 42.9,
+     "ci95_pct": [
+      15.8,
+      75.0
+     ]
+    },
+    "Insurance Scam": {
+     "k": 3,
+     "n": 5,
+     "pct": 60.0,
+     "ci95_pct": [
+      23.1,
+      88.2
+     ]
+    },
+    "Investment Scam": {
+     "k": 0,
+     "n": 7,
+     "pct": 0.0,
+     "ci95_pct": [
+      0.0,
+      35.4
+     ]
+    },
+    "Job Scam": {
+     "k": 2,
+     "n": 4,
+     "pct": 50.0,
+     "ci95_pct": [
+      15.0,
+      85.0
+     ]
+    },
+    "KYC Scam": {
+     "k": 10,
+     "n": 11,
+     "pct": 90.9,
+     "ci95_pct": [
+      62.3,
+      98.4
+     ]
+    },
+    "Loan Scam": {
+     "k": 2,
+     "n": 5,
+     "pct": 40.0,
+     "ci95_pct": [
+      11.8,
+      76.9
+     ]
+    },
+    "Lottery/Prize Scam": {
+     "k": 5,
+     "n": 7,
+     "pct": 71.4,
+     "ci95_pct": [
+      35.9,
+      91.8
+     ]
+    },
+    "OTP Phishing": {
+     "k": 4,
+     "n": 8,
+     "pct": 50.0,
+     "ci95_pct": [
+      21.5,
+      78.5
+     ]
+    },
+    "UPI Request Scam": {
+     "k": 6,
+     "n": 8,
+     "pct": 75.0,
+     "ci95_pct": [
+      40.9,
+      92.9
+     ]
+    }
+   }
+  },
+  "latency_ms": {
+   "n": 5734,
+   "median": 0.23,
+   "p95": 0.6,
+   "max": 38.0
+  },
+  "rules_firing_on_false_positives": {
+   "msg.payment_request": 8,
+   "msg.reward": 4,
+   "url.fake_tld_label": 1,
+   "url.ip_literal": 1,
+   "url.no_tls": 1,
+   "url.typosquat": 1,
+   "msg.credential_request": 1
+  },
+  "rules_missing_on_false_negatives": {
+   "Investment Scam": 7,
+   "OTP Phishing": 4,
+   "Fake Police/Court Notice": 4,
+   "Loan Scam": 3,
+   "Lottery/Prize Scam": 2,
+   "UPI Request Scam": 2,
+   "Insurance Scam": 2,
+   "Job Scam": 2,
+   "KYC Scam": 1
+  }
+ },
+ "observations": {
+  "missed_scams": 27,
+  "missed_with_romanised_hindi_words": 8,
+  "positives": 62,
+  "positives_with_romanised_hindi_words": 14,
+  "flagged_legitimate": 12,
+  "flagged_legitimate_firing_payment_request": 8,
+  "flagged_legitimate_firing_reward": 4,
+  "flagged_legitimate_high_or_worse": 0,
+  "flagged_legitimate_from_url_rules_only": 3
+ },
+ "errors": {
+  "false_positives": [
+   {
+    "dataset": "ScamShield-IN",
+    "index": 11,
+    "split": "holdout",
+    "sha256": "d3fdaa050337a1acc848a096aef68208bfcf82248a81b7cdac3b8357f72e6754",
+    "classification": "Suspicious",
+    "rule": "R-SUS-1",
+    "codes": [
+     "url.fake_tld_label"
+    ],
+    "snippet": "Job is knocking @ Ur door. Don¿t be late. Hurry up & don¿t miss this great opportunity.  C",
+    "fraud_type": null,
+    "stratum": "legit_scamshield"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 143,
+    "split": "holdout",
+    "sha256": "6f414dd36dbd71dca216d0d3f268a280280949a54c83233d5500d3539bafd970",
+    "classification": "Suspicious",
+    "rule": "R-SUS-1",
+    "codes": [
+     "url.ip_literal",
+     "url.no_tls"
+    ],
+    "snippet": "Wet n Wild models are here to dance to your tunes. Click to download international hits fo",
+    "fraud_type": null,
+    "stratum": "legit_scamshield"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 144,
+    "split": "holdout",
+    "sha256": "b09bf7113b3aee628e417ee43c992a666d6d352086f0cc34fab5b39afc1f0fa1",
+    "classification": "Suspicious",
+    "rule": "R-SUS-1",
+    "codes": [
+     "msg.payment_request",
+     "msg.reward"
+    ],
+    "snippet": "REE Gift this festive season fr members.Get FREE BENETTON WRIST WATCH MRP2600.Only pay Rs4",
+    "fraud_type": null,
+    "stratum": "legit_scamshield"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 153,
+    "split": "holdout",
+    "sha256": "4dfc786002d4870c74a42d05395eb7c9bec043ff6bdc478a21b143f53d7727ed",
+    "classification": "Suspicious",
+    "rule": "R-SUS-1",
+    "codes": [
+     "msg.payment_request"
+    ],
+    "snippet": "Reminder:Vodafone bill of Rs399 due 25th.Pay via MyVi App to avoid late fee.",
+    "fraud_type": null,
+    "stratum": "legit_scamshield"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 158,
+    "split": "holdout",
+    "sha256": "f95caba062ef0a7ebc159aad5155dd5fd52ca626cca8e53867d6752cf852228b",
+    "classification": "Suspicious",
+    "rule": "R-SUS-1",
+    "codes": [
+     "msg.payment_request",
+     "msg.reward"
+    ],
+    "snippet": "REE Designer SATYA PAUL Mens leather Wallet MRP Rs 1295 for members. Just pay Rs 399 as de",
+    "fraud_type": null,
+    "stratum": "legit_scamshield"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 257,
+    "split": "holdout",
+    "sha256": "978abe203c4bfa24efb5239cbd91b7a3848b4e069e1c1983892d51fc3e182b4e",
+    "classification": "Suspicious",
+    "rule": "R-SUS-1",
+    "codes": [
+     "msg.payment_request",
+     "msg.reward"
+    ],
+    "snippet": "ongratulations!U have won a discount voucher fr being a loyal member.Claim this voucher ri",
+    "fraud_type": null,
+    "stratum": "legit_scamshield"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 333,
+    "split": "holdout",
+    "sha256": "9fd1628da588782a9919144ddc6ff20ca01dcf3aab297138dc1aca2e5d56915e",
+    "classification": "Suspicious",
+    "rule": "R-SUS-1",
+    "codes": [
+     "url.typosquat"
+    ],
+    "snippet": "Revise your income tax return the easy way Vidya Balan avoids sleeveless tops for The Dirt",
+    "fraud_type": null,
+    "stratum": "legit_scamshield"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 369,
+    "split": "holdout",
+    "sha256": "e336f86d6d03fa53fd856a144672ac914e2e71492dc03443f0ebb007bc9dd3af",
+    "classification": "Suspicious",
+    "rule": "R-SUS-1",
+    "codes": [
+     "msg.payment_request"
+    ],
+    "snippet": "Own property in Posh colony of NCR @12 lac onwards.Pay only 1.2 lac now and rest in easy i",
+    "fraud_type": null,
+    "stratum": "legit_scamshield"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 429,
+    "split": "holdout",
+    "sha256": "c5a9e1ddbb94ee8c68a09346501c5dda5c6436ace6b68cde11db65771711b881",
+    "classification": "Suspicious",
+    "rule": "R-SUS-1",
+    "codes": [
+     "msg.payment_request"
+    ],
+    "snippet": "Reliance Datacard @1599 UNLIMITED PLAN@750 PAY RS.149 & GET LAPTOP BAG + 6GIFT CALL-938222",
+    "fraud_type": null,
+    "stratum": "legit_scamshield"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 562,
+    "split": "holdout",
+    "sha256": "7105f38834074acdcfaf7ef99a203b9134057e50a31156084c2ed838a3d11ee8",
+    "classification": "Suspicious",
+    "rule": "R-SUS-1",
+    "codes": [
+     "msg.payment_request",
+     "msg.reward"
+    ],
+    "snippet": "ongratulations! U have won a discount voucher fr being a loyal member.Claim this voucher r",
+    "fraud_type": null,
+    "stratum": "legit_scamshield"
+   },
+   {
+    "dataset": "UCI SMS Spam Collection",
+    "index": 1290,
+    "split": "holdout",
+    "sha256": "e5059bf65a8519361ee48420c511c08efbbc62f892a47838c0bf3fc7d170bb95",
+    "classification": "Suspicious",
+    "rule": "R-SUS-1",
+    "codes": [
+     "msg.payment_request"
+    ],
+    "snippet": "Hey...Great deal...Farm tour 9am to 5pm $95/pax, $50 deposit by 16 May",
+    "fraud_type": null,
+    "stratum": "legit_uci_ham"
+   },
+   {
+    "dataset": "UCI SMS Spam Collection",
+    "index": 2777,
+    "split": "dev",
+    "sha256": "1d243ff0963299885877aa26df643a3eb4e8810d0960a58e123c971119a7d386",
+    "classification": "Suspicious",
+    "rule": "R-SUS-1",
+    "codes": [
+     "msg.credential_request"
+    ],
+    "snippet": "Send me your id and password",
+    "fraud_type": null,
+    "stratum": "legit_uci_ham"
+   }
+  ],
+  "missed_scams": [
+   {
+    "dataset": "ScamShield-IN",
+    "index": 0,
+    "split": "holdout",
+    "sha256": "dbe46bf9cf78e5836c96fdd885eac1234fdcfbe58794ba06f1e06f72a9fc3efa",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [
+     "msg.threat"
+    ],
+    "snippet": "Ur SIM will be blocked in 2hrs due to suspicious activity.SMS OTP 7711 to 9123456789 to st",
+    "fraud_type": "OTP Phishing",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 20,
+    "split": "holdout",
+    "sha256": "57320c7c36e41aa5188f5883a4671eb87ed1296e70acf58a75cbfb7b2b7050cd",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [
+     "msg.reward",
+     "url.keywords"
+    ],
+    "snippet": "Congratulations! You have won Rs 25,00,000 in KBC Lucky Draw 2026. Claim now: kbc-lottery-",
+    "fraud_type": "Lottery/Prize Scam",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 33,
+    "split": "dev",
+    "sha256": "33ee8c5d90898357e117d8fdf4dd44312b13379acab52d9d4ab5ed850a58fdd7",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [
+     "msg.threat",
+     "msg.urgency"
+    ],
+    "snippet": "A/c debited Rs49,990 at AMAZON.Not done by u? SMS OTP 552189 to 9988112233 to block txn im",
+    "fraud_type": "OTP Phishing",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 74,
+    "split": "dev",
+    "sha256": "1dc8bb227348d6f16a4bbbb7476d3a617708d0c847b50abc61c1fe505d88c1e7",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [],
+    "snippet": "Aapka demat account SEBI registered advisor ke through 3x return de raha hai. Minimum inve",
+    "fraud_type": "Investment Scam",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 79,
+    "split": "dev",
+    "sha256": "25dbf89a1a9d441fddf79fbc9613d74da7d0f6c30927caaf9c980dbe5b0114df",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [
+     "msg.impersonation_claim",
+     "msg.urgency"
+    ],
+    "snippet": "Aapka OTP 778215 hai jo abhi expire ho raha hai. Customer care ko turant batayein verifica",
+    "fraud_type": "OTP Phishing",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 102,
+    "split": "dev",
+    "sha256": "164b5a6ca4e32503bc15603447ab42e3a39733cee56a24f689234b37d9806b6b",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [
+     "msg.threat"
+    ],
+    "snippet": "Your electricity connection will be disconnected tonight at 9:30pm due to unpaid bill. Pay",
+    "fraud_type": "UPI Request Scam",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 129,
+    "split": "holdout",
+    "sha256": "b9e60f4636c251c2f62db141450a320080a4a8c11774385e128d30a3c2d4bbac",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [],
+    "snippet": "Aapko pre-approved personal loan Rs 5,00,000 mil sakta hai 0% interest par. Apply now: qui",
+    "fraud_type": "Loan Scam",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 132,
+    "split": "holdout",
+    "sha256": "d819140d097d63e643d1c2f1d7dc30c8d297c587db03ac9969783ec47d465e6c",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [
+     "msg.urgency"
+    ],
+    "snippet": "Aapki car insurance expire ho gayi hai. Renew karein 50% discount ke saath abhi: insure-re",
+    "fraud_type": "Insurance Scam",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 170,
+    "split": "holdout",
+    "sha256": "54ba59165c63d224ae7aab77ceb5c36db40d76f905be790dcd4119fa154a0ed8",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [
+     "msg.investment",
+     "msg.job_offer"
+    ],
+    "snippet": "Invest Rs 5000 in our crypto trading bot, guaranteed daily profit 10%. Join Telegram group",
+    "fraud_type": "Investment Scam",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 208,
+    "split": "holdout",
+    "sha256": "5770f79336061ab72d439f33316b289854a7b11e5766812ddb57061b850f49e1",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [
+     "msg.urgency"
+    ],
+    "snippet": "This is to inform you, an FIR has been filed against your Aadhaar number in money launderi",
+    "fraud_type": "Fake Police/Court Notice",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 229,
+    "split": "dev",
+    "sha256": "480a816b92be1e8de2472cb2819d6b45b18b7683179ad68759e132fff5599686",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [
+     "msg.job_offer"
+    ],
+    "snippet": "Work From Home!Earn Rs2500/day by reviewing products online.No experience needed.Sms JOB t",
+    "fraud_type": "Job Scam",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 237,
+    "split": "holdout",
+    "sha256": "ce7a1944be226457bdd69d003618e6d30c8a8018f76416f3499fd05020d6cd60",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [
+     "msg.reward"
+    ],
+    "snippet": "Hi, maine galti se aapko Rs 5000 bhej diya UPI se. Please refund kar dijiye is number par:",
+    "fraud_type": "UPI Request Scam",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 242,
+    "split": "holdout",
+    "sha256": "6c5cb88ed58ed27db3529b818bcf658b4e1c90587a847d76ed62e42cd16c729c",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [
+     "msg.reward",
+     "msg.urgency"
+    ],
+    "snippet": "Ur Health Insurance Claim Rs85,000 Approved!Share A/c & IFSC to process refund within 24hr",
+    "fraud_type": "Insurance Scam",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 247,
+    "split": "holdout",
+    "sha256": "f71b55cd28f228f5be23226f4e0fc90ceba84b46342c423b5bd20d62c6f337f7",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [
+     "msg.threat",
+     "msg.urgency"
+    ],
+    "snippet": "FIR No.2026/4471 registered against ur mobile no in money laundering case.Contact Delhi Po",
+    "fraud_type": "Fake Police/Court Notice",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 258,
+    "split": "holdout",
+    "sha256": "63144cbcdb1054e7efa9742c2a8e9e8e793c8136ebd067b95c17a26a2fad59db",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [],
+    "snippet": "Instant loan up to 2 lakh bina documents ke. Sirf Aadhaar number bhejein WhatsApp pe: +91X",
+    "fraud_type": "Loan Scam",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 290,
+    "split": "dev",
+    "sha256": "421b2eecfeeacd47dc31a04a51dc6ac354e0fbf485d574d328365fcb165f58df",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [
+     "msg.impersonation_claim",
+     "msg.threat"
+    ],
+    "snippet": "Aapka parcel customs mein illegal items ke saath pakda gaya hai. Mumbai Police se baat kar",
+    "fraud_type": "Fake Police/Court Notice",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 321,
+    "split": "holdout",
+    "sha256": "b3abf4591b4834931ecc915a2d27e45229ab257fa40a05b74baf37b0322f4b62",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [],
+    "snippet": "Forex trading se daily Rs 8000 kamayein ghar baithe. Free demo: forexwin-india.net",
+    "fraud_type": "Investment Scam",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 362,
+    "split": "holdout",
+    "sha256": "6c6aac38c2a04bdd4822549310b11de0e5491593a9767bf5d075f82f1311c60b",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [
+     "msg.impersonation_claim",
+     "url.keywords"
+    ],
+    "snippet": "Your Airtel no will stop o/g & i/c calls today.Re-verify KYC at airtel-reverify.com or vis",
+    "fraud_type": "KYC Scam",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 367,
+    "split": "dev",
+    "sha256": "291638d48acaf46011c8f6b55736e481a39190bd64f0e9ded8b61f4e99aace4e",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [
+     "msg.job_offer"
+    ],
+    "snippet": "Work from home job available, earn Rs 3000 daily by liking YouTube videos. Register: easye",
+    "fraud_type": "Job Scam",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 381,
+    "split": "holdout",
+    "sha256": "9679d4fbd413a30087b44e261b83798f8c6fcbb1b7e16b168feecff1a5495c9c",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [
+     "msg.investment"
+    ],
+    "snippet": "Crypto Trading Bot guarantees Rs5000 daily profit.Join free Telegram grp t.me/cryptoindiap",
+    "fraud_type": "Investment Scam",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 421,
+    "split": "holdout",
+    "sha256": "7787e8479b883d419e7513c75eee8aa152c3d33f9b34d99b560071cfea774947",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [],
+    "snippet": "Pre-Approved Personal Loan Rs5Lac @0% interest no docs required.Apply now sms LOAN to 5678",
+    "fraud_type": "Loan Scam",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 457,
+    "split": "holdout",
+    "sha256": "df68b80a1308094c708435d62a10a36b90704952bcea6d7f72c0a1bb5b9b37bc",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [
+     "msg.investment"
+    ],
+    "snippet": "Stock tip: Buy XYZ shares before 2pm, expert ne bataya 200% return milega kal tak. Join VI",
+    "fraud_type": "Investment Scam",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 470,
+    "split": "dev",
+    "sha256": "11576cb0996c17ccc2d85131cf9a4d19bc504ffd217e66730ac129b0d8f12328",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [
+     "msg.investment"
+    ],
+    "snippet": "Mutual Fund SIP guaranteed 25% return monthly,No risk.Invest Rs10000 today call 9871234567",
+    "fraud_type": "Investment Scam",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 487,
+    "split": "holdout",
+    "sha256": "ffc811071b0c6d1120ea28020a78026b4998423ee3ed000e4a10ea05f943539c",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [
+     "msg.urgency"
+    ],
+    "snippet": "Your account will be debited Rs 49999. If this is not you, share OTP 6541 now to cancel tr",
+    "fraud_type": "OTP Phishing",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 499,
+    "split": "holdout",
+    "sha256": "b9cff9afb7bf7020874f362d4be39dc06bbe0e0cc194f719dee1bf6259bab47d",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [],
+    "snippet": "Your number has been selected for COVID relief fund Rs 50000 by Govt of India. Click to cl",
+    "fraud_type": "Lottery/Prize Scam",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 512,
+    "split": "holdout",
+    "sha256": "f087667235365bfcd902bd800cac9024891d681331e0352511832526de2e7432",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [],
+    "snippet": "Mutual fund mein invest karke har mahine Rs 50000 kamayein bina risk ke. Call abhi: 789456",
+    "fraud_type": "Investment Scam",
+    "stratum": "scam_specific"
+   },
+   {
+    "dataset": "ScamShield-IN",
+    "index": 534,
+    "split": "holdout",
+    "sha256": "cbf8f201beed0c37027fe92df8f55787903a8567ecf1cde924f1be166214e743",
+    "classification": "Low Risk",
+    "rule": "R-LOW-1",
+    "codes": [
+     "msg.threat"
+    ],
+    "snippet": "Your Aadhaar has been used in a cybercrime case in Delhi. Reply YES to avoid digital arres",
+    "fraud_type": "Fake Police/Court Notice",
+    "stratum": "scam_specific"
+   }
+  ]
+ },
+ "ai": {
+  "provider_note": "Assessed with the provider(s) configured when this ran (see 'providers'); results do not transfer to other models.",
+  "providers": [
+   "ollama (local) / qwen3:4b"
+  ],
+  "sample": 36,
+  "status_counts": {
+   "ok": 33,
+   "unavailable": 3
+  },
+  "median_latency_ms": 28428,
+  "unavailable_reasons": [
+   "local: unavailable: local model not reachable (ReadTimeout)"
+  ],
+  "responses_scored": 33,
+  "validator_flagged": {
+   "output_used_unknown_finding_ids": 6,
+   "quote_not_verbatim_in_message": 0,
+   "asserted_a_different_classification": 0,
+   "called_target_safe_when_not_low_risk": 0,
+   "no_grounded_points": 23,
+   "rejected_overall": 0
+  },
+  "independent_recheck": {
+   "observations_with_quote_not_in_message": 0,
+   "observations_total": 31,
+   "responses_with_numbers_not_in_inputs": 0,
+   "responses_with_domains_not_in_inputs": 0
+  },
+  "note": "The classifier result is deterministic and is passed to the model as fixed input; none of these figures describe detection accuracy.",
+  "per_message": [
+   {
+    "stratum": "scam_specific",
+    "sha256": "6da758f8e089beb6cd4e8ddcfdf87253b1ea0353055a1a27fbcd9694b9e9ec84",
+    "classification": "Suspicious",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 27641,
+    "validation_notes": [],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 3
+    },
+    "findings_given": 2
+   },
+   {
+    "stratum": "scam_specific",
+    "sha256": "76be4c8a67aad6434eb1f1c19309fc9b72077c08934ce396065ced065a43abaa",
+    "classification": "Suspicious",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 27933,
+    "validation_notes": [],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 4
+    },
+    "findings_given": 2
+   },
+   {
+    "stratum": "scam_specific",
+    "sha256": "f71b55cd28f228f5be23226f4e0fc90ceba84b46342c423b5bd20d62c6f337f7",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 31461,
+    "validation_notes": [],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 2,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 4
+    },
+    "findings_given": 2
+   },
+   {
+    "stratum": "scam_specific",
+    "sha256": "b9cff9afb7bf7020874f362d4be39dc06bbe0e0cc194f719dee1bf6259bab47d",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 21055,
+    "validation_notes": [
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "scam_specific",
+    "sha256": "6881bd6a9c99ebfb6e029d9c31054077cc764810fd69cf8cdf40f7d07efa05b9",
+    "classification": "Suspicious",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 27821,
+    "validation_notes": [],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 3
+    },
+    "findings_given": 1
+   },
+   {
+    "stratum": "scam_specific",
+    "sha256": "65917abdc508411f5e991949776e5bc3e03a41ce298f0c1815e9803726b8d7b7",
+    "classification": "Suspicious",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 28848,
+    "validation_notes": [],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 3
+    },
+    "findings_given": 2
+   },
+   {
+    "stratum": "scam_specific",
+    "sha256": "b2b5e74663c90a13274d03b7d8894de5b7ad5c32c7fb759e74a00930932a4af1",
+    "classification": "High Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 25901,
+    "validation_notes": [],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 3
+    },
+    "findings_given": 5
+   },
+   {
+    "stratum": "scam_specific",
+    "sha256": "b9e60f4636c251c2f62db141450a320080a4a8c11774385e128d30a3c2d4bbac",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 28428,
+    "validation_notes": [
+     "dropped unknown finding id(s): R-LOW-1",
+     "dropped unknown finding id(s): R-LOW-1",
+     "dropped unknown finding id(s): R-LOW-1",
+     "dropped unknown finding id(s): R-LOW-1",
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "scam_specific",
+    "sha256": "ce7a1944be226457bdd69d003618e6d30c8a8018f76416f3499fd05020d6cd60",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 28698,
+    "validation_notes": [],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 3
+    },
+    "findings_given": 1
+   },
+   {
+    "stratum": "scam_specific",
+    "sha256": "df68b80a1308094c708435d62a10a36b90704952bcea6d7f72c0a1bb5b9b37bc",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 36147,
+    "validation_notes": [
+     "dropped unknown finding id(s): R-LOW-1"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 2
+    },
+    "findings_given": 1
+   },
+   {
+    "stratum": "scam_specific",
+    "sha256": "bc7c57584d6fcb697bd87b7eeea01a949c5839fbe2edb602d9a2fdebfe92aa6b",
+    "classification": "Suspicious",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 25900,
+    "validation_notes": [],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 2
+    },
+    "findings_given": 1
+   },
+   {
+    "stratum": "scam_specific",
+    "sha256": "9ae5a6cb8ed1ee3def40fd7ea2efd7b92ed500a1e5d09b4656f8647f39079570",
+    "classification": "Suspicious",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 31958,
+    "validation_notes": [],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 4
+    },
+    "findings_given": 1
+   },
+   {
+    "stratum": "legit_scamshield",
+    "sha256": "92e5aceec45a8831c697927a457814dbeed98a239de7ea6746d47684a42d06ed",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 27575,
+    "validation_notes": [
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_scamshield",
+    "sha256": "abf262769ba12b3381cb4079809b0e68ca9ca1f66aedbfdf801b614937acbae5",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 37673,
+    "validation_notes": [
+     "dropped unknown finding id(s): R-LOW-1",
+     "dropped unknown finding id(s): R-LOW-1",
+     "dropped unknown finding id(s): R-LOW-1",
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_scamshield",
+    "sha256": "b09ff688039e7bf29221b3f68bd176553773c506226eab31d1eeb30b1965bd56",
+    "classification": "Low Risk",
+    "ai_status": "unavailable",
+    "provider": null,
+    "model": null,
+    "latency_ms": 150119,
+    "validation_notes": [
+     "No AI explanation; the deterministic findings and classification above are complete without it."
+    ],
+    "error": "local: unavailable: local model not reachable (ReadTimeout)",
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_scamshield",
+    "sha256": "59fe174a0748e3373e3a7a855c9cf12ac2cfe1986233a3f559a9bd4decc721ae",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 36018,
+    "validation_notes": [
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_scamshield",
+    "sha256": "870a6c7b8ceb0c55c5e59992b5c3d73c3f9a6f878f442383e16b4cb04b5b0e9d",
+    "classification": "Low Risk",
+    "ai_status": "unavailable",
+    "provider": null,
+    "model": null,
+    "latency_ms": 150113,
+    "validation_notes": [
+     "No AI explanation; the deterministic findings and classification above are complete without it."
+    ],
+    "error": "local: unavailable: local model not reachable (ReadTimeout)",
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_scamshield",
+    "sha256": "53e1e34b016b1f8039f9d248f3f6d43237e178c97609b64c56bdced762f70924",
+    "classification": "Low Risk",
+    "ai_status": "unavailable",
+    "provider": null,
+    "model": null,
+    "latency_ms": 150111,
+    "validation_notes": [
+     "No AI explanation; the deterministic findings and classification above are complete without it."
+    ],
+    "error": "local: unavailable: local model not reachable (ReadTimeout)",
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_scamshield",
+    "sha256": "4d102c50610ae4ee7d33759706c3f70f5a14bee1d35b4243cfe7b9917ddf0d36",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 36248,
+    "validation_notes": [
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_scamshield",
+    "sha256": "e578ff33ed37485f9a2a925bbd8e870c372de3d47f796b602b55c708b90a5d8e",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 35244,
+    "validation_notes": [
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_scamshield",
+    "sha256": "fbc9a0f2bd8c6a46d9cdbe88365b4d33307365e009b8ad59ca5d08666bfb8601",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 31190,
+    "validation_notes": [
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_scamshield",
+    "sha256": "fa31d80bcaaa7ba287337532500325706a3d2cc28074d6846fea61677ffdd740",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 32504,
+    "validation_notes": [
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_scamshield",
+    "sha256": "7f34fce135a00bf2d01c11b8678df351899629e11b909bf1daccab0479ef29d9",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 21568,
+    "validation_notes": [
+     "dropped unknown finding id(s): R-LOW-1",
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_scamshield",
+    "sha256": "7bdaee6d78980c305d1e08510d49953c0ee2e1a879b21aa3f494a91e3a253945",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 25626,
+    "validation_notes": [
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_uci_ham",
+    "sha256": "86aae6233e5ff9df4378bc2604ceb8cda9231cee62439b7dd2262bc51ba9ad63",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 19232,
+    "validation_notes": [
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 0,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_uci_ham",
+    "sha256": "7d97ddc020ea9f5178ed33fe08884bc2480314f9f4e6f0fc92f697800e3f6044",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 27422,
+    "validation_notes": [
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_uci_ham",
+    "sha256": "9d5d4f36092b3dc90b7b54ce4749b20e27198d2c00396184f796478e8278c10c",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 17930,
+    "validation_notes": [
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 0,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_uci_ham",
+    "sha256": "92b0af91ba4521e83ca7b640019ac3cc74324162c9e751dab6b0043e4efc5ab9",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 25404,
+    "validation_notes": [
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_uci_ham",
+    "sha256": "81db73bf07915f4f3f13f7579f2dae44565cbedbf92025fb4ef8e08bcf600f5a",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 31947,
+    "validation_notes": [
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_uci_ham",
+    "sha256": "84ecfc2d3ce791e210f6d98ee254d2152ef968cdbd4dd9c0218992975d3438ea",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 23128,
+    "validation_notes": [
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_uci_ham",
+    "sha256": "544760caa3fa7b06b5982ac690fa44ce51a340889a890f375d24bd27f343b1f7",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 28087,
+    "validation_notes": [
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_uci_ham",
+    "sha256": "d65ad46eb641a0b70a330253b4cfc2d7a7feeacf798f106189fed06cd8bcb48b",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 21494,
+    "validation_notes": [
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_uci_ham",
+    "sha256": "9cdb97734b159652c677173f73b951e1107fc44d8ab7e561879d39fa1738fe5c",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 22462,
+    "validation_notes": [
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 0,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_uci_ham",
+    "sha256": "dcef6871657cd23cfb65771c6790ec235e889e6fc3c19f9d3c147ddc1df9f0e5",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 30240,
+    "validation_notes": [
+     "dropped unknown finding id(s): R-LOW-1",
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_uci_ham",
+    "sha256": "e4e44eddd68c098fd7c87b5f4a9b32bdda9605afa9b87c79155f485c4730d17a",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 44666,
+    "validation_notes": [
+     "dropped unknown finding id(s): R-LOW-1",
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   },
+   {
+    "stratum": "legit_uci_ham",
+    "sha256": "756b91c567b1d23474b1edaa4ad72b1cb60904c7bc9a1dec6a401c5a8c893c81",
+    "classification": "Low Risk",
+    "ai_status": "ok",
+    "provider": "ollama (local)",
+    "model": "qwen3:4b",
+    "latency_ms": 28186,
+    "validation_notes": [
+     "no grounded points returned"
+    ],
+    "error": null,
+    "checks": {
+     "unverified_quotes": 0,
+     "observations": 1,
+     "unsupported_numbers": [],
+     "unsupported_domains": [],
+     "points": 0
+    },
+    "findings_given": 0
+   }
+  ],
+  "run_config": {
+   "run_at": "2026-11-10T11:51:43Z",
+   "wtd_commit": "e8c927191e9f1577d2bc8f67b3f668858962e26e",
+   "wtd_tree_dirty": true
+  },
+  "no_grounded_points_breakdown": {
+   "messages_with_zero_findings_given_to_the_model": 23,
+   "no_grounded_points_when_there_were_no_findings_to_cite": 23,
+   "no_grounded_points_although_findings_were_available": 0,
+   "messages_with_findings_given_to_the_model": 10,
+   "unknown_finding_ids_cited_among_messages_with_findings": 1
+  }
+ }
+}

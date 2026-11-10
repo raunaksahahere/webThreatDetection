@@ -3,6 +3,7 @@ import {
   Ban,
   CircleCheck,
   CircleDashed,
+  CircleHelp,
   CircleSlash,
   CircleX,
   Database,
@@ -65,6 +66,7 @@ const CHECK_ICON: Record<CheckStatus, ReactNode> = {
   succeeded: <CircleCheck size={14} aria-hidden />,
   failed: <CircleX size={14} aria-hidden />,
   unavailable: <CircleSlash size={14} aria-hidden />,
+  inconclusive: <CircleHelp size={14} aria-hidden />,
   skipped: <CircleDashed size={14} aria-hidden />,
   not_implemented: <Wrench size={14} aria-hidden />,
 };

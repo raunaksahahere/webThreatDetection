@@ -1,5 +1,7 @@
 """Threat-intelligence lookups (fixed, trusted endpoints; never user-controlled URLs).
 
+Google Safe Browsing and OpenPhish live in `intel_phish.py` and are merged in by `lookup()`.
+
 Sources and their actual scope (shown in every finding):
 - URLhaus (abuse.ch): malware-download URLs only. Needs the server's URLHAUS_AUTH_KEY (visitors never supply a key; public-demo quotas
   bound how often it is used). Not-for-profit use.
@@ -143,7 +145,22 @@ def _recent(date_str: str | None) -> bool:
 
 
 def lookup(url: str | None, hosts: list[str], shared_hosting: set[str] | None = None, remote: bool = True) -> IntelOutcome:
-    """Look up the submitted URL and up to 5 distinct hosts (submitted, redirects, final).
+    """All intelligence sources: CERT Polska, URLhaus, Google Safe Browsing and (when enabled) OpenPhish.
+
+    Each source records its own check, so "no match", "unavailable" and "not checked" stay distinguishable. No source can
+    count twice for the same indicator: an authoritative listing already decides the class, and weaker ones never stack above it."""
+    from . import intel_phish
+
+    out = _lookup_core(url, hosts, shared_hosting, remote)
+    ph = intel_phish.lookup(url, list(dict.fromkeys(h for h in hosts if h))[:5], shared_hosting or set(), remote)
+    out.findings += ph.findings
+    out.checks += ph.checks
+    out.matches += ph.matches
+    return out
+
+
+def _lookup_core(url: str | None, hosts: list[str], shared_hosting: set[str] | None = None, remote: bool = True) -> IntelOutcome:
+    """CERT Polska and URLhaus. Look up the submitted URL and up to 5 distinct hosts (submitted, redirects, final).
 
     remote=False uses only local data (CERT Polska snapshot) so nothing about the lookup leaves this machine;
     used by the real-time quick check, where every visited address would otherwise be sent to a third party."""

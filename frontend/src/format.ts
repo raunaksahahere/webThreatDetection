@@ -3,7 +3,7 @@ import type { CheckStatus, Classification, Coverage, Module, Provenance, Severit
 export const SEVERITY_ORDER: Severity[] = ['critical', 'high', 'medium', 'low', 'info'];
 export const STRENGTH_ORDER: Strength[] = ['authoritative', 'strong', 'moderate', 'weak'];
 export const MODULE_ORDER: Module[] = ['url', 'dns', 'intel', 'tls', 'web', 'content', 'message', 'correlation', 'ai'];
-export const CHECK_STATUS_ORDER: CheckStatus[] = ['failed', 'unavailable', 'skipped', 'not_implemented', 'succeeded'];
+export const CHECK_STATUS_ORDER: CheckStatus[] = ['failed', 'unavailable', 'inconclusive', 'skipped', 'not_implemented', 'succeeded'];
 
 export const MODULE_LABEL: Record<Module, string> = {
   url: 'URL structure',
@@ -21,6 +21,7 @@ export const CHECK_STATUS_LABEL: Record<CheckStatus, string> = {
   succeeded: 'Succeeded',
   failed: 'Failed',
   unavailable: 'Unavailable',
+  inconclusive: 'Inconclusive',
   skipped: 'Skipped',
   not_implemented: 'Not implemented',
 };
@@ -69,10 +70,11 @@ export function strengthRank(s: string): number {
 }
 
 /** "11 of 13 checks completed; 1 failed; 1 unavailable" — counts only, never a percentage. */
-export function coverageText(c: Coverage): string {
+export function coverageText(c: Coverage, inconclusive = 0): string {
   const parts = [`${c.succeeded} of ${c.applicable} ${c.applicable === 1 ? 'check' : 'checks'} completed`];
   if (c.failed) parts.push(`${c.failed} failed`);
   if (c.unavailable) parts.push(`${c.unavailable} unavailable`);
+  if (inconclusive) parts.push(`${inconclusive} inconclusive`);
   if (c.skipped) parts.push(`${c.skipped} skipped`);
   return parts.join('; ');
 }

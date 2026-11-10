@@ -6,6 +6,7 @@ import { formatDate } from '../format';
 import { CopyButton } from '../components/CopyButton';
 import { ValueView } from '../components/ValueView';
 import { Notice } from '../components/Section';
+import { ActionReason, DemoModeNotice, useChainStatus } from '../components/ChainNotice';
 
 export const CHAIN_CAVEAT = 'The chain proves this report has not changed since it was registered — not that its conclusions are true.';
 
@@ -146,7 +147,7 @@ function StatusHistory({ items }: { items: unknown[] }) {
   );
 }
 
-function ReviewBox({ current, reviews, busy, onReview }: { current: string | null | undefined; reviews: ReviewRecord[]; busy: Busy; onReview: (s: ReviewRecord['status'], note: string) => Promise<void> }) {
+function ReviewBox({ current, reviews, busy, blocked, onReview }: { current: string | null | undefined; reviews: ReviewRecord[]; busy: Busy; blocked: boolean; onReview: (s: ReviewRecord['status'], note: string) => Promise<void> }) {
   const [status, setStatus] = useState<ReviewRecord['status']>('Validated');
   const [note, setNote] = useState('');
   const needNote = status !== 'Validated';
@@ -189,7 +190,7 @@ function ReviewBox({ current, reviews, busy, onReview }: { current: string | nul
           <span className="field-label">Reviewer note {needNote ? '(required)' : '(optional)'}</span>
           <textarea rows={2} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} placeholder="e.g. Confirmed independently: the domain was registered 3 days ago and asks for the OTP" />
         </label>
-        <button type="submit" className="btn btn-secondary" disabled={busy !== null || (needNote && !note.trim())}>
+        <button type="submit" className="btn btn-secondary" disabled={blocked || busy !== null || (needNote && !note.trim())} aria-describedby={blocked ? 'chain-reason' : undefined}>
           {busy === 'review' ? <LoaderCircle size={15} className="spin" aria-hidden /> : <Gavel size={15} aria-hidden />} Record review on-chain
         </button>
       </form>
@@ -213,6 +214,8 @@ export function RegistryPanel({ report, onChanged }: Props) {
   const [reviseOpen, setReviseOpen] = useState(false);
   const [reason, setReason] = useState('');
 
+  const chain = useChainStatus();
+  const blocked = chain.kind !== 'unknown' && chain.writesBlocked;
   const complete = report.status === 'complete';
 
   const load = useCallback(async () => {
@@ -279,7 +282,8 @@ export function RegistryPanel({ report, onChanged }: Props) {
       setFilename(name);
     });
 
-  const cli = `node verifier/verify.mjs --envelope ${filename ?? '<file>'} --deployment deployments/local.json`;
+  const deployment = chain.kind === 'sepolia' ? 'deployments/sepolia.json' : 'deployments/local.json';
+  const cli = `node verifier/verify.mjs --envelope ${filename ?? '<file>'} --deployment ${deployment}`;
 
   return (
     <div className="registry">
@@ -288,6 +292,7 @@ export function RegistryPanel({ report, onChanged }: Props) {
         <span>{CHAIN_CAVEAT}</span>
       </p>
       <p className="fine">Only a salted SHA-256 commitment and the classification code are written on chain. No URLs, message text, indicators or personal data.</p>
+      <DemoModeNotice status={chain} />
 
       {!complete ? (
         <Notice tone="neutral">Registration becomes available once the analysis is complete.</Notice>
@@ -309,10 +314,11 @@ export function RegistryPanel({ report, onChanged }: Props) {
                 <span className="field-label">Submitter label (optional)</span>
                 <input type="text" value={submitter} maxLength={60} placeholder="e.g. SOC analyst on duty" onChange={(e) => setSubmitter(e.target.value)} />
               </label>
-              <button type="button" className="btn btn-primary" onClick={doRegister} disabled={busy !== null}>
+              <button type="button" className="btn btn-primary" onClick={doRegister} disabled={blocked || busy !== null} aria-describedby={blocked ? 'chain-reason' : undefined}>
                 {busy === 'register' ? <LoaderCircle size={16} className="spin" aria-hidden /> : <Blocks size={16} aria-hidden />}
                 {busy === 'register' ? 'Registering…' : 'Register commitment on-chain'}
               </button>
+              <ActionReason id="chain-reason" status={chain} />
             </div>
           ) : (
             <>
@@ -337,11 +343,13 @@ export function RegistryPanel({ report, onChanged }: Props) {
                   {busy === 'download' ? <LoaderCircle size={16} className="spin" aria-hidden /> : <Download size={16} aria-hidden />}
                   Download report for independent verification
                 </button>
-                <button type="button" className="btn btn-ghost" onClick={() => setReviseOpen((o) => !o)} disabled={busy !== null} aria-expanded={reviseOpen}>
+                <button type="button" className="btn btn-ghost" onClick={() => setReviseOpen((o) => !o)} disabled={blocked || busy !== null} aria-expanded={reviseOpen} aria-describedby={blocked ? 'chain-reason' : undefined}>
                   <GitBranch size={16} aria-hidden />
                   Publish revision
                 </button>
               </div>
+
+              <ActionReason id="chain-reason" status={chain} />
 
               {reviseOpen ? (
                 <form
@@ -370,7 +378,7 @@ export function RegistryPanel({ report, onChanged }: Props) {
 
               {verify ? <VerifyView v={verify} /> : null}
 
-              <ReviewBox current={state?.onchain?.current_status} reviews={state?.reviews ?? []} busy={busy} onReview={doReview} />
+              <ReviewBox current={state?.onchain?.current_status} reviews={state?.reviews ?? []} busy={busy} blocked={blocked} onReview={doReview} />
 
               <div className="cli">
                 <div className="cli-head">

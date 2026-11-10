@@ -86,7 +86,7 @@ export function VerdictBanner({ report, assessment, onFocusFinding, knownFinding
         {cov ? (
           <div className="coverage">
             <p className="mini-label">Coverage</p>
-            <p className="coverage-text">{coverageText(cov)}</p>
+            <p className="coverage-text">{coverageText(cov, (report.checks ?? []).filter((c) => c.status === 'inconclusive').length)}</p>
             <Tally checks={report.checks ?? []} />
             {cov.essential_missing.length ? (
               <p className="coverage-missing">

@@ -113,8 +113,8 @@ function StatusPills() {
       >
         API{health.version ? ` ${health.version}` : ''}
       </Pill>
-      <Pill tone={chain.connected ? 'good' : 'bad'} title={chain.connected ? `Chain ${chain.chain_id ?? '?'} · contract ${chain.contract ?? 'unknown'}` : 'Blockchain not reachable: registration and verification are unavailable'}>
-        {chain.connected ? `Chain ${chain.chain_id ?? ''}`.trim() : 'Chain offline'}
+      <Pill tone={chain.connected ? 'good' : 'bad'} title={chain.connected ? `Chain ${chain.chain_id ?? '?'}${chain.chain_id === 31337 ? ' (local Anvil demonstration chain, not public)' : ''} · contract ${chain.contract ?? 'unknown'}` : chain.kind === 'not_deployed' ? 'No registry deployed yet: public on-chain registration is pending Sepolia setup' : 'Blockchain not reachable: registration and verification are unavailable'}>
+        {chain.connected ? `Chain ${chain.chain_id ?? ''}${chain.chain_id === 31337 ? ' (local)' : ''}`.trim() : chain.kind === 'not_deployed' ? 'Chain: not deployed' : 'Chain offline'}
       </Pill>
       <Pill tone={aiTone} title={`AI provider: ${ai.provider ?? 'none'} · model: ${ai.model ?? 'none'} · status: ${aiStatus}`}>
         AI {aiOn ? aiShort : aiStatus}

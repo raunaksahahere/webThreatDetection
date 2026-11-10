@@ -7,7 +7,7 @@
      │  X-WTD-Token, JSON only, fetched content shown as text
      ▼
  FastAPI backend (backend/wtd)
-  ├─ pipeline.py ── url_rules ── intel (CERT Polska, URLhaus) ── classify ── correlate ── ai/explain
+  ├─ pipeline.py ── url_rules ── intel (CERT Polska, URLhaus, Google Safe Browsing, OpenPhish†) ── classify ── correlate ── ai/explain
   │       │                                                                    │
   │       ▼                                                                    ▼
   │  inspector.py  (child process: rlimits, scrubbed env, wall-clock kill)   Gemini → OpenRouter free → local Ollama
@@ -35,7 +35,11 @@ One backend, one datastore, one analysis pipeline, one contract. No queues, vect
    - shorteners, shared hosting, embedded redirects, keywords, IP literals and user-info tricks.
 
    Look-alike rules are skipped for the Tranco top-10k registrable domains, reported as `url.popular_domain`. False positives and detection are measured in `docs/EVALUATION.md`.
-3. **Intelligence first** (`intel.py`): CERT Polska (phishing domains, local copy refreshed in the background) and URLhaus (malware URLs and hosts, live with the operator's key). **An authoritative listing means the site is not visited.**
+3. **Intelligence first** (`intel.py`, `intel_phish.py`). **An authoritative listing means the site is not visited.** Each source records its own check, so "no match", "unavailable", "not checked" and "stale" stay distinguishable:
+   - CERT Polska: phishing domains, local copy refreshed in the background.
+   - URLhaus: malware URLs and hosts, live with the operator's key.
+   - Google Safe Browsing (Lookup API v4): needs `GSB_API_KEY`; sends scheme, host and path only (never the query or fragment) in one request for the address plus redirect hosts (for a pasted message, the first link in it); the key travels in a header; matches are cached for Google's `cacheDuration`, no-matches for 5 minutes; local per-minute and daily request budgets; 429 backs off. SOCIAL_ENGINEERING and MALWARE matches are authoritative, UNWANTED_SOFTWARE and POTENTIALLY_HARMFUL_APPLICATION strong. Findings use "suspected" wording and the UI adds "Advisory provided by Google".
+   - OpenPhish community feed†: **off by default** because its terms restrict use to personal, non-commercial research and forbid disclosing the data to third parties; enabled only with `WTD_OPENPHISH=1`. Matched locally against an hourly-refreshed snapshot. An exact URL match is authoritative only while the snapshot is fresh (36 hours); a stale snapshot downgrades it to strong and makes a no-match inconclusive; beyond 7 days the snapshot is not used. A host-level match on a shared platform is context only. An exact match is not counted a second time as a host match.
 4. **Isolated inspection** (`inspector.py` → `fetcher.py`): one GET per hop, at most 5 redirects. Each hop is re-parsed, policy-checked and DNS-validated, and the TCP connection goes only to the validated IP while keeping SNI and Host. TLS chains are captured from that same connection. Limits:
    - 25 s total; 5 s connect and 8 s read;
    - 1 MB body; 2 MB decompressed;
@@ -55,6 +59,13 @@ One backend, one datastore, one analysis pipeline, one contract. No queues, vect
    - The response's signature and freshness are verified.
    - Revoked for key/CA compromise is a trust incident; other revocation reasons count as configuration problems.
    - Otherwise status is "unavailable", which is not a risk signal. CRLs are not fetched.
+
+   **Certificate Transparency record lookup** (`checks/ct_checks.py`, check `tls.ct_lookup`, never essential). This is a query to a public CT-monitoring service, **not** log verification: it does not check SCT signatures or Merkle inclusion proofs, and the service's index can lag the logs.
+   - Sources: Cert Spotter (primary; `match_wildcards` so a wildcard certificate covering the host is returned) and crt.sh as fallback. Only the hostname of a site that was actually contacted is sent, to those two fixed hosts, and not for IP-address sites.
+   - The presented certificate is matched by public-key hash and validity window (or serial and validity for crt.sh), so a precertificate and its final certificate count as one. A wildcard covers exactly one label. Duplicates are merged.
+   - Bounds: 3 s connect and 5 s read; 2 MB per response; at most 3 pages and 100 entries per page; results cached 6 hours (30 minutes when empty); an hourly request budget; a 429 blocks that source until its `Retry-After`. The lookup runs while the DNS/RDAP steps run.
+   - Outcomes are explicit: `succeeded`; `inconclusive` (partial history, or no records for a name covered by a certificate that carries SCTs); `unavailable` (timeout, 5xx, rate limit, budget); `failed` (unparseable or oversized response); `skipped` (disabled with `WTD_CT=0`, or an IP address).
+   - Findings: `tls.ct_records` (info) always carries the source, lookup time, certificate count, issuers, earliest and latest start dates and whether the presented certificate was found. `tls.ct_leaf_not_listed` (low, weak) is raised only when the picture is complete, the certificate is publicly trusted, carries embedded SCTs and is older than 72 hours, yet is absent. No records, several certificates or a recent first issue date never raise the class.
 6. **DNS and age** (`checks/dns_checks.py`): NS/MX/SPF/DMARC records, and the RDAP registration date via the IANA bootstrap (`unavailable` where a TLD has no RDAP).
 7. **Website security posture** (`checks/web_checks.py`): HSTS, CSP, XCTO, framing, Referrer-Policy, cookie flags, HTTP→HTTPS, mixed content, SRI, version disclosure, directory listing. These are reported with impact and remediation but **excluded from the threat classification**.
 8. **Correlation** (`pipeline.correlate`): deterministic shared indicators (domain, URL, IP, leaf key, brand) and, for messages, payment and contact identifiers (stored as keyed HMACs) plus word-shingle similarity. Only campaign-specific links can raise risk: shared certificate keys, payment or contact identifiers, or near-identical text. Re-checks of the same target, CDN IPs and brand names never do.
@@ -110,7 +121,7 @@ The optional AI brief explains a cluster, and its grounding is enforced in code:
 How the rules are applied:
 - **Strength scale:** weak (language, keywords, AI observations, missing headers), moderate (structural signals with benign explanations), strong (homograph of a protected brand, credential form posting elsewhere, distrusted CA), authoritative (listing in an authoritative source).
 - **Signal grouping:** certificate configuration problems count as one group.
-- **What never lowers a result:** a valid certificate, an official-domain match, or a missing intelligence listing. Contradictions are listed in the report.
+- **What never lowers a result:** a valid certificate, an official-domain match, a missing intelligence listing, or a CT record that matches. A CT lookup that returns nothing, returns many certificates or shows a recent first issue date never raises one either. Contradictions are listed in the report.
 - **Coverage:** shown as counts, never as a probability.
 - **URLhaus host listings:**
   - mass-abused platforms (≥ 1000 URLs, shared hosting, official brand domains, `abused_legit` per DBL) are context only;
@@ -120,7 +131,7 @@ How the rules are applied:
 ## 4. Report and finding schema
 `backend/wtd/models.py` is the single source (`docs/report.schema.json` is generated from it).
 - **Every finding has:** id, code, module, title, observed fact, structured evidence, source, provenance (`live`, `cached`, `dataset`, `synthetic`, `ai`), timestamp, severity, strength, impact, recommendation and limitation.
-- **Checks** are recorded separately with status `succeeded`, `failed`, `unavailable`, `skipped` or `not_implemented`, plus whether they are essential.
+- **Checks** are recorded separately with status `succeeded`, `failed`, `unavailable`, `inconclusive` (ran, but the data was partial or contradictory so nothing is concluded), `skipped` or `not_implemented`, plus whether they are essential.
 - **No floats** appear anywhere, so canonical hashing is identical across languages.
 
 ## 5. Security boundaries
@@ -129,7 +140,7 @@ How the rules are applied:
 | Browser → API | Operator token on every non-health route (constant-time compare). Per-client rate limit. Strict pydantic models with size caps (URL 2048; message or raw e-mail 150 000 characters, of which only redacted excerpts are stored). 422 for non-http(s) schemes. |
 | API → inspector | Only `{url}` crosses. Child process with RLIMIT_AS 1 GB, CPU 30 s, 64 files, no file writes, no core dumps, empty env (no API keys), new session; 40 s wall-clock kill. Output capped at 4 MB and validated. |
 | Inspector → Internet | ada parse → scheme/port/credential/name policy → DNS A/AAAA → **every** address checked against an explicit IANA special-purpose blocklist (IPv4-mapped, NAT64, 6to4 and Teredo embeddings extracted). Any non-public answer blocks the host (anti-rebinding); the socket connects only to the validated address. Each redirect is re-validated; loops are detected. |
-| Backend → intelligence | Fixed endpoints only, never user-controlled. Keys from `.env`. A no-hit is "not listed (unknown)". |
+| Backend → intelligence and CT services | Fixed endpoints only, never user-controlled. Keys from `.env`, sent in headers (never in URLs, so they cannot appear in error text). Safe Browsing receives scheme, host and path only; CT services receive only a hostname. A no-hit is "not listed (unknown)"; an unconfigured, rate-limited or failed source is `unavailable`/`failed`, never a clean result. |
 | Backend → AI | Structured findings plus redacted untrusted text in a delimited block. Strict JSON schema, no tools, free models only, `data_collection: deny`. Code validates cited IDs, verbatim quotes and classification consistency; contradicting output is `rejected`. |
 | Backend → chain | Only report id hash, commitment, revision and classification code. Raw URLs, messages and personal data stay off-chain (verified by scanning block data in testing). |
 | UI | No `dangerouslySetInnerHTML`; analysed URLs shown defanged and not clickable; fetched HTML never rendered. |

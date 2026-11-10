@@ -3,6 +3,7 @@ import { ArrowRight, Globe, Info, LoaderCircle, Mail, QrCode, ShieldAlert } from
 import jsQR from 'jsqr';
 import { MOCK_MODE, createAnalysis, errorMessage } from '../api';
 import { QuotaLine } from '../components/PublicDemo';
+import { NoWalletLine } from '../components/ChainNotice';
 import { navigate, reportPath, href } from '../router';
 import { FlowSteps } from '../components/FlowSteps';
 import { Notice } from '../components/Section';
@@ -221,6 +222,7 @@ export function InvestigatePage() {
           ) : null}
         </div>
         <QuotaLine />
+        <NoWalletLine />
       </form>
 
       <section className="how" aria-labelledby="how-h">

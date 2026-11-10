@@ -280,6 +280,7 @@
     "failed",
     "unavailable",
     "skipped",
+    "inconclusive",
     "not_implemented"
    ],
    "title": "CheckStatus",

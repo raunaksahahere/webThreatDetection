@@ -14,7 +14,8 @@ from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
-from . import access, intel, pipeline
+from . import access, intel, intel_phish, pipeline
+from .checks import ct_checks
 from .ai.explain import status as explain_status
 from .config import ROOT, SETTINGS
 from .models import iso
@@ -41,6 +42,8 @@ def _startup() -> None:
     if n:
         log.info("marked %d unfinished analyses as interrupted", n)
     intel.CERTPL.load_local()
+    if intel_phish.openphish_enabled():
+        intel_phish.OPENPHISH.load_local()
     log.info("API token file: data/api_token (or WTD_API_TOKEN). Dashboard: http://127.0.0.1:8000/")
 
 
@@ -112,7 +115,11 @@ def health() -> dict:
     return {"ok": True, "version": app.version, "chain": chain.status(),
             "ai": explain_status(),
             "intel": {"urlhaus": "configured" if intel.urlhaus_key() else "not configured",
-                      "certpl": f"{len(intel.CERTPL.domains)} domains" if intel.CERTPL.domains else "not loaded"},
+                      "certpl": f"{len(intel.CERTPL.domains)} domains" if intel.CERTPL.domains else "not loaded",
+                      "safe_browsing": "configured" if intel_phish.gsb_key() else "not configured",
+                      "openphish": ("disabled (terms)" if not intel_phish.openphish_enabled()
+                                    else "snapshot loaded" if intel_phish.OPENPHISH.keys else "enabled, snapshot not loaded"),
+                      "ct_lookup": "enabled" if ct_checks.enabled() else "disabled"},
             "access": ({"mode": "public_demo", "session_limit": access.session_limit(), "daily_limit": access.daily_limit(),
                         "chain_actions": "open" if access.local_chain() else "operator token"}
                        if access.public_demo() else {"mode": "operator_token"})}

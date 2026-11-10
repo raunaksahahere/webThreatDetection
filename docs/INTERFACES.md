@@ -6,7 +6,7 @@ Owner: backend/integration. Changes go through this file first.
 `docs/report.schema.json` (generated from `backend/wtd/models.py`). Key enums:
 - classification: `Low Risk | Suspicious | High Risk | Confirmed Malicious | Inconclusive`
 - severity: `info | low | medium | high | critical`; strength: `weak | moderate | strong | authoritative`
-- check status: `succeeded | failed | unavailable | skipped | not_implemented`
+- check status: `succeeded | failed | unavailable | inconclusive | skipped | not_implemented`
 - provenance: `live | cached | dataset | synthetic | ai`
 - AI status: `ok | unavailable | failed | disabled | rejected`
 No floats anywhere.
@@ -16,7 +16,7 @@ All `/api/*` routes except `GET /api/health` require header `X-WTD-Token: <token
 
 | Method | Path | Body | Response |
 |---|---|---|---|
-| GET | `/api/health` | — | `{ok, version, chain:{connected, chain_id, contract}, ai:{provider, model, status}, intel:{urlhaus, certpl}}` |
+| GET | `/api/health` | — | `{ok, version, chain:{connected, chain_id, contract, kind?}, ai:{provider, model, status}, intel:{urlhaus, certpl, safe_browsing, openphish, ct_lookup}}` |
 | POST | `/api/analyses` | `{"kind":"url","url":"..."}` or `{"kind":"message","text":"...","investigate_links":true}` | 202 `{"id","status":"queued"}` |
 | GET | `/api/analyses?limit=50` | — | `[{id, kind, status, created_at, input_display, classification}]` newest first |
 | GET | `/api/analyses/{id}` | — | full `Report` (poll every 1.5 s while status is `queued`/`running`) |

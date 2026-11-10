@@ -20,12 +20,17 @@ STATUS = ["Pending", "Validated", "Disputed", "Retracted"]
 
 
 class ChainUnavailable(RuntimeError):
-    pass
+    """The registry cannot be used. `kind` is a stable, non-sensitive reason that /api/health exposes to the dashboard:
+    not_deployed, not_built, rpc_unreachable, chain_mismatch, no_contract_code, not_configured."""
+
+    def __init__(self, message: str, kind: str = "unavailable"):
+        super().__init__(message)
+        self.kind = kind
 
 
 def _deployment() -> dict:
     if not SETTINGS.deployment_file.exists():
-        raise ChainUnavailable("no deployment file; run scripts/chain.sh start && scripts/deploy.sh")
+        raise ChainUnavailable("no deployment file; run scripts/chain.sh start && scripts/deploy.sh", "not_deployed")
     return json.loads(SETTINGS.deployment_file.read_text())
 
 
@@ -33,7 +38,7 @@ def _deployment() -> dict:
 def _abi() -> list:
     p = ROOT / "contracts" / "out" / "ThreatReportRegistry.sol" / "ThreatReportRegistry.json"
     if not p.exists():
-        raise ChainUnavailable("contract ABI not built; run scripts/deploy.sh (it runs forge build)")
+        raise ChainUnavailable("contract ABI not built; run scripts/deploy.sh (it runs forge build)", "not_built")
     return json.loads(p.read_text())["abi"]
 
 
@@ -42,17 +47,18 @@ def _w3() -> Web3:
     try:
         w3.eth.chain_id
     except Exception as e:
-        raise ChainUnavailable(f"RPC {SETTINGS.rpc_url} not reachable ({type(e).__name__})") from e
+        # The RPC URL is not echoed: /api/health is public and a hosted RPC URL can contain an API key.
+        raise ChainUnavailable(f"blockchain RPC not reachable ({type(e).__name__})", "rpc_unreachable") from e
     return w3
 
 
 def _contract(w3: Web3):
     dep = _deployment()
     if w3.eth.chain_id != dep["chainId"]:
-        raise ChainUnavailable(f"connected chain id {w3.eth.chain_id} does not match deployment {dep['chainId']}")
+        raise ChainUnavailable(f"connected chain id {w3.eth.chain_id} does not match deployment {dep['chainId']}", "chain_mismatch")
     addr = Web3.to_checksum_address(dep["address"])
     if not w3.eth.get_code(addr):
-        raise ChainUnavailable("no contract code at the deployed address (chain was reset?); run scripts/deploy.sh")
+        raise ChainUnavailable("no contract code at the deployed address (chain was reset?); run scripts/deploy.sh", "no_contract_code")
     return w3.eth.contract(address=addr, abi=_abi()), dep
 
 
@@ -62,17 +68,18 @@ def _signer_key(w3: Web3, role: str = "reporter") -> str:
     if role == "reviewer" and os.environ.get("WTD_REVIEWER_KEY"):
         return os.environ["WTD_REVIEWER_KEY"]
     if w3.eth.chain_id != 31337:
-        raise ChainUnavailable(f"WTD_{role.upper()}_KEY must be set for non-local chains")
+        raise ChainUnavailable(f"WTD_{role.upper()}_KEY must be set for non-local chains", "not_configured")
     return ANVIL_REPORTER_KEY if role == "reporter" else ANVIL_REVIEWER_KEY
 
 
 def status() -> dict:
     try:
+        _deployment()  # no deployment configured is the real state whatever the RPC does, so it is reported first
         w3 = _w3()
         c, dep = _contract(w3)
         return {"connected": True, "chain_id": w3.eth.chain_id, "contract": c.address, "block": w3.eth.block_number}
     except ChainUnavailable as e:
-        return {"connected": False, "chain_id": None, "contract": None, "error": str(e)}
+        return {"connected": False, "chain_id": None, "contract": None, "error": str(e), "kind": e.kind}
 
 
 def _send(w3: Web3, fn, key: str) -> dict:

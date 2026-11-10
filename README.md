@@ -12,17 +12,18 @@ Hackathon prototype (AI · Cybersecurity · Web3).
 |---|---|
 | URL/domain investigation | `backend/wtd/pipeline.py`, isolated inspector (`inspector.py`, `fetcher.py`, `netguard.py`) |
 | Phishing and impersonation indicators | homographs, typosquats, brand-in-domain/subdomain, fake-TLD labels, credential forms posting elsewhere, brand assets hot-linked, new domains (`checks/url_rules.py`, `checks/web_checks.py`, `checks/dns_checks.py`). **False positives measured** on real lists: [`docs/EVALUATION.md`](docs/EVALUATION.md) |
-| HTTPS/TLS analysis and trust issues | `checks/tls_checks.py`: independent path verification, expiry, hostname, weak crypto, lifetime, CT, distrust lists (Chromium, Mozilla OneCRL, eMudhra fingerprints from Bugzilla 2083449) |
+| HTTPS/TLS analysis and trust issues | `checks/tls_checks.py`: independent path verification, expiry, hostname, weak crypto, lifetime, CT, distrust lists (Chromium, Mozilla OneCRL, eMudhra fingerprints from Bugzilla 2083449); `checks/ct_checks.py`: Certificate Transparency **record lookup** (Cert Spotter, crt.sh fallback; a monitoring-service query, not verification of SCT signatures or inclusion proofs) that checks whether the presented certificate is logged and when certificates were first issued for the name |
 | AI evidence-grounded explanations | `ai/explain.py`: Gemini (Flash Lite, with a second model when the first is over quota) → free OpenRouter model → local Ollama; strict JSON schema; cited IDs, quotes and classification validated in code |
 | Scam-message analysis | `message/analyse.py`: indicator extraction (URLs, emails, phones, UPI, wallets) and social-engineering rules; urgency alone is never fraud |
 | E-mail security analysis | `message/email_checks.py`: paste or load raw `.eml`; receiving-server SPF/DKIM/DMARC, display-name and look-alike senders, Reply-To divergence, disguised links, risky attachments (never opened) |
 | QR-code scam detection | Dashboard **QR code** tab: decoded locally (jsQR); web addresses get the full investigation; `upi://pay` codes flagged when presented as "scan to receive money" |
 | Structured, explainable risk | `classify.py`: five classes, auditable rules, coverage counts, contradictions listed |
 | AI correlation | `incidents.py` + `ai/campaign.py`: deterministic clusters typed as campaign / shared infrastructure / repeat checks; validated AI campaign brief (cited indicators, reports and findings checked; verdict capped by link type) |
-| Threat intelligence | CERT Polska Warning List (phishing domains) and URLhaus (malware URLs) with stated scope |
+| Threat intelligence | CERT Polska Warning List (phishing domains), URLhaus (malware URLs), Google Safe Browsing (needs the operator's key) and OpenPhish (**off by default**: its terms restrict use to personal, non-commercial research). Each reports its own status: no match, unavailable, not checked or stale |
 | On-chain threat-report registry | `contracts/src/ThreatReportRegistry.sol` (roles, ordered revisions, status history); register, revise and **independent review** (Validated/Disputed/Retracted, separate reviewer key, note hash on-chain) from the dashboard; local anvil chain, Sepolia tooling in `scripts/testnet.sh` |
 | Independent verification | `verifier/verify.mjs` (Node + viem) recomputes the commitment and reads contract storage |
 | Investigation dashboard | `frontend/` (React + Vite), served at `/` |
+| Measured evaluation | URL rules: [`docs/EVALUATION.md`](docs/EVALUATION.md). Message rules: [`docs/EVALUATION_MESSAGES.md`](docs/EVALUATION_MESSAGES.md) (`scripts/eval_messages.py`) |
 | ≥ 3 suspicious + 3 benign cases | `TESTING.md`, `docs/test-cases-observed.json` (12 cases, all matched) |
 | Optional companion extension | `extension/` (MV3): page and link checks on click; opt-in warning before risky pages via a local-only quick check |
 
@@ -59,15 +60,47 @@ Demonstrations:
   # exit 0 = matches latest revision · 2 = superseded revision · 1 = altered / not anchored · 3 = error
   ```
 
+## Free demonstration and blockchain status
+
+**No wallet and no test ETH are needed to use the demonstration.** The dashboard has no wallet-connection feature: investigating, reading reports and verifying a registered report never ask you to connect or fund anything. When a registry is available, the server signs registrations with its own keys.
+
+| | Without a wallet or test ETH | Status |
+|---|---|---|
+| Investigate a link, domain, message, raw e-mail or QR code; read the report, its evidence, limitations and history | Yes | Works. Optional sources report honestly when unavailable: AI needs a provider key, Safe Browsing needs `GSB_API_KEY`, OpenPhish is off by default (see Limitations) |
+| Register, revise and review a report on a **local** Anvil chain | Yes (the server holds anvil's public test keys, used only on chain id 31337) | Implemented and tested: 22 contract tests, cross-language vectors, a 13-step browser run. The dashboard labels it local: it is not public and resets when the server restarts |
+| Verify a registered report independently (`verifier/verify.mjs`) | Yes: a read-only RPC call, no signing | Works wherever a real registered report and a configured network exist |
+| Register, revise or review on **public Sepolia** | Not offered yet | **Pending.** Nothing is deployed on Sepolia, and the dashboard says so and disables those actions with the reason |
+
+Sepolia ETH is **test currency** from free faucets; no real cryptocurrency purchase is needed for the intended testnet demonstration. Test ETH is not the only missing piece: a contract must also be deployed, its reporter and reviewer roles granted, and the server pointed at it. Deferred setup, in order:
+
+1. **Get free Sepolia test ETH** for the reporter address printed by `scripts/testnet.sh balance` (about 0.02 ETH). The reviewer account is topped up from the reporter during deployment. If `.env.sepolia` does not exist yet, `scripts/testnet.sh keys` creates two testnet-only keys in it (mode 600, gitignored; it prints only public addresses).
+2. **Keep the testnet environment private.** `.env.sepolia` holds `WTD_RPC_URL`, `WTD_DEPLOYMENT`, `WTD_REPORTER_KEY` and `WTD_REVIEWER_KEY`. Never commit it or reuse these keys anywhere with value.
+3. **Deploy the existing registry:** `scripts/testnet.sh deploy`. It refuses any chain id but 11155111, grants the roles and writes `deployments/sepolia.json`.
+4. **Confirm contract, chain, permissions and configuration.** `scripts/testnet.sh balance` shows chain id 11155111; the next step also re-checks bytecode, the deploy receipt and the owner/reporter/reviewer roles on chain before it signs anything.
+5. **Run the public evidence script:** `backend/.venv/bin/python scripts/sepolia_evidence.py`. It registers a synthetic report, revises and reviews it, runs the independent verifier against a public RPC (match, tampered, superseded, current) and writes `docs/SEPOLIA_EVIDENCE.md` and `docs/evidence/`.
+6. **Update the status only after the run succeeds:** change the "Public" row of the table below to point at the generated evidence. Do not edit it before.
+
+To make a running server use Sepolia: locally, `WTD_NETWORK=sepolia scripts/api.sh restart`; on the hosted service, the commented `WTD_CHAIN=external` block in `render.yaml` (needs `deployments/sepolia.json` committed and `WTD_REPORTER_KEY` / `WTD_REVIEWER_KEY` set as secrets; see `docs/DEPLOY.md`). On a public chain, registering, revising and reviewing need the operator token, because the server pays the testnet gas; reading and verifying need nothing.
+
+## Verification evidence
+
+| | Network | Status | Where |
+|---|---|---|---|
+| **Public** | Ethereum Sepolia (chain id 11155111) | **Not deployed yet.** The testnet reporter address held no test ETH when this snapshot was prepared. The tooling is ready and rehearsed on a disposable local chain; no public contract address or transaction is claimed anywhere in this repository. | After the steps above: `docs/SEPOLIA_EVIDENCE.md`, `docs/evidence/sepolia-demo.json` |
+| **Local** | anvil (chain id 31337) | Observed 2026-11-08: register, verify, tamper, revise, review, restart | `docs/WEB3.md` ("Observed results"), `verifier/e2e-demo.sh`. Anvil is a developer chain whose RPCs can rewrite state, so this shows the contract's rules, not public availability |
+
+Only a salted commitment hash, a classification code and a note hash go on-chain, and the demonstration report is a synthetic test vector. A match proves a report is unchanged since registration, not that it is true.
+
 Tests:
 
 ```bash
-(cd backend && .venv/bin/python -m pytest -q)        # 124 tests: request boundary, TLS, classifier, messages, e-mail, AI validation (explanations and campaign briefs), API, persistence
+(cd backend && .venv/bin/python -m pytest -q)        # 251 tests: request boundary, TLS, CT lookup, intelligence sources, classifier, messages, e-mail, AI validation (explanations and campaign briefs), message evaluation, API, persistence
 (cd contracts && forge test)                          # 22 contract tests incl. unauthorised writes and revision ordering
 node verifier/test-vectors.mjs                        # cross-language canonicalization vectors
 backend/.venv/bin/python scripts/run_cases.py         # documented cases through the live API
 (cd e2e && npm install && npm test)                   # real-browser click-through (Brave/Chrome, headless): dashboard 13 steps, extension 13 steps
 backend/.venv/bin/python scripts/eval_url_rules.py --tranco top-1m.csv --tranco-id 94P72   # false-positive / detection evaluation (docs/EVALUATION.md)
+backend/.venv/bin/python scripts/eval_messages.py --download                                # message-rule evaluation on public labelled SMS data (docs/EVALUATION_MESSAGES.md)
 ```
 
 The browser checks use an installed Brave or Chrome (`WTD_BROWSER=/path` to override) and save screenshots to `docs/screenshots/`.
@@ -98,11 +131,14 @@ Weak signals (urgent wording, keywords, AI observations, missing security header
 - Only a hash commitment and a classification code go on-chain. URLs, messages and personal data stay off-chain.
 
 ## Limitations (honest scope)
-- The documented cases demonstrate coverage, not detection accuracy. The only measured figures are for the URL-rule layer alone (`docs/EVALUATION.md`): 0.4% flagged on 1,000 unseen popular sites, and 11% of held-out CERT Polska phishing domains caught without the feed.
+- The documented cases demonstrate coverage, not detection accuracy. The only measured figures are for single layers: the URL rules alone (`docs/EVALUATION.md`: 0.4% flagged on 1,000 unseen popular sites, and 11% of held-out CERT Polska phishing domains caught without the feed) and the message rules on public labelled SMS data (holdout, offline rule layer only): 29 of 48 specific scam messages flagged (60.4%, 95% CI 46.3–73.0%) and 11 of 3,505 legitimate messages flagged (0.3%); the positives look templated and the set is small, see [`docs/EVALUATION_MESSAGES.md`](docs/EVALUATION_MESSAGES.md). There is no end-to-end accuracy figure.
 - Intelligence scope:
   - CERT Polska focuses on threats to users in Poland;
   - URLhaus covers malware downloads, not phishing;
+  - Google Safe Browsing runs only when the operator sets `GSB_API_KEY` (non-commercial terms; Google receives the scheme, host and path of analysed addresses); without it the report says "unavailable";
+  - OpenPhish is disabled unless the operator enables it after confirming its terms are met; the report then says "not checked";
   - a no-hit means unknown.
+- Certificate Transparency: the lookup asks a monitoring service (Cert Spotter, then crt.sh) what it has indexed. It does not verify SCT signatures or inclusion proofs, can lag the logs, and is reported as unavailable or inconclusive when the service is slow, rate limited or returns partial data; it never raises a verdict on its own.
 - One page is fetched without running scripts, so cloaked phishing kits can look harmless. There is no screenshot or visual comparison.
 - The brand list is curated (43 brands) and incomplete; some banks' new `.bank.in` domains are not yet listed.
 - E-mail authentication results are taken from the pasted headers as recorded by the receiving server. Whoever pastes the message could edit them, and DKIM signatures are not re-verified.
